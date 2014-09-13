@@ -1,0 +1,44 @@
+
+#############
+## Windows detritus
+#############
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Mac crap
+.DS_Store
+
+#Dbase
+errors/
+*.cdx
+*.dbf
+*.obj
+*.c
+dbfstru/
+dbcheck/
+db/
+mcomment/
+icomment/
+dcomment/
+temp/
+orig_source/
+v1.1/
+zips/
+htmlhelp/
+oldstuff/
+frms/
+save/
+*.map
+*.exp
+*.std
+*.exe
+*.lib
+*.txt

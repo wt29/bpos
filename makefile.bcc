@@ -1,0 +1,57 @@
+OBJFILES = bpos.obj proclib.obj acme.obj Apcheque.obj Apeom.obj Apremit.obj Aprep.obj Aptran.obj Areom.obj Arrep.obj \
+Arstat.obj Artran.obj Dpurord.obj Errorsys.obj Fpurord.obj Invforms.obj Maincate.obj Maincust.obj Maindept.obj \
+Mainsupp.obj MainItem.obj Proclib.obj Purckit.obj Recitem.obj Reclist.obj Recpost.obj \
+Returns.obj Setupdbf.obj Utilarch.obj Utilback.obj Utilcond.obj Utillabe.obj Utilpack.obj \
+Utilrepr.obj Utilsppa.obj Utilstoc.obj s_appr.obj s_arch.obj s_cash.obj s_daily.obj \
+s_inq1.obj s_inq2.obj s_inv1.obj s_inv2.obj s_layb.obj s_repo.obj s_spec.obj printfunc.obj
+
+PRGFILES = bpos.prg acme.prg Apcheque.prg Apeom.prg Apremit.prg Aprep.prg Aptran.prg Areom.prg Arrep.prg \
+Arstat.prg Artran.prg Dpurord.prg Errorsys.prg Fpurord.prg Invforms.prg Maincate.prg Maincust.prg Maindept.prg \
+Mainsupp.prg Mainitem.prg proclib.prg Purckit.prg Recitem.prg Reclist.prg Recpost.prg \
+Returns.prg Setupdbf.prg Utilarch.prg Utilback.prg Utilcond.prg Utillabe.prg Utilpack.prg \
+Utilrepr.prg Utilsppa.prg Utilstoc.prg s_appr.prg s_arch.prg s_cash.prg s_daily.prg \
+s_inq1.prg s_inq2.prg s_inv1.prg s_inv2.prg s_layb.prg s_repo.prg s_spec.prg printfunc.prg
+
+CFILES = bpos.c acme.c Apcheque.c Apeom.c Apremit.c Aprep.c Aptran.c Areom.c Arrep.c \
+Arstat.c Artran.c Dpurord.c Errorsys.c Fpurord.c Invforms.c Maincate.c Maincust.c Maindept.c \
+Mainsupp.c Mainitem.c proclib.c Purckit.c Recitem.c Reclist.c Recpost.c \
+Returns.c Setupdbf.c Utilarch.c Utilback.c Utilcond.c Utillabe.c Utilpack.c \
+Utilrepr.c Utilsppa.c Utilstoc.c s_appr.c s_arch.c s_cash.c s_daily.c \
+s_inq1.c s_inq2.c s_inv1.c s_inv2.c s_layb.c s_repo.c s_spec.c printfunc.c
+
+BCB = c:\borland\bcc55
+BHC = C:\xharbour.bcc
+TOPMODULE = bpos.prg
+
+#LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib pcrepos.lib \
+#         common.lib gtwvw.lib codepage.lib ct.lib pcrepos.lib hsx.lib hbsix.lib tip.lib debug.lib
+LIBFILES = common.lib debug.lib vm.lib rtl.lib pcrepos.lib gtwvt.lib lang.lib rdd.lib \
+           macro.lib pp.lib dbffpt.lib dbfntx.lib dbfcdx.lib hsx.lib hbsix.lib ct.lib \
+           tip.lib
+#pp.lib cw32.lib import32.lib dbfntx.lib dbfdbt.lib debug.lib optcon.lib dbfdbt.lib
+#samples.lib hbzip.lib import32.lib cw32.lib bcc640.lib cw32.lib
+
+DEFFILE = 
+HARBOURFLAGS = /d /n /gc /b /w2
+LFLAGS = -L$(BCB)\lib\obj;$(BCB)\lib;$(BHC)\lib;$(BCB)\lib\psdk -Gn -M -m -s -Tpe -ap -r
+LINKER = link
+ 
+#ALLOBJ = c0x32.obj $(OBJFILES)
+ALLOBJ = $(OBJFILES)
+ALLLIB = $(LIBFILES) cw32.lib kernel32.lib import32.lib
+
+# import32.lib cw32.lib kernel32.lib
+
+.prg.c:
+ $(BHC)\bin\harbour $(HARBOURFLAGS) $<
+
+.c.obj:
+# $(BCB)\BIN\bcc32 -OS $(CFLAGS) -d -L$(BHC)\lib -c -I$(BHC)\include;$(BCB)\include -o$* $**
+ $(BCB)\BIN\bcc32 -L$(BHC)\lib -c -I$(BHC)\include;$(BCB)\include -o$* $**
+
+#.c.obj:
+#    $(BCB)\BIN\bcc32 $**
+
+bpos.exe: $(PRGFILES) $(OBJFILES) $(CFILES)
+ $(BCB)\BIN\ilink32 $(LFLAGS) $(ALLOBJ),BPOS.EXE,,$(ALLLIB)
+
