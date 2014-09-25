@@ -269,7 +269,6 @@ else
    if Netuse( "ytdsales" )
     nfieldpos := fieldpos( sMonth )
     indx( "fieldget( nfieldpos ) * -1", 'totals' )
-
 // Build an array of fields
     aReport := {}
     aadd( aReport, {'idCheck(master->id)','Item ID', 14, 0, FALSE } )
@@ -877,13 +876,10 @@ local mscr := Box_Save(10,26,15,56)
 memvar stdate,enddate
 private stdate := Bvars( B_DATE ) - 13, enddate := Bvars( B_DATE )
 
-
 @ 11,29 say "Enter start date:" get stdate picture 'D' valid stdate >= ctod('01/01/80')
 @ 12,28 say "Enter finish date:" get enddate picture 'D' valid enddate >= ctod('01/01/80')
-@ 13,37 say "Binding: " get bind picture '@!K';
-        valid ( bind = '* ' .or. dup_chk( bind, 'binding') )
-@ 14,34 say "Department: " get dpart picture '@K!';
-        valid ( dpart = '*  ' .or. dup_chk( dpart, 'dept'))
+@ 13,37 say "Binding: " get bind picture '@!K' valid ( bind = '* ' .or. dup_chk( bind, 'binding') )
+@ 14,34 say "Department: " get dpart picture '@K!' valid ( dpart = '*  ' .or. dup_chk( dpart, 'dept'))
 read
 
 if select( 'binding') != 0
@@ -909,8 +905,7 @@ if IsReady(16)
    select 0
    if Netuse( Oddvars( TEMPFILE ), EXCLUSIVE, 10, "saletmp" )
     salehist->( dbgobottom() )
-    while ((( salehist->date ) >= stdate) .and. salehist->(!bof())) .or.;
-           salehist->date = ctod("  /  /  ")
+    while ((( salehist->date ) >= stdate) .and. salehist->(!bof())) .or. salehist->date = ctod("  /  /  ")
      Pinwheel()      
      if ( salehist->date) <= enddate .and. salehist->date <> ctod("  /  /  ") 
       if ( master->binding == bind .or. bind == '* ')
@@ -939,9 +934,7 @@ if IsReady(16)
 // --- Keep only 20 descs in each department ----
   select 0
   if Netuse( Oddvars( TEMPFILE2 ), EXCLUSIVE, 10, "stmp" )
-
    indx("department+descend(padl(str(qty),8,'0'))","dept")
-
    stmp->( dbgotop() )
    while stmp->( !eof() )
     count := 0
@@ -971,9 +964,7 @@ if IsReady(16)
     set relation to stmp->id into master, stmp->brand into brand
 
     stmp->( dbgotop() )
-
-//    // Pitch17()
-    
+   
     aadd(aReport,{'substr(master->desc,1,50)','Desc',50,0,FALSE})
     aadd(aReport,{'substr(master->alt_desc,1,20)','Author',20,0,FALSE})
     aadd(aReport,{'master->binding','Binding',7,0,FALSE})
@@ -982,9 +973,6 @@ if IsReady(16)
 
     Reporter(aReport,'"Best Sellers Listing ('+dtoc(stdate)+' to '+dtoc(enddate)+')',;
     'department',"'Department : '+department+' ('+lookitup('dept',department)+')'",'','',FALSE)
-
-//    // Pitch10()
-//    Endprint()
 
     stmp->( orddestroy( 'dept' ) )
     stmp->( dbclosearea() )

@@ -304,10 +304,10 @@ return
 procedure stprint
 local nMenuSelect,mstktype:=Sysinc("StkType","G"),mapp,mavg,mstocktake,aArray
 local getlist:={}, mscr, mdbf, aReport,sForCond
-local mcount,msum,mavr,msell,mrrp,moh,mcost,monhand,mmargin,mupmargin,mappr,mapprval
+local mcount,msum,mavr,msell,mrrp,moh,mcost,mappr,mapprval
 
-memvar totcost, mdep, lIncludeApps, lanswer
-public totcost, mdep, lIncludeApps, lanswer
+memvar totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin
+public totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin
 
 mdep:=Sysinc("Stkdept","G")
 while TRUE
