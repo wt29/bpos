@@ -646,7 +646,7 @@ if Netuse( "kit", SHARED, 10, 'ekit' )
   Error( 'No ' + if( kit_master, 'Kit Record', 'Kitted items' ) + ' found',12)
  else
   cls
-  Heading( if( kit_master, 'Descs on Kit # '+ sID, 'Kits id ' ;
+  Heading( if( kit_master, '' + ITEM_DESC + ' on Kit # '+ sID, 'Kits id ' ;
           + trim( sID ) + ' is attached to' ) )
   sobj := TBrowseDB( 02, 0, 24, 79)
   sobj:HeadSep := HEADSEP

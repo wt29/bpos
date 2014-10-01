@@ -29,7 +29,7 @@ while mgo
  Heading( 'Desc File Maintenance Menu')
  aArray := {}
  aadd( aArray, { 'File', 'Return to file Maintenance Menu', nil, nil } )
- aadd( aArray, { 'Add', 'Add New Descs', { || Add_desc() }, nil } )
+ aadd( aArray, { 'Add', 'Add New ' + ITEM_DESC + '', { || Add_desc() }, nil } )
  aadd( aArray, { 'Print', 'Print Desc Details', { || Descprint() }, nil } )
  aadd( aArray, { 'Value', 'Stock Valuation', { || Descvalue() }, nil } )
  aadd( aArray, { 'Markdown', 'Markdown Stock', { || Descmarkdn() }, nil } )
@@ -62,14 +62,14 @@ while TRUE
 
  aArray := {}
  aadd( aArray, { 'Return', 'Return to desc file Maintainance' } )
- aadd( aArray, { 'Supplier', 'Descs for nominated Supplier' } )
+ aadd( aArray, { 'Supplier', '' + ITEM_DESC + ' for nominated Supplier' } )
  aadd( aArray, { ALT_DESC, 'Desc file by ' + ALT_DESC + ' order' } )
  aadd( aArray, { 'Desc', 'Desc file by Desc order' } )
  aadd( aArray, { 'Category', 'Desc file by Category and id' } )
  aadd( aArray, { 'Department', 'Print all desc in Nominated Dept' } )
- aadd( aArray, { BRAND_DESC, 'Print all descs on ' + BRAND_DESC } )
+ aadd( aArray, { BRAND_DESC, 'Print all ' + ITEM_DESC + ' on ' + BRAND_DESC } )
 #ifdef HOTLIST
- aadd( aArray, { 'Hot List', 'Print Hotlist Descs' } )
+ aadd( aArray, { 'Hot List', 'Print Hotlist ' + ITEM_DESC + '' } )
 #endif
  aadd( aArray, { 'Zed Rept', 'Prepare Adhoc desc listing' } )
  aadd( aArray, { 'Status', 'Print Desc File by Status' } )
@@ -108,7 +108,7 @@ while TRUE
    read
    moh := TRUE
    Bsave( 11, 40, 13, 63 )
-   @ 12,42 say 'Onhand descs only' get moh pict 'y'
+   @ 12,42 say 'Onhand ' + ITEM_DESC + ' only' get moh pict 'y'
    read
 
    if lastkey() == K_ESC
@@ -116,7 +116,7 @@ while TRUE
 
    else
     mscr:= Bsave( 07, 10, 09, 70 )
-    Center(08,'-=< About to print descs for ' + trim( LookItUp( "supplier" , msupp ) ) + ' >=-')
+    Center(08,'-=< About to print ' + ITEM_DESC + ' for ' + trim( LookItUp( "supplier" , msupp ) ) + ' >=-')
     if Isready(10)
      if select('ytdsales') != 0     // DAC
       ytdsales -> ( dbclosearea() )
@@ -133,15 +133,15 @@ while TRUE
        report form macust to print noconsole ;
               while master->supp_code = msupp .and. Pinwheel() ;
               for if( moh, master->onhand > 0, TRUE ) ;
-               heading BPOSCUST+';Report for Customer - '+mcust+';Descs with Primary Supplier ';
-              +LookItup( "supplier" , msupp )+if( moh, ';Onhand Descs Only','' ) noeject
+               heading BPOSCUST+';Report for Customer - '+mcust+';' + ITEM_DESC + ' with Primary Supplier ';
+              +LookItup( "supplier" , msupp )+if( moh, ';Onhand ' + ITEM_DESC + ' Only','' ) noeject
 
       else
        report form madetail to print noconsole ;
               while master->supp_code = msupp .and. Pinwheel();
               for if( moh, master->onhand > 0, TRUE ) ;
-              heading BPOSCUST+";Detail report for Internal Use;Descs with Primary Supplier " ;
-              +LookItUp( "supplier" , msupp )+if( moh, ';Onhand Descs Only','' ) noeject
+              heading BPOSCUST+";Detail report for Internal Use;' + ITEM_DESC + ' with Primary Supplier " ;
+              +LookItUp( "supplier" , msupp )+if( moh, ';Onhand ' + ITEM_DESC + ' Only','' ) noeject
 
       endif
       Pitch10()
@@ -167,7 +167,7 @@ while TRUE
   sAltDesc1 := space( 10 )
   sAltDesc2 := space( 10 )
   mchoice := 'R'
-  @ 05,10 say '<A>ll AltDescs or <R>ange' get mchoice pict '!' valid( mchoice $ 'AR' )
+  @ 05,10 say '<A>ll Alt' + ITEM_DESC + ' or <R>ange' get mchoice pict '!' valid( mchoice $ 'AR' )
   read
   if mchoice = 'R'
    @ 07,10 say 'Enter AltDesc part to start ' get sAltDesc1 pict '@!'
@@ -222,11 +222,11 @@ while TRUE
 
  case choice = 4
   Bsave( 03, 08, 12, 72 )
-  Heading( 'Print Descs on Master File' )
+  Heading( 'Print ' + ITEM_DESC + ' on Master File' )
   mtitl1 := space(10)
   mtitl2 := space(10)
   mchoice := 'R'
-  @ 05,10 say '<A>ll Descs or <R>ange' get mchoice pict '!' valid( mchoice $ 'AR' )
+  @ 05,10 say '<A>ll ' + ITEM_DESC + ' or <R>ange' get mchoice pict '!' valid( mchoice $ 'AR' )
   read
   if mchoice = 'R'
    @ 07,10 say 'Enter Desc part to start ' get mtitl1 pict '@!'
@@ -249,14 +249,14 @@ while TRUE
     if mprntype = 'C'
      report form macust to print noconsole ;
             while upper(substr(master->desc,1,mlen2))<= mtitl2 .and. Pinwheel();
-            Heading BPOSCUST+";Report for "+mcust+";List of Descs from "+mtitl1+" to "+mtitl2;
+            Heading BPOSCUST+";Report for "+mcust+";List of ' + ITEM_DESC + ' from "+mtitl1+" to "+mtitl2;
             noeject
      Error('')
 
     else
      report form madetail to print noconsole ;
             while upper(substr(master->desc,1,mlen2))<=mtitl2 .and.Pinwheel() Heading;
-            BPOSCUST + ";Detail Report for Internal Use;List of Descs from "+mtitl1+" to "+mtitl2;
+            BPOSCUST + ";Detail Report for Internal Use;List of ' + ITEM_DESC + ' from "+mtitl1+" to "+mtitl2;
             noeject
 
     endif
@@ -265,12 +265,12 @@ while TRUE
     master->( dbgotop() )
     if mprntype = 'C'
      report form macust to print noconsole while Pinwheel() Heading;
-            BPOSCUST+";Report for "+mcust+";Complete List of Descs" ;
+            BPOSCUST+";Report for "+mcust+";Complete List of ' + ITEM_DESC + '" ;
             noeject
 
     else
      report form madetail to print noconsole while Pinwheel() Heading ;
-            BPOSCUST+";Detail Report for Internal Use;Complete List of Descs";
+            BPOSCUST+";Detail Report for Internal Use;Complete List of ' + ITEM_DESC + '";
      noeject
 
     endif
@@ -284,7 +284,7 @@ while TRUE
 
  case choice = 5
   Bsave(3,08,15,72)
-  Heading('Print Descs on Master File by Category')
+  Heading('Print ' + ITEM_DESC + ' on Master File by Category')
   if Netuse( "category", FALSE, 10, NOALIAS, NEW )
    if Netuse( "macatego", FALSE, 10, NOALIAS, NEW )
     set relation to macatego->id into master,;
@@ -293,7 +293,7 @@ while TRUE
     moh := FALSE
     @ 07,10 say 'Enter Category code for print' get mcat pict '@!'
     Bsave( 11,40,13,63 )
-    @ 12,42 say 'Onhand descs only' get moh pict 'y'
+    @ 12,42 say 'Onhand ' + ITEM_DESC + ' only' get moh pict 'y'
     read
     if updated()
      mcat := trim(mcat)
@@ -307,7 +307,7 @@ while TRUE
        Pitch17()
        seek mcat
        if mprntype = 'C'
-        mhead := BPOSCUST+";Report for "+mcust+";List of Descs on File matching " +;
+        mhead := BPOSCUST+";Report for "+mcust+";List of ' + ITEM_DESC + ' on File matching " +;
                   "Category " + trim(Category->name)
         report form macucate to print noconsole ;
                for if( moh, master->onhand > 0 , TRUE ) ;
@@ -317,7 +317,7 @@ while TRUE
         report form madecate to print noconsole ;
                for if( moh, master->onhand > 0 , TRUE ) ;
                while macatego->code = mcat .and. Pinwheel() ;
-               Heading BPOSCUST+";Detail Report for Internal Use;List of Descs matching Category "+mCAT;
+               Heading BPOSCUST+";Detail Report for Internal Use;List of ' + ITEM_DESC + ' matching Category "+mCAT;
                noeject
 
        endif
@@ -342,7 +342,7 @@ while TRUE
     moh := FALSE
     @ 12,14 say 'ออ> Department Code' get mdept pict '@!' valid( Dup_chk( mdept ,"dept" ) )
     Bsave( 11,40,13,63 )
-    @ 12,42 say 'Onhand descs only' get moh pict 'y'
+    @ 12,42 say 'Onhand ' + ITEM_DESC + ' only' get moh pict 'y'
     read
     if moh
      cutoff := 1
@@ -365,17 +365,17 @@ while TRUE
       report form macust to print noconsole ;
              while master->department = mdept .and. Pinwheel() ;
              for if( moh, master->onhand >= cutoff , TRUE ) ;
-             Heading BPOSCUST+";List of Descs in Department " + ;
+             Heading BPOSCUST+";List of ' + ITEM_DESC + ' in Department " + ;
              trim( Lookitup( "dept" , mdept ) ) + ;
-             if( moh, ' ;Onhand descs only', '' ) noeject
+             if( moh, ' ;Onhand ' + ITEM_DESC + ' only', '' ) noeject
 
      else
       report form madetail to print noconsole ;
              while master->department = mdept .and. Pinwheel() ;
              for if( moh, master->onhand >= cutoff , TRUE ) ;
-             Heading BPOSCUST + ";List of Descs in Department " + ;
+             Heading BPOSCUST + ";List of ' + ITEM_DESC + ' in Department " + ;
              trim( Lookitup( "dept" , mdept ) ) + ;
-             if( moh, if(cutoff > 1,' ;Descs with Onhand >= '+alltrim(str(cutoff)),' ;Onhand descs only'), '' ) noeject
+             if( moh, if(cutoff > 1,' ;' + ITEM_DESC + ' with Onhand >= '+alltrim(str(cutoff)),' ;Onhand ' + ITEM_DESC + ' only'), '' ) noeject
 
      endif
      Pitch10()
@@ -390,7 +390,7 @@ while TRUE
   endif
 
  case choice = 7
-  Heading( "Print all descs on " + BRAND_DESC )
+  Heading( "Print all ' + ITEM_DESC + ' on " + BRAND_DESC )
   mscr := Bsave( 2,10,08,70 )
   Center( 3, 'This procedure will require an index of the master file' )
   if Isready(12)
@@ -410,9 +410,9 @@ while TRUE
      seek mimpr
      
      Pitch17()
-     Center( 7 , 'Printing Descs for ' + Lookitup( "brand" , mimpr ) )
+     Center( 7 , 'Printing ' + ITEM_DESC + ' for ' + Lookitup( "brand" , mimpr ) )
      if mprntype == 'C'
-      mhead := BPOSCUST+";Report for "+mcust+";List of Descs on File matching " +;
+      mhead := BPOSCUST+";Report for "+mcust+";List of ' + ITEM_DESC + ' on File matching " +;
                +BRAND_DESC+" " + trim(Lookitup( "brand" , mimpr ) )
       report form macust to print noconsole ;
              while master->brand = mimpr .and. inkey()!=K_ESC Heading mhead noeject
@@ -420,7 +420,7 @@ while TRUE
      else
         report form madetail to print noconsole ;
                while master->brand = mimpr .and. inkey()!=K_ESC;
-               Heading BPOSCUST+";Detail Report for Internal Use;List of Descs matching "+BRAND_DESC+" " ;
+               Heading BPOSCUST+";Detail Report for Internal Use;List of ' + ITEM_DESC + ' matching "+BRAND_DESC+" " ;
               +Lookitup( "brand" , mimpr ) noeject
 
      endif
@@ -434,7 +434,7 @@ while TRUE
   endif
 
  case choice = 8
-  Heading("Print Special Descs Listing")
+  Heading("Print Special ' + ITEM_DESC + ' Listing")
   Print_find( 'Report' )
   
   firstpass := TRUE
@@ -704,7 +704,7 @@ memvar stat
 private stat := space(3)
 
 Bsave(05,08,9,33)
-Heading('Print Descs on File by Status')
+Heading('Print ' + ITEM_DESC + ' on File by Status')
 @ 07,10 say 'Enter Status Code ' get stat pict '@!' ;
         valid ( empty( stat ) .or. dup_chk( stat, 'status') )
 read
@@ -727,7 +727,7 @@ if Isready(11)
  aadd( farr,{'master->sell_price','Sell;Price',7,2,FALSE})
  aadd( farr,{'master->onhand','On;Hand',5,0,FALSE})
  
- Reporter(farr,'"Report Of Descs With Status ("+stat+")"','','','','',FALSE,;
+ Reporter(farr,'"Report Of ' + ITEM_DESC + ' With Status ("+stat+")"','','','','',FALSE,;
            "(master->status == stat) .and. master->onhand > 0")
  
  Pitch10()
@@ -744,7 +744,7 @@ local getlist:={}, farr:={}
 memvar illus
 private illus := space(20)
 Bsave(05,08,9,50)
-Heading('Print Descs on File by Illustrator')
+Heading('Print ' + ITEM_DESC + ' on File by Illustrator')
 @ 07,10 say 'Enter Illustrator ' get illus pict '@!'
 read
 if Isready(11)
@@ -758,7 +758,7 @@ if Isready(11)
  aadd(farr,{'master->alt_desc','Author',20,0,FALSE})
  aadd(farr,{'master->sell_price','Price',7,2,FALSE})
  
- Reporter(farr,'"List Of Descs For Illustrator "+"( "+alltrim(illus)+" )"',;
+ Reporter(farr,'"List Of ' + ITEM_DESC + ' For Illustrator "+"( "+alltrim(illus)+" )"',;
  '','','','',FALSE,"master->illustrat = alltrim(illus)",,96)
  
  Pitch10()
@@ -917,7 +917,7 @@ while TRUE
     Heading('Stock Valuation')
 
    endif
-   Highlight( 03, 10, 'Number of Descs Counted   ', Ns( msum, 9 ) )
+   Highlight( 03, 10, 'Number of ' + ITEM_DESC + ' Counted   ', Ns( msum, 9 ) )
    Highlight( 05, 10, 'Number of Items Counted    ', Ns( monhand, 9 ) )
    Highlight( 07, 10, 'Stock Value at Last Cost  $', Ns( mcost, 10, 2 ) )
    Highlight( 09, 10, 'Stock Value at Avr. Cost  $', Ns( mavg, 10, 2 ) )

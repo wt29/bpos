@@ -214,7 +214,7 @@ else
  endif
  select master
  @ 2,08 clear to 6,72
- @ 5,10 say 'Previous Descs                  Stocktake     Onhand         Qty'
+ @ 5,10 say 'Previous ' + ITEM_DESC + '                  Stocktake     Onhand         Qty'
  while TRUE
   mqty := 1
   qtyflag := FALSE
@@ -284,7 +284,7 @@ else
      mtot2++
      Line_clear( 19 )
     endif
-    Highlight( 20, 10, 'Descs scanned this session = ', Ns( mtot2, 5 ) )
+    Highlight( 20, 10, '' + ITEM_DESC + ' scanned this session = ', Ns( mtot2, 5 ) )
     Highlight( 21, 10, 'Volumes added this session  = ', Ns( mtot3, 5 ) )
     if mtot2 > 20
      mrate := ( ( seconds() - start ) ) / mtot2
@@ -599,7 +599,7 @@ while TRUE
    else
     Heading("Stocktake totals for Dept. " + Lookitup( "dept" , mdep ) )
    endif
-   Highlight( 05, 10, 'Number of Descs Counted       ', Ns( mcount ) )
+   Highlight( 05, 10, 'Number of ' + ITEM_DESC + ' Counted       ', Ns( mcount ) )
    Highlight( 06, 10, 'Number of Items Counted        ', Ns( msum ) )
    Highlight( 08, 10, 'Items Onhand Pre Stocktake     ', Ns( moh ) )
    Highlight( 10, 10, 'Number of Items on Approval    ', Ns( mappr ) )
@@ -902,7 +902,7 @@ Heading("Resync Master File Quantities")
        enddo
 
        select hold
-       Highlight(11,10,'Updating Hold descs   ',Ns(lastrec()))
+       Highlight(11,10,'Updating Hold ' + ITEM_DESC + '   ',Ns(lastrec()))
        @ 11,45 say 'Record #'
        while !hold->( eof() )
         @ 11,55 say hold->( recno() )

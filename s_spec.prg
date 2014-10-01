@@ -195,7 +195,7 @@ while TRUE
    mqty := 1
    mdep := 0
    mspecmode := 1
-   if sID = '*'    // Not found descs
+   if sID = '*'    // Not found ' + ITEM_DESC + '
     mdesc := space( 24 )
     sAltDesc := space(20)
     macq := space(10)
@@ -1184,7 +1184,7 @@ aArray := {}
 aadd( aArray, { 'Return', 'Return to Special Menu' } )
 aadd( aArray, { 'Customer', 'Customer Special Status Reports' } )
 aadd( aArray, { 'All', 'Print entire Special File' } )
-aadd( aArray, { 'Not Found', 'Descs not found' } )
+aadd( aArray, { 'Not Found', '' + ITEM_DESC + ' not found' } )
 aadd( aArray, { 'Overdue', 'Special orders not yet filled' } )
 newchoice := MenuGen( aArray, 10, 36, 'Print' )
 do case
@@ -1342,7 +1342,7 @@ case newchoice = 3
 
  endcase
 case newchoice = 4
- Heading('Print All not found Descs')
+ Heading('Print All not found ' + ITEM_DESC + '')
  if Isready(12)
   // Pitch17()
   farr := {}
@@ -1420,7 +1420,7 @@ while !special->( eof() ) ;
     .and. if( by_key, special->key = mkeyval ,special->number = mkeyval )
  if special->delivered < special->qty .or. !muns
   if special->ordno != mordno .and. !empty( special->ordno )
-   @ prow()+2,15 say 'The following descs have your ref no ' + special->ordno
+   @ prow()+2,15 say 'The following ' + ITEM_DESC + ' have your ref no ' + special->ordno
    mordno := special->ordno
   endif
   if empty( special->notfound )

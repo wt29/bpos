@@ -305,7 +305,7 @@ while TRUE                                      // Main Menu Loop
    aadd( aMenu, { 'Pack', 'Housekeeping Duties', { || u_Pack() }, nil } )
    aadd( aMenu, { 'Archive', 'Archive Utilities', { || u_Archive() }, nil } )
    aadd( aMenu, { 'Backup', 'Backup System', { || utilBack( 08, 50 ) }, nil } )
-//   aadd( aMenu, { 'Import', 'Append descs & Standby POS files', { || u_import() }, nil } )
+//   aadd( aMenu, { 'Import', 'Append ' + ITEM_DESC + ' & Standby POS files', { || u_import() }, nil } )
 //   aadd( aMenu, { 'Update', 'Update Databases for remote system', { || u_update() }, nil } )
    aadd( aMenu, { 'Condense', 'Condense Sales/Stock Histories', { || u_condense() }, nil } )
 //   aadd( aMenu, { 'Test Print', 'Execute the printer test', { || Testw32Prn() }, nil } )

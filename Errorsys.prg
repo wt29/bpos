@@ -16,7 +16,7 @@ Return
 
 Static Function ErrorMenu(oEr)
 
-Local nErrLines,nActCount,cChoices,nErrTop,nErrBot,nChoice,cChoice,cErrScr,nIntense,;
+Local nErrLines,nActCount,aMenu,nErrTop,nErrBot,nChoice,cChoice,cErrScr,nIntense,;
       cDevice,ccolor,bOldErr,cMsg,cErrWrnMsg,nLogFile
 
 Local DosErr:={"Invalid function number","File not found","Path not found",;
@@ -199,15 +199,15 @@ while cchoice != 'A'
  set( _SET_INTENSITY , nIntense )
 
  nIntense:=set( _SET_INTENSITY , TRUE )
- cChoices:={}
+ aMenu:={}
 
  if (oEr:canRetry)
-  aadd( cchoices, { 'Retry', 'Retry the Operation' } )
+  aadd( aMenu, { 'Retry', 'Retry the Operation' } )
 
  endif
- aadd( cchoices, { 'Print', 'Print these details for sending to ' + DEVELOPER } )
- aadd( cchoices, { 'Abort', 'Exit from ' + SYSNAME } )
- nchoice := MenuGen( cchoices, 12, 62, 'Select' )
+ aadd( aMenu, { 'Abort', 'Exit from ' + SYSNAME } )
+ aadd( aMenu, { 'Print', 'Print these details for sending to ' + DEVELOPER } )
+ nchoice := MenuGen( aMenu, 12, 62, 'Select' )
 
  set( _SET_INTENSITY , nIntense )
  set( _SET_DEVICE , cDevice )
@@ -219,7 +219,7 @@ while cchoice != 'A'
   Box_Restore( cErrScr )
   return TRUE
 
- case ( !oEr:canRetry .and. nchoice = 1 ) .or. (  oEr:canRetry .and. nchoice = 2 )
+ case ( !oEr:canRetry .and. nchoice = 3 ) .or. (  oEr:canRetry .and. nchoice = 1 )
   dbcloseall()    // Shut all files - will allow Error( 4 ) to print ok
   set printer to ( trim( LVars( L_REPORT_NAME ) ) )
   oPrinter := PrintCheck( "System Error Report" )

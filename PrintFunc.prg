@@ -311,7 +311,7 @@ local sub_code := { || &(sub_group_by) }
 local grp_head := { || &(gh) }
 local sub_head := { || &(sh) }
 
-local fcondblock,wcondblock,pos
+local bForCondition,bWhileCondition,pos
 local totals:=FALSE
 local cont:=TRUE,a,fldrec,fld
 local done:=FALSE,prin:=FALSE,z,t
@@ -353,7 +353,6 @@ else  // to Screen
  oPrinter:SetFont( 'Lucida Console', 8, {3,-50} )
 
 endif
-// altd()
 for i := 1 to len( aReport )    // Initialise the totals arrays and determine whether any fields
  if aReport[ i, PR_FLD_TOT ]    // require totals.
   totals := TRUE
@@ -376,28 +375,28 @@ if empty( sub_group_by )
 endif
 
 if empty( forcond )
- fcondblock := { || .t. }
+ bForCondition := { || .t. }
 
 else
- fcondblock := { || &( forcond ) }
+ bForCondition := { || &( forcond ) }
 
 endif
 
 if empty( whilecond )
- wcondblock := { || Pinwheel() }
+ bWhileCondition := { || Pinwheel() }
 
 else
- wcondblock := { || &( 'Pinwheel() .and. ' + whilecond ) }
+ bWhileCondition := { || &( 'Pinwheel() .and. ' + whilecond ) }
 
 endif
 
 PageHead2( oPrinter, aReport, report_name, page_number, toScreen, page_width )
 page_number++
-dbsetfilter( fcondblock )
-cont := eval( wcondblock )
+dbsetfilter( bForCondition )
+cont := eval( bWhileCondition )
 while !eof() .and. cont
  code := eval( grp_code )
- if eval( fcondblock )
+ if eval( bForCondition )
   if !empty( group_by ) 
    if !toScreen
     oPrinter:NewLine()
@@ -415,7 +414,7 @@ while !eof() .and. cont
 
   while !eof() .and. eval( grp_code ) == code .and. cont
    scode := eval( sub_code )
-   if eval( fcondblock )
+   if eval( bForCondition )
     if !empty( sub_group_by )
      if !toScreen
       oPrinter:newline()
@@ -431,7 +430,7 @@ while !eof() .and. cont
     endif
 
     while !(eof()) .and. eval( sub_code ) == scode .and. eval( grp_code ) == code .and. cont
-     if !msummary .and. eval( fcondblock )
+     if !msummary .and. eval( bForCondition )
 // Build an array of fields to be printed
 
       a := {}
@@ -581,7 +580,7 @@ while !eof() .and. cont
 
      endif
 
-     if totals .and. eval(fcondblock)
+     if totals .and. eval(bForCondition)
       for i := 1 to len(aReport)
        if aReport[i,PR_FLD_TOT]
         sub_sub_tot[i] += eval({||&(aReport[i,1])})
@@ -592,7 +591,7 @@ while !eof() .and. cont
 
      endif
      dbskip()
-     cont := eval(wcondblock)
+     cont := eval(bWhileCondition)
      if empty(sub_group_by)
       exit
 
@@ -651,7 +650,7 @@ while !eof() .and. cont
 
    else
     dbskip()
-    cont := eval( wcondblock )
+    cont := eval( bWhileCondition )
 
    endif // eval( codeblock )
    if empty(group_by)
@@ -723,7 +722,7 @@ while !eof() .and. cont
 
  else
   dbskip()
-  cont := eval( wcondblock )
+  cont := eval( bWhileCondition )
 
  endif // eval( codeblock )
 

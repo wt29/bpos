@@ -35,8 +35,8 @@ while mgo
  Heading( 'Append System Menu' )
  aArray := {}
  aadd( aArray, { 'Utility', 'Return to Utility Menu' } )
- aadd( aArray, { 'Bisac', 'Add descs from a BISAC File' } )
- aadd( aArray, { 'CD ROM', 'CD ROM Descs from files' } )
+ aadd( aArray, { 'Bisac', 'Add ' + ITEM_DESC + ' from a BISAC File' } )
+ aadd( aArray, { 'CD ROM', 'CD ROM ' + ITEM_DESC + ' from files' } )
  aadd( aArray, { 'Standby', 'Append from and clear Standby POS' } )
  choice := MenuGen( aArray, 09, 50, 'Import' )
  do case
@@ -544,7 +544,7 @@ while TRUE
 #endif
      Error( "No \baker\baker.out input file found",12 )
     else
-     Heading( "Append descs from Baker & Taylor File" )
+     Heading( "Append ' + ITEM_DESC + ' from Baker & Taylor File" )
 
      aArray := {}
      aadd( aArray, { 'id', 'c', 12, 0 } )
@@ -659,7 +659,7 @@ while TRUE
       Shell( "bookfind" )
      endif
      if !no_append .and. file( "\bookfind\bookfind.out" )
-      if Isready( 7, 12, 'Append Download descs from Bookfind BIP' )
+      if Isready( 7, 12, 'Append Download ' + ITEM_DESC + ' from Bookfind BIP' )
 
        aArray := {}
        aadd( aArray, { 'tag', 'c', 3, 0 } )
@@ -814,7 +814,7 @@ while TRUE
 #else
      if file( Oddvars( SYSPATH ) + "whitaker.out" )
 #endif
-      if !no_append .and. Isready( 7, 12, 'Append Download descs from Whitaker BBIP' )
+      if !no_append .and. Isready( 7, 12, 'Append Download ' + ITEM_DESC + ' from Whitaker BBIP' )
 
        aArray := {}
        aadd( aArray, { 'space', 'c', 6, 0 } )
@@ -945,7 +945,7 @@ while TRUE
     mfile := Directory( "\bowker\*.out" ) 
 
     if len( mfile ) != 0 .and. !no_append ;
-       .and. Isready( 7, 12,'Append Download descs from GBIP' )
+       .and. Isready( 7, 12,'Append Download ' + ITEM_DESC + ' from GBIP' )
 
      mfile := Getfile( "*.out", "\bowker\" )       
 

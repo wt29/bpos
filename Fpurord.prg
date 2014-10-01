@@ -588,7 +588,7 @@ while TRUE
 
       if Isready(  5, 10, 'Ok to delete all of PO No ' + Ns( mpo ) )
        madd := FALSE
-       @ 6,10 say 'Add descs back into Draft Purchase Orders' get madd pict 'y'
+       @ 6,10 say 'Add ' + ITEM_DESC + ' back into Draft Purchase Orders' get madd pict 'y'
        read
 
        mreason := space( len( master->comments ) )

@@ -8,7 +8,7 @@ Procedure f_department
 
 #include "bpos.ch"
 
-local mgo := FALSE,choice,oldscr:=Box_Save()
+local lGo := FALSE,choice,oldscr:=Box_Save()
 local mdept,mscr,mdept2,x,y,last_year,this_year,gchoice
 local mjan,mfeb,mmar,mapr,mmay,mjun,mjul,maug,msep,moct,mnov,mdec,mcat
 local report_name,page_width,page_number,col_head1,col_head2,top_mar,bot_mar
@@ -16,14 +16,13 @@ local tlycost,tlysell,ttycost,ttysell,lycost,lysell,tycost,tysell
 local weeknum,page_len,ly,ty,start_week,first_day,p_sel,this_arr,last_arr
 local getlist:={}, mstr, tot_lysell, tot_tysell, s, mtot, aArray, farr
 
-Center(24,'Opening Department File')
 if Netuse( "deptmove" )
  if Netuse( "dept" )
-  mgo := TRUE
+  lGo := TRUE
  endif
 endif
-line_clear( 24 )
-while mgo
+
+while lGo
 
  Box_Restore( oldscr )
  Heading( 'Department File Maintenance Menu' )
@@ -136,7 +135,7 @@ while mgo
   Heading('Global Department Change')
   aArray := {}
   aadd( aArray, { 'Exit', 'Return to Category Menu' } )
-  aadd( aArray, { 'Dept', 'Change all descs from one Department to another' } )
+  aadd( aArray, { 'Dept', 'Change all ' + ITEM_DESC + ' from one Department to another' } )
   aadd( aArray, { 'Category', 'Change the department using a category code' } )
   gchoice := Menugen( aArray, 11, 03, 'Global' )
 
@@ -237,7 +236,7 @@ while mgo
    @ 04, 10 say 'Department Code' get mdept pict '@!' valid( Dup_chk( mdept , "dept" ) )
    read
    if lastkey() != K_ESC
-    Center( 5, 'About to change the department of all descs' )
+    Center( 5, 'About to change the department of all ' + ITEM_DESC + '' )
     Center( 6, 'which have a category of ' + trim( Lookitup( 'category', mcat ) ) )
     Center( 7, 'to a department of ' + trim( Lookitup( 'dept', mdept ) ) )
     if Isready( 12 )
@@ -568,7 +567,7 @@ while mgo
    endif
   endcase
  case Choice < 2
-  mgo := FALSE
+  lGo := FALSE
   exit
  endcase
  Box_Restore( oldscr )

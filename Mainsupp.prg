@@ -132,7 +132,7 @@ if Secure( X_GLOBALS )
  aadd( aArray, { 'Absorb', 'Absorb one Supplier into Another' } )
  aadd( aArray, { 'Create', 'Create a new Supplier from ' + BRAND_DESC } )
  aadd( aArray, { BRAND_DESC, 'Absorb one ' + BRAND_DESC + ' into another' } )
- aadd( aArray, { ID_DESC, 'Absorb descs using ' +ID_DESC+' info' } )
+ aadd( aArray, { ID_DESC, 'Absorb ' + ITEM_DESC + ' using ' +ID_DESC+' info' } )
  aadd( aArray, { 'Name', 'Change the Name/Code of a supplier' } )
 
  nMenuChoice := MenuGen( aArray, 08, 03, 'Global' )
@@ -717,10 +717,9 @@ case nMenuChoice = 9
     col_head2 := '컴컴컴컴컴컴컴컴'
     for x := start_week to min( start_week+18, 53 )
      col_head1 += padl( 'W' + ns( x ) , 6 )
-     col_head2 += ' ' + '컴컴�'
-    next
+     col_head2 += ' ' + "==="
+ next
     report_name := 'Sales by Supplier by Week Variance '
- //   // Pitch17()
     set device to print
     PageHead( report_name, page_width, page_number, col_head1, col_head2 )
     tot_lysell := {}
@@ -835,7 +834,6 @@ case nMenuChoice = 10
     ttycost := 0
     ttysell := 0
     report_name := 'Ytd Sales Variance by Department to Week ' + Ns( weeknum - 1 )
-    // Pitch10()
     set device to print
     PageHead( report_name, page_width, page_number, col_head1, col_head2 )
     while !supplier->(eof()) .and. Pinwheel()

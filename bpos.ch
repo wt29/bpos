@@ -78,13 +78,13 @@ v1.24 - Current Sales File print
 #else
  #define STORETYPE 'Store'
  #define STORENAMEDESC 'Store Name'
- #define ITEM_DESC 'Item'
+ #define ITEM_DESC 'Items'
  #define ID_DESC 'Code'
  #define DESC_DESC 'Description'
  #define ALT_DESC 'Alt. Descrpt'
  #define BRAND_DESC 'Brand'
- #define PACKAGE_DESC 'Pack.'
- #define ILLUSTRATOR_DESC 'Descript2'
+ #define PACKAGE_DESC 'Package'
+ #define ILLUSTRATOR_DESC '2nd Description'
  #define PLU_DESC 'PLU'
  
 #endif
@@ -198,6 +198,7 @@ v1.24 - Current Sales File print
 
 #define CONDENSE .t.
 
+// EPSON seems to be the default docket printer emulation
 #ifdef EPSON
  #define PITCH_17 chr(27)+chr(103)
  #define PITCH_10 chr(27)+chr(80)
@@ -217,6 +218,8 @@ v1.24 - Current Sales File print
           IF <v1> == NIL ; <v1> := <x1> ; END                           ;
           [; IF <vn> == NIL ; <vn> := <xn> ; END ]
   
+// Set up the lengths of various fields - Note these values are used when 
+//  the DB tables are first created
 #ifndef ID_CODE_LEN
  #define ID_CODE_LEN 13
 #endif
@@ -395,6 +398,7 @@ v1.24 - Current Sales File print
 #define APPE_BY_PROFORMA       8
 #define APPE_FROM_PDT          9
 
+// BPOS Config variables - direct map to the BVARS file
 #define B_NAME        1
 #define B_SERIAL      2
 #define B_ADDRESS1    3
@@ -493,6 +497,7 @@ v1.24 - Current Sales File print
 // **TODO**
 #define FIRST_PTR        4
 
+// Node (workstation) variables - direct map to the NODES files
 #define L_NODE           1
 #define L_REGISTER       2
 #define L_PRINTER        3
@@ -560,6 +565,7 @@ v1.24 - Current Sales File print
 #define L_POZ           65
 #define L_ONP           66
 
+// X - Security defines 
 #define X_SUPERVISOR    1
 #define X_FILES         2
 #define X_PURCHASE      3
@@ -606,6 +612,7 @@ v1.24 - Current Sales File print
 #define OPERNAME       15      // Operator Name
 #define IS_CONSIGNED   16      // Was last title looked up by consignment
 
+// Strings for some basic printer functions
 #define L_LPT1_10      2
 #define L_LPT1_12      3  
 #define L_LPT1_17      4  
@@ -627,6 +634,7 @@ v1.24 - Current Sales File print
 #define L_LPT4_LQ      20 
 #define L_LPT4_DR      21 
 
+// Windows defines
 #define MB_OK                       0
 #define MB_OKCANCEL                 1
 #define MB_ABORTRETRYIGNORE         2

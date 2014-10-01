@@ -140,7 +140,7 @@ while TRUE
    read
    moh := TRUE
    Box_Save( 11, 40, 13, 63 )
-   @ 12,42 say 'Onhand descs only' get moh pict 'y'
+   @ 12,42 say 'Onhand ' + ITEM_DESC + ' only' get moh pict 'y'
    read
 
    if lastkey() == K_ESC
@@ -177,7 +177,7 @@ while TRUE
 
       else
        sHeading = 'Detail report for Internal Use Items with Primary Supplier ' ;
-              + LookItUp( 'supplier', msupp ) + if( moh, 'Onhand Descs Only', ''  )
+              + LookItUp( 'supplier', msupp ) + if( moh, 'Onhand ' + ITEM_DESC + ' Only', ''  )
        Reporter( aDetail,;                                                      // Field Array
             sHeading,;                                                          // Report Heading
             ,;                                                                  // Group By
@@ -211,7 +211,7 @@ while TRUE
   sAltDesc1 := space( 10 )
   sAltDesc2 := space( 10 )
   mchoice := 'R'
-  @ 05,10 say '<A>ll AltDescs or <R>ange' get mchoice pict '!' valid( mchoice $ 'AR' )
+  @ 05,10 say '<A>ll Alt' + ITEM_DESC + ' or <R>ange' get mchoice pict '!' valid( mchoice $ 'AR' )
   read
   if mchoice = 'R'
    @ 07,10 say 'Enter Alternate Description part to start ' get sAltDesc1 pict '@!'
@@ -227,7 +227,7 @@ while TRUE
     sAltDesc2 := trim(sAltDesc2)
     dbseek( sAltDesc1, TRUE )
     if mprntype = 'C'
-     sHeading =  'Report for Customer - ' + mCust + ';Alternate Descs from ' + sAltDesc1 + ' to ' + sAltDesc2
+     sHeading =  'Report for Customer - ' + mCust + ';Alternate ' + ITEM_DESC + ' from ' + sAltDesc1 + ' to ' + sAltDesc2
      Reporter( aCustomer,;                                                      //Field Array
             sHeading,;                                                                  // Report Heading
             ,;                                                                  // Group By
@@ -387,7 +387,7 @@ while TRUE
     moh := FALSE
     @ 07,10 say 'Enter Category code for print' get mcat pict '@!'
     Box_Save( 11,40,13,63 )
-    @ 12,42 say 'Onhand descs only' get moh pict 'y'
+    @ 12,42 say 'Onhand ' + ITEM_DESC + ' only' get moh pict 'y'
     read
     if updated()
      mcat := trim(mcat)
@@ -462,7 +462,7 @@ while TRUE
      ordsetfocus( BY_DEPARTMENT )
      seek mdept
      shead = "List of Stock Items in Department " + trim( Lookitup( "dept" , mdept ) ) + ;
-             if( moh, if(cutoff > 1,' Items with Onhand >= ' + alltrim(str(cutoff)),' Onhand descs only'), '' )
+             if( moh, if(cutoff > 1,' Items with Onhand >= ' + alltrim(str(cutoff)),' Onhand ' + ITEM_DESC + ' only'), '' )
 
      sfor = if( moh, "master->onhand >= cutoff" , ".t." )
      sWhile = 'master->department = mdept'
@@ -652,7 +652,7 @@ local getlist:={}, farr:={}
 memvar illus
 private illus := space(20)
 Box_Save(05,08,9,50)
-Heading('Print Descs on File by Illustrator')
+Heading('Print ' + ITEM_DESC + ' on File by Illustrator')
 @ 07,10 say 'Enter Illustrator ' get illus pict '@!'
 read
 if Isready(11)
@@ -664,7 +664,7 @@ if Isready(11)
  aadd(farr,{'master->alt_desc','Author',20,0,FALSE})
  aadd(farr,{'master->sell_price','Price',7,2,FALSE})
  
- Reporter(farr,'"List Of Descs For Illustrator "+"( "+alltrim(illus)+" )"',;
+ Reporter(farr,'"List Of ' + ITEM_DESC + ' For Illustrator "+"( "+alltrim(illus)+" )"',;
  '','','','',FALSE,"master->illustrat = alltrim(illus)",,96)
  
  ordsetfocus( BY_ID )

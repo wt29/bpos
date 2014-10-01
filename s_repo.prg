@@ -931,7 +931,7 @@ if IsReady(16)
    endif
    close salehist
   endif
-// --- Keep only 20 descs in each department ----
+// --- Keep only 20 ' + ITEM_DESC + ' in each department ----
   select 0
   if Netuse( Oddvars( TEMPFILE2 ), EXCLUSIVE, 10, "stmp" )
    indx("department+descend(padl(str(qty),8,'0'))","dept")

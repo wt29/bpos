@@ -32,7 +32,7 @@ while mgo
  Heading( 'Update Maintenance Menu' )
  aArray := {}
  aadd( aArray, { 'Utility', 'Return to Utility Menu' } )
- aadd( aArray, { 'Descs', 'Create/Retrieve Desc Update' } )
+ aadd( aArray, { '' + ITEM_DESC + '', 'Create/Retrieve Desc Update' } )
  aadd( aArray, { 'Stock', 'Create/Retrieve Stock Updates' } )
 #ifdef COOP
  aadd( aArray, { 'Prices', 'Check Price Changes from Head Office' } )
@@ -45,9 +45,9 @@ while mgo
   aArray := {}
   aadd( aArray, { 'Update', 'Return to Update Menu' } )
   aadd( aArray, { 'Create', 'Create Update File for Remote' } )
-  aadd( aArray, { 'Retrieve', 'Add Descs from Update Diskette' } )
+  aadd( aArray, { 'Retrieve', 'Add ' + ITEM_DESC + ' from Update Diskette' } )
   aadd( aArray, { 'Report', 'Print Desc Update File Report' } )
-  tchoice := MenuGen( aArray, 12, 51, 'Descs')
+  tchoice := MenuGen( aArray, 12, 51, '' + ITEM_DESC + '')
   do case
   case tchoice = 2
    Heading('Create Update Diskette for Remote')
@@ -181,7 +181,7 @@ while mgo
       aadd( farr, { 'cost_price','Invoice;Cost',7,2,FALSE} )
       aadd( farr, { 'sell_price','Sell;Price',7,2,FALSE} )
       aadd( farr, { 'retail','Retail;Price',7,2,FALSE} )
-      Reporter(farr,'"Update Descs File Listing"')
+      Reporter(farr,'"Update ' + ITEM_DESC + ' File Listing"')
       Pitch10()
       endprint()
       tupdate->( dbclosearea() )

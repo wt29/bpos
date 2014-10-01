@@ -1,6 +1,6 @@
 /*
 
- Transfer Descs from One system to Another
+ Transfer ' + ITEM_DESC + ' from One system to Another
 
  Last change: DOFAT 30/06/2008 8:41:25 PM
 

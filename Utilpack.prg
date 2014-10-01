@@ -821,7 +821,7 @@ if mallfiles .or. mfile = "HOLD"
   Kill( Oddvars( SYSPATH ) + "hold" + mindxext  )
  endif
  if Netuse( "hold",EXCLUSIVE,1, NOALIAS, FALSE )
-  mcount := FileDisp( 'Held Descs', must_index )
+  mcount := FileDisp( 'Held ' + ITEM_DESC + '', must_index )
   if !file( Oddvars( SYSPATH ) + "hold" + mindxext ) 
    indx( "id", 'id' )
    indx( 'key', 'key' )

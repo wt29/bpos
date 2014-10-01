@@ -128,7 +128,7 @@ else
  @ 05,10 say 'Minimum Number of Days since last Invoice' get mmindays pict '999'
  @ 06,10 say 'Maximum Number of Days since last Invoice' get mmaxdays pict '9999'
  @ 08,10 say '         Ignore Sale or Return Flag (Y/N)' get mflag pict 'Y'
- @ 10,10 say '            Delete existing "Hold" Descs' get mhold pict 'Y'
+ @ 10,10 say '            Delete existing "Hold" ' + ITEM_DESC + '' get mhold pict 'Y'
 
  read
  if Isready(12)
@@ -399,15 +399,15 @@ while TRUE
 
       case mfiltchoice = 1
        draftret->( dbsetfilter( { || draftret->type = 'O' } ) )
-       mfiltertext := 'Only Operator Descs Displayed'
+       mfiltertext := 'Only Operator ' + ITEM_DESC + ' Displayed'
 
       case mfiltchoice = 2
        draftret->( dbsetfilter( { || draftret->type = 'I' } ) )
-       mfiltertext := 'Only Invoice Descs Displayed'
+       mfiltertext := 'Only Invoice ' + ITEM_DESC + ' Displayed'
 
       case mfiltchoice = 3
        draftret->( dbsetfilter( { || draftret->type = 'S' } ) )
-       mfiltertext := 'Only Sales Descs Displayed'
+       mfiltertext := 'Only Sales ' + ITEM_DESC + ' Displayed'
 
       endcase
       mfilter := ( mfiltchoice > 0 )

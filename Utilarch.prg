@@ -1,28 +1,28 @@
 /*
 
+ Procedure Utilarch - Archive old unused ' + ITEM_DESC + '
 
- Procedure Utilarch - Archive old unused Descs
+ Last change:  TG   25 Feb 2011    1:47 pm
 
-
-      Last change:  TG   25 Feb 2011    1:47 pm
-*/
+ */
 
 Procedure U_Archive
 
 #include "bpos.ch"
 
-local mmin := FALSE, mrecsarch:=0
+local lIgnoreMinStock := FALSE
+local mrecsarch := 0
 local x                                 // Array Ordinal
 local mfpos                             // Field Position
-local aArray, nType, getlist:={}, aReport, sHeading, sForCOnd
+local aMenu, nMenu, getlist:={}, aReport, sHeading, sForCOnd
 
-memvar dLastSale, dLastRecv, dEntered, nMinNum
-public dLastSale, dLastRecv, dEntered, nMinNum
+memvar dLastSale, dLastReceived, dEntered, nMinStock
+public dLastSale, dLastReceived, dEntered, nMinStock
 
 dLastSale := Bvars( B_DATE )-365
-dLastRecv := Bvars( B_DATE )-365
+dLastReceived := Bvars( B_DATE )-365
 dEntered := Bvars( B_DATE )-365
-nMinNum := 0
+nMinStock := 0
 
 Heading( 'Archive Master file Items' )
 Center( 24, 'Opening files for Archive Maintenance' )
@@ -36,63 +36,73 @@ if Netuse( Oddvars( SYSPATH ) + "archive\archive", EXCLUSIVE )
  if Isready( 8 )
   Box_Save( 02, 02, 22, 78 )
   @ 3,10 say '   Date of last sale' get dLastSale
-  @ 4,10 say 'Date of last invoice' get dLastRecv
+  @ 4,10 say 'Date of last invoice' get dLastReceived
   @ 5,10 say '  Date of item entry' get dEntered
-  @ 6,10 say 'Ignore minimum stock' get mmin pict 'Y'
+  @ 6,10 say 'Ignore minimum stock' get lIgnoreMinStock pict 'Y'
   read
-  @ 08,10 say 'You are about to archive all descs which have -'
+  @ 08,10 say 'You are about to archive all ' + ITEM_DESC + ' which have -'
   @ 09,10 say '- No Onhand Stock'
   @ 10,10 say '- None on Order'
   @ 11,10 say '- None marked for Special Order'
-  if mmin
+  if lIgnoreMinStock
    @ 12,10 say '- Not been Sold since ' + dtoc( dLastSale )
-   @ 13,10 say '- Not been Received since ' + dtoc( dLastRecv )
-   @ 14,10 say '- Been added to system before ' + dtoc( dEntered )
-   nMinNum := 1000                                                 // just pick a large number
+   @ 13,10 say '- Not been Received since ' + dtoc( dLastReceived )
+   @ 14,10 say '- Been added to ' + SYSNAME + ' before ' + dtoc( dEntered )
+   nMinStock := 1000000  // A stupidly large number
 
   else
    @ 12,10 say '- A Minimum Stock of 0'
    @ 13,10 say '- Not been Sold since ' + dtoc( dLastSale )
-   @ 14,10 say '- Not been Received since ' + dtoc( dLastRecv )
-   @ 15,10 say '- Been added to system before ' + dtoc( dEntered )
+   @ 14,10 say '- Not been Received since ' + dtoc( dLastReceived )
+   @ 15,10 say '- Been added to ' + SYSNAME + ' before ' + dtoc( dEntered )
 
   endif
   Heading( 'Select Operation' )
-  aArray := {}
-  aadd( aArray, { 'Print  ', '' } )
-  aadd( aArray, { 'Execute', '' } )
-  aadd( aArray, { 'Quit   ', '' } )
-  ntype := MenuGen( aArray, 18, 5 )
+  aMenu := {}
+  aadd( aMenu, { 'Print  ', '' } )
+  aadd( aMenu, { 'Execute', '' } )
+  aadd( aMenu, { 'Quit   ', '' } )
+  nMenu := MenuGen( aMenu, 18, 5 )
   do case
-  case ntype = 1  // Print
+  case nMenu = 1  // Print
    if Netuse( "master" )
-    ordsetfocus( BY_DESC )
-    master->( dbgotop() )
     Print_find( 'report' )
-
     aReport := {}
-    aadd( aReport, { 'idcheck(ID)', 'ID', 15, 0, FALSE } )
+    aadd( aReport, { 'idcheck(ID)', 'ID', ID_CODE_LEN + 1, 0, FALSE } )
 //    aadd( aReport, { 'space(1) ', ' ', 1, 0, FALSE } )
     aadd( aReport, { 'desc', 'Description', 35, 0, FALSE } )
 //    aadd( aReport, { 'alt_desc', 'Alternate;Description', 20, 0, FALSE } )
+    aadd( aReport, { 'space(1) ', ' ', 1, 0, FALSE } )
     aadd( aReport, { 'department', 'Dept', 4, 0, FALSE } )
-    aadd( aReport, { 'Lookitup("brand", "brand")', 'Brand', 20, 0, FALSE } )
+    aadd( aReport, { 'space(1) ', ' ', 1, 0, FALSE } )
+    aadd( aReport, { 'Lookitup("brand", "brand")', 'Brand', 10, 0, FALSE } )
 //    aadd( aReport, { 'binding', 'Binding', 7, 0, FALSE } )
     aadd( aReport, { 'sell_price', 'Price', 7, 2, FALSE } )
     aadd( aReport, { 'space(1) ', ' ', 1, 0, FALSE } )
     aadd( aReport, { 'onhand', 'In;Stock', 5, 0, FALSE } )
+    aadd( aReport, { 'space(1) ', ' ', 1, 0, FALSE } )
+    aadd( aReport, { 'dsale', 'Last;Sold', 8, 0, FALSE } )
+    aadd( aReport, { 'space(1) ', ' ', 1, 0, FALSE } )
+    aadd( aReport, { 'entered', 'Date;Entered', 9, 0, FALSE } )
+    aadd( aReport, { 'space(1) ', ' ', 1, 0, FALSE } )
+    aadd( aReport, { 'dLastRecv', 'Date Last;Received', 10, 0, FALSE } )
 
     select master
+    master->( ordsetfocus( BY_DESC ) )
+    master->( dbgotop() )
 
     sHeading = 'Report on Items selected for Archive'
 
- /*   sforCond = "master->onhand <= 0 .and. master->onorder = 0 .and. " + ;
-               "master->special = 0 .and. master->entered < dEntered .and. " + ;
-               "master->dsale < dLastSale .and. master->dlastrecv < dLastRecv .and. " + ;
-               "master->minstock <= nMinNum .and. master->consign = 0"
- */
- sForCond := "master->onhand = 0"
-    Reporter( aReport,;                                                      // Field Array
+    sforCond = "(master->onhand <= 0) .and. " + ;
+	           "(master->onorder = 0) .and. " + ;
+               "(master->special = 0) .and. " + ;
+			   "(master->entered < dEntered) .and. " + ;
+               "(master->dsale < dLastSale) .and. " + ;
+			   "(master->dlastrecv < dLastReceived) .and. " + ;
+               "(master->minstock <= nMinStock) .and. " + ;
+			   "(master->consign = 0)"
+
+	Reporter( aReport,;                                                      // Field Array
               sHeading ,;                                                    // Report Heading
               ,;                                                             // Group By
               ,;                                                             // Group Heading
@@ -107,7 +117,7 @@ if Netuse( Oddvars( SYSPATH ) + "archive\archive", EXCLUSIVE )
     master->( dbclosearea() )
    endif
 
-  case ntype = 2  // Execute
+  case nMenu = 2  // Execute
    if Isready(16)
     Center(17,'-=< Archiving - Please Wait >=-')
     if Netuse( "salehist", EXCLUSIVE )
@@ -119,10 +129,10 @@ if Netuse( Oddvars( SYSPATH ) + "archive\archive", EXCLUSIVE )
         Highlight(18,03,'Master file Records',Ns(lastrec()))
         SysAudit( "ArcStart" )
         while !master->( eof() )
-         if master->onhand = 0 .and. master->onorder = 0 .and. ;
+         if master->onhand <= 0 .and. master->onorder = 0 .and. ;
           master->special = 0 .and. master->entered < dEntered .and. ;
-          master->dsale < dLastSale .and. master->dlastrecv < dLastRecv .and. ;
-          master->minstock <= nMinNum .and. master->consign = 0
+          master->dsale < dLastSale .and. master->dlastrecv < dLastReceived .and. ;
+          master->minstock <= nMinStock .and. master->consign = 0
 
           if !archive->( dbseek( master->id ) )
            Add_rec('archive')
@@ -200,7 +210,7 @@ if Netuse( Oddvars( SYSPATH ) + "archive\archive", EXCLUSIVE )
     endif
     SysAudit( "ArcFinish" )
     Box_Save( 5, 03, 8, 76 )
-    Center( 06, 'Bluegum Software strongly recommend you Backup your new Archive' )
+    Center( 06, DEVELOPER + ' strongly recommend you Backup your new Archive' )
     Center( 07, ' on a separate disk set using the \Utility\Backup\Archive option' )
     Error( 'Archive Completed', 09 )
 
@@ -211,5 +221,5 @@ if Netuse( Oddvars( SYSPATH ) + "archive\archive", EXCLUSIVE )
  endif
 
 endif
-close databases
+dbCloseAll()
 return

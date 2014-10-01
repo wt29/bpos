@@ -154,7 +154,7 @@ if mgo
             qty_avail := 0
 
            else
-            if Bvars( B_SPECLABE )         // Print spine label for descs on special
+            if Bvars( B_SPECLABE )         // Print spine label for ' + ITEM_DESC + ' on special
              Print_find( "barcode" )
              Spec_label( needed )
 
@@ -333,7 +333,7 @@ if mgo
    Center( 10, '-=< Backorder processing in Progress >=-' )
    poline->( ordsetfocus( 'number' ) )
    for x := 1 to len( po_list )
-    if poline->( dbseek( po_list[ x ] ) )     // Find po and flag rest of descs as on backorder
+    if poline->( dbseek( po_list[ x ] ) )     // Find po and flag rest of ' + ITEM_DESC + ' as on backorder
      while poline->number = po_list[ x ] .and. !poline->( eof() )
       Rec_lock( 'poline' )
       poline->back_ord := TRUE 
