@@ -24,7 +24,7 @@ if Netuse( "salehist", EXCLUSIVE )
  @ 3,07 say 'This option will condense to Sales History files.'
  @ 4,05 say 'Records before ' + dtoc( start_last_year ) + ' will be condensed to a year total.'
  @ 5,05 say 'Records between ' + dtoc( start_this_year ) + ' and ' + dtoc( start_last_year ) + ' will be condensed by month.'
- Center( 7, 'Bluegum Software STRONGLY recommends you backup BEFORE this step!!' )
+ Center( 7, DEVELOPER + ' STRONGLY recommends you backup BEFORE this step!!' )
  if Isready( 8 )
   if Isready( 8, 10, 'Again - Do you wish to proceed' )
    SysAudit( 'CondSaHist'+dtoc( start_last_year ) +'|'+dtoc( start_last_year ) )

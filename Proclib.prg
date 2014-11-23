@@ -237,7 +237,7 @@ local nOrigSelect := select()
 
 if mqty != nil
  if master->onhand + mqty < MAXNEGSTOCK
-  Error( 'Negative Stock limit Exceeded on desc', 12, ,trim( left( master->desc, 40 ) ) )
+  Error( 'Negative Stock limit Exceeded on ' + DESC_DESC, 12, ,trim( left( master->desc, 40 ) ) )
 
  else
   master->onhand += mqty
@@ -373,7 +373,7 @@ if Netuse( "nodes", EXCLUSIVE )                         // All of our 'L_' Varia
    fieldput( x, mlvars[ x ] ) 
   next                                                  // And Again for more fields
  else
-  Error( 'Trouble locating Node Address in Nodes file - Notify Bluegum Software', 12 )
+  Error( 'Trouble locating Node Address in Nodes file - Notify ' + DEVELOPER , 12 )
  endif
  nodes->( dbclosearea() )
 endif
@@ -527,10 +527,11 @@ return
 
 *
 
-function error ( ertext,errow,erwait,extrainfo )
+function error ( ertext, errow, erwait, extrainfo )
 local sScreen, ercol, er_bott, er_right, ocursor:=setcursor(0)
 default erText to ""
 default extraInfo to ""
+default erWait to 0
 if bvars( B_BELLS )
  tone( lvars( L_BAD ), 5 )
 endif
@@ -544,26 +545,22 @@ if errow = nil
 
 else
  er_right := ercol + max( 27, max( len( ertext ), if( extrainfo != "", len( extrainfo ), 0 ) ) ) + 4
- er_bott := errow + if( erwait = nil, 2, 1 ) + if( empty( ertext ), 0, 1 )+ if( extrainfo = "", 0, 1 )
+ er_bott := errow + if( erwait = 0, 2, 1 ) + if( empty( ertext ), 0, 1 )+ if( extrainfo = "", 0, 1 )
  sScreen:=Box_Save( errow, ercol, er_bott, er_right, C_YELLOW )
  Center( errow + 1, ertext )
  if extrainfo != ""
   Center( errow + 2, extrainfo )
 
  endif
- if erwait = nil
+ if erwait = 0
   Center( er_bott - 1, '- Hit any key to continue -' )
 
  endif  
 
 endif
-if erwait != nil
- inkey( erwait )
 
-else
- inkey( 0 )
+inkey( erwait )
 
-endif
 Syscolor( 1 )           
 Box_Restore( sScreen )
 setcursor( ocursor )
@@ -2392,7 +2389,7 @@ else
 endif
 
 if ( FileName := Fcreate( TermName, FC_HIDDEN ) ) !=-1
- Fwrite( FileName,"Bluegum Software Terminal Control File" )
+ Fwrite( FileName, DEVELOPER + " Terminal Control File" )
  Fwrite( FileName, CRLF )
  TermName := "This site is licensed for " + Ns( TERMINALCOUNT ) + " terminals"
  Fwrite( FileName, TermName )

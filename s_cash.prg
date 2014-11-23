@@ -3,11 +3,12 @@
    Last change:  APG  14 Sep 2004   10:03 pm
 
 
-      Last change:  TG   29 Apr 2011    4:13 pm
+   Last change:  TG   29 Apr 2011    4:13 pm
 */
-Global aDocket
 
 #include "bpos.ch"
+
+// global aDocket
 
 static numtt, tt_types, tt_names, tt_cdflag, fkeys, lastfkeyhit:=0, price_conf, round_amt := 0
 
@@ -21,7 +22,6 @@ local mtrantype, mCustHistFlag, tax_exempt, retflag, specflag, qtyflag, discdone
 local mqty, mmasterprice, hasdisc, mrow, mFinalTot, msellprice, msale_type, mCustKey
 local mstype, mNoDiscTot
 local getlist := {}
-
 
 default hdpos to FALSE
 

@@ -4,7 +4,8 @@
 
  Last change: APG 1/08/2008 9:28:40 AM
 
-      Last change:  TG   15 May 2010   10:32 am
+ Last change:  TG   15 May 2010   10:32 am
+
 */
 
 #include "bpos.ch"

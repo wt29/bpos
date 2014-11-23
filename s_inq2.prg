@@ -104,9 +104,9 @@ return
 *
 
 function enq_cate
-local mkey, mcode, mscr, msel:=select(), openmastcat:=FALSE
+local sKey, mcode, mscr, msel:=select(), openmastcat:=FALSE
 local getlist:={}, mrec, oldcur:=setcursor(1)
-local sID := master->id, catebrow, mqty, oldntxord
+local sID := master->id, catebrow, nQty, oldntxord
 local okf6 := setkey( K_F6, nil ), okf5
 static lastcat
 if Netuse( "category", SHARED, 10, 'ecat' )
@@ -126,14 +126,14 @@ if Netuse( "category", SHARED, 10, 'ecat' )
   catebrow:skipblock := KeyskipBlock( {||emcat->id}, sID )
   catebrow:addcolumn(tbcolumnnew("Code",{||emcat->code}))
   catebrow:addcolumn(tbcolumnnew("Category Name",{||ecat->name}))
-  mkey:=0
+  sKey:=0
  // Something to do with automatic category maint from Add desc !!
-  while mkey != K_ESC .and. mkey != K_END
+  while sKey != K_ESC .and. sKey != K_END
    catebrow:forcestable()
-   mkey:=inkey( 0 )
-   if !Navigate( catebrow, mkey )
+   sKey:=inkey( 0 )
+   if !Navigate( catebrow, sKey )
     do case
-    case mkey == K_INS
+    case sKey == K_INS
      mscr := Box_Save( 02, 02, 05, 28 )
      mcode := space(6)
      okf5 := setkey( K_F5, { || Stuffcat( lastcat ) } )
@@ -141,11 +141,11 @@ if Netuse( "category", SHARED, 10, 'ecat' )
      read
      setkey( K_F5, okf5 )
      if !empty( mcode )
-      mqty := 1
+      nQty := 1
       Add_rec( 'emcat ')
       emcat->code := mcode
       emcat->id := master->id
-      emcat->qty := mqty
+      emcat->qty := nQty
       emcat->skey := upper( master->desc )
       emcat->( dbrunlock() )
       lastcat := emcat->code
@@ -153,7 +153,7 @@ if Netuse( "category", SHARED, 10, 'ecat' )
      Box_Restore( mscr )
      emcat->( dbseek( sID ) )
      catebrow:refreshall()
-    case mkey == K_DEL
+    case sKey == K_DEL
      if Isready( 3, 5, 'Ok to delete code ' + emcat->code )
       Del_rec( 'emcat', UNLOCK )
       seek sID
@@ -180,12 +180,12 @@ return nil
 
 *
 
-func enq_hist ( retval )
+func enq_hist ( lReturnVal )
 local key,mscr,o_dbf:=select(),enqbrow,getlist:={},refrec
 local oldcur:=setcursor(1), tscr, sID:=left( master->id, 12 )
 local okf5:=setkey( K_F5, nil )
 
-default retval to 0
+default lReturnVal to 0
 if Netuse( "stkhist", SHARED, 10, 'estk' )
  ordsetfocus( 'id' )
  if !dbseek( sID )
@@ -241,8 +241,8 @@ if Netuse( "stkhist", SHARED, 10, 'estk' )
      enddo
 
      Oddvars( RETURNS_OFFSET, recpos )
-     retval := recpos */
-     retval := estk->( recno() )
+     lReturnVal := recpos */
+     lReturnVal := estk->( recno() )
      exit
     endcase
    endif
@@ -255,7 +255,7 @@ endif
 select ( o_dbf )
 setcursor( oldcur )
 setkey( K_F5, okf5 )
-return retval     //  Retval
+return lReturnVal     //  lReturnVal
 
 *
 
@@ -286,8 +286,8 @@ return mret
 *
 
 func enq_sales
-local mscr, o_dbf:=select(), enqbrow, retval:=0,getlist:={},oldrec:=recno()
-local oldcur:=setcursor(1), tscr, sID:=substr(master->id,1,12), mkey
+local mscr, o_dbf:=select(), enqbrow, lReturnVal:=0,getlist:={},oldrec:=recno()
+local oldcur:=setcursor(1), tscr, sID:=substr(master->id,1,12), sKey
 local totsold, totinv, totsoldv, totret, totretv, mrec
 if Netuse("salehist",SHARED,10,'ehist' ) 
  ordsetfocus( 'id' )
@@ -308,13 +308,13 @@ if Netuse("salehist",SHARED,10,'ehist' )
   enqbrow:addcolumn(tbcolumnnew("Sell",{ || transform( ;
           ehist->unit_price-ehist->discount, '9999.99' ) }))
   enqbrow:freeze := 1
-  mkey := 0
-  while mkey != K_ESC .and. mkey != K_END
+  sKey := 0
+  while sKey != K_ESC .and. sKey != K_END
    enqbrow:forcestable()
-   mkey:=inkey(0)
-   if !navigate(enqbrow,mkey)
+   sKey:=inkey(0)
+   if !navigate(enqbrow,sKey)
     do case
-    case mkey == K_F10   // Edit a line item in history
+    case sKey == K_F10   // Edit a line item in history
      if Secure( X_EDITFILES )
       tscr := Box_Save( 2, 10, 4, 70 )
       Rec_lock()
@@ -325,7 +325,7 @@ if Netuse("salehist",SHARED,10,'ehist' )
       Box_Restore( tscr )
      endif
 
-    case mkey == K_F8
+    case sKey == K_F8
      mrec := ehist->( recno() )
      dbseek( sID + chr( 256 ), TRUE )
      totsold := 0
@@ -367,15 +367,15 @@ endif
 select ( o_dbf )
 goto oldrec
 setcursor(oldcur)
-return retval
+return lReturnVal
 
 *
 
 function enq_po
-local cur_dbf:=select(),sID:=master->id,sobj,keypress,c,okf9:=setkey( K_F9, nil )
-local oldscr:=Box_Save(),retval:=0,oldcur:=setcursor(1)
+local cur_dbf:=select(),sID:=master->id,oBrowse,nKeyPressed,c,okf9:=setkey( K_F9, nil )
+local oldscr:=Box_Save(),lReturnVal:=0,oldcur:=setcursor(1)
 if select( "ep" ) != 0
- return retval
+ return lReturnVal
 endif
 if Netuse( "pohead", SHARED, 10, "eh" )
  if Netuse( "poline", SHARED, 10, "ep" ) 
@@ -388,36 +388,36 @@ if Netuse( "pohead", SHARED, 10, "eh" )
    eh->( dbseek( ep->number ) )
    cls
    Heading('Purchase Orders on Item')
-   sobj := TBrowseDB(01, 0, 24, 79)
-   sobj:HeadSep := HEADSEP
-   sobj:ColSep := COLSEP
-   sobj:goTopBlock := { || dbseek( sID ) }
-   sobj:goBottomBlock  := { || jumptobott( sID ) }
-   sobj:skipBlock := Keyskipblock( { || ep->id }, sID ) 
+   oBrowse := TBrowseDB(01, 0, 24, 79)
+   oBrowse:HeadSep := HEADSEP
+   oBrowse:ColSep := COLSEP
+   oBrowse:goTopBlock := { || dbseek( sID ) }
+   oBrowse:goBottomBlock  := { || jumptobott( sID ) }
+   oBrowse:skipBlock := Keyskipblock( { || ep->id }, sID ) 
    c := tbcolumnnew( 'Number', { || ep->number } )
    c:colorblock := { || if( ep->qty != ep->qty_ord , {5, 6}, {1, 2} ) }
-   sobj:addcolumn( c )
-//   sobj:addcolumn( tbcolumnNew( 'R', { || if( empty( ep->abs_ptr ), ' ', '*' ) } ) )
-   sobj:addcolumn( tbcolumnNew( 'Ship Date', { || ep->ship_date } ) )
-   sobj:addcolumn( tbcolumnNew( 'Supp', { || eh->supp_code } ) )
-   sobj:addcolumn( tbcolumnNew( 'Date Ord', { || eh->date_ord } ) )
-   sobj:addcolumn( tbcolumnNew( 'Qty Ord', { || ep->qty_ord } ) )
-   sobj:addcolumn( tbcolumnNew( 'Qty Rec', { || ep->qty_ord-ep->qty } ) )
-   sobj:addcolumn( tbcolumnNew( 'Comments', { || substr( ep->comment, 1, 20 ) } ) )
-   sobj:addcolumn( tbcolumnNew( 'B/O Date', { || ep->date_bord } ))
-   sobj:freeze := 1
-   keypress := 0
-   while keypress != K_ESC .and. keypress != K_END
-    sobj:forcestable()
-    keypress := inkey(0)
-    if !navigate(sobj,keypress)
+   oBrowse:addcolumn( c )
+//   oBrowse:addcolumn( tbcolumnNew( 'R', { || if( empty( ep->abs_ptr ), ' ', '*' ) } ) )
+   oBrowse:addcolumn( tbcolumnNew( 'Ship Date', { || ep->ship_date } ) )
+   oBrowse:addcolumn( tbcolumnNew( 'Supp', { || eh->supp_code } ) )
+   oBrowse:addcolumn( tbcolumnNew( 'Date Ord', { || eh->date_ord } ) )
+   oBrowse:addcolumn( tbcolumnNew( 'Qty Ord', { || ep->qty_ord } ) )
+   oBrowse:addcolumn( tbcolumnNew( 'Qty Rec', { || ep->qty_ord-ep->qty } ) )
+   oBrowse:addcolumn( tbcolumnNew( 'Comments', { || substr( ep->comment, 1, 20 ) } ) )
+   oBrowse:addcolumn( tbcolumnNew( 'B/O Date', { || ep->date_bord } ))
+   oBrowse:freeze := 1
+   nKeyPressed := 0
+   while nKeyPressed != K_ESC .and. nKeyPressed != K_END
+    oBrowse:forcestable()
+    nKeyPressed := inkey(0)
+    if !navigate(oBrowse,nKeyPressed)
      do case
-     case keypress = K_ENTER
-      retval := ep->number
-      keypress := K_ESC
-     case keypress = K_F10 .and. Secure( X_EDITFILES )
+     case nKeyPressed = K_ENTER
+      lReturnVal := ep->number
+      nKeyPressed := K_ESC
+     case nKeyPressed = K_F10 .and. Secure( X_EDITFILES )
       Fpoadj( 'ep', 'eh' )
-//     case keypress == K_ALT_A
+//     case nKeyPressed == K_ALT_A
 //      Abs_edit( 'Poline', 'ep' )
      endcase
     endif
@@ -431,15 +431,15 @@ select (cur_dbf)
 Box_Restore( oldscr )
 setcursor(oldcur)
 setkey( K_F9, okf9 )
-return retval
+return lReturnVal
 
 *
 
 function enq_serial
-local cur_dbf:=select(),sID:=master->id,sobj,keypress,c,okf9:=setkey( K_F9, nil )
-local oldscr:=Box_Save(),retval:=0,oldcur:=setcursor(1)
+local cur_dbf:=select(),sID:=master->id,oBrowse,nKeyPressed,c,okf9:=setkey( K_F9, nil )
+local oldscr:=Box_Save(),lReturnVal:=0,oldcur:=setcursor(1)
 if select( "ep" ) != 0
- return retval
+ return lReturnVal
 endif
 if Netuse( "serial", SHARED, 10, "ep" )
  ordsetfocus( 'id' )
@@ -448,23 +448,23 @@ if Netuse( "serial", SHARED, 10, "ep" )
  else
   cls
   Heading('Serial Numbers Orders on id')
-  sobj := TBrowseDB(01, 0, 24, 79)
-  sobj:HeadSep := HEADSEP
-  sobj:ColSep := COLSEP
-  sobj:goTopBlock := { || dbseek( sID ) }
-  sobj:goBottomBlock  := { || jumptobott( sID ) }
-  sobj:skipBlock:=KeySkipBlock( {|| ep->id }, sID )
+  oBrowse := TBrowseDB(01, 0, 24, 79)
+  oBrowse:HeadSep := HEADSEP
+  oBrowse:ColSep := COLSEP
+  oBrowse:goTopBlock := { || dbseek( sID ) }
+  oBrowse:goBottomBlock  := { || jumptobott( sID ) }
+  oBrowse:skipBlock:=KeySkipBlock( {|| ep->id }, sID )
   c:=tbcolumnnew('Serial', { || ep->serial } )
-  sobj:addcolumn( c )
-  sobj:addcolumn(tbcolumnNew('Cust Key', { ||  ep->key } ) )
-  sobj:addcolumn(tbcolumnNew('Invno', { || ep->invno } ) )
-  sobj:addcolumn(tbcolumnNew('Date sold',{ || ep->date_sold } ) )
-  sobj:freeze := 1
-  keypress := 0
-  while keypress != K_ESC .and. keypress != K_END
-   sobj:forcestable()
-   keypress := inkey(0)
-   Navigate(sobj,keypress)
+  oBrowse:addcolumn( c )
+  oBrowse:addcolumn(tbcolumnNew('Cust Key', { ||  ep->key } ) )
+  oBrowse:addcolumn(tbcolumnNew('Invno', { || ep->invno } ) )
+  oBrowse:addcolumn(tbcolumnNew('Date sold',{ || ep->date_sold } ) )
+  oBrowse:freeze := 1
+  nKeyPressed := 0
+  while nKeyPressed != K_ESC .and. nKeyPressed != K_END
+   oBrowse:forcestable()
+   nKeyPressed := inkey(0)
+   Navigate(oBrowse,nKeyPressed)
   enddo
  endif
  ep->( dbclosearea() )
@@ -473,12 +473,12 @@ select (cur_dbf)
 Box_Restore( oldscr )
 setcursor(oldcur)
 setkey( K_F9, okf9 )
-return retval
+return lReturnVal
 
 *
 
 procedure enq_spec
-local cur_dbf:=select(), sID:=master->id, sobj, keypress, okf8:=setkey( K_F8, nil )
+local cur_dbf:=select(), sID:=master->id, oBrowse, nKeyPressed, okf8:=setkey( K_F8, nil )
 local oldscr:=Box_Save(), oldcur:=setcursor(1)
 if Netuse( "customer", SHARED, 10, "ecust" )
  if Netuse( "special", SHARED, 10, "espec" )
@@ -488,28 +488,28 @@ if Netuse( "customer", SHARED, 10, "ecust" )
    Error( 'No Special Orders found', 12 )
   else
    cls
-   Heading( 'Special Orders on id' )
-   sobj := TBrowseDB( 01, 0, 24, 79 )
-   sobj:HeadSep := HEADSEP
-   sobj:ColSep := COLSEP
-   sobj:goTopBlock := { || dbseek( sID ) }
-   sobj:goBottomBlock := { || jumptobott( sID ) }
-   sobj:skipBlock:=KeySkipBlock( { || espec->id }, sID )
-   sobj:addcolumn(tbcolumnNew('Number', { || espec->number } ) )
-   sobj:addcolumn(tbcolumnNew('Name', { || ecust->name } ) )
-   sobj:addcolumn(tbcolumnNew('Date Ord',{ || espec->date } ) )
-   sobj:addcolumn(tbcolumnNew('Qty Ord', { || espec->qty } ) )
-   sobj:addcolumn(tbcolumnNew('Qty Recv', { || espec->received } ) )
-   sobj:addcolumn(tbcolumnNew('Qty Supp', { || espec->delivered } ))
-   sobj:addcolumn(tbcolumnNew('Cust Ord',{ || espec->ordno } ) )
-   sobj:addcolumn(tbcolumnNew('Deposit', { || espec->deposit } ) )
-   sobj:addcolumn(tbcolumnNew('Comments',{ || espec->comments } ) )
-   sobj:freeze := 1
-   keypress := 0
-   while keypress != K_ESC .and. keypress != K_END
-    sobj:forcestable()
-    keypress := inkey(0)
-    navigate(sobj,keypress)
+   Heading( 'Special Orders on ' + ID_DESC )
+   oBrowse := TBrowseDB( 01, 0, 24, 79 )
+   oBrowse:HeadSep := HEADSEP
+   oBrowse:ColSep := COLSEP
+   oBrowse:goTopBlock := { || dbseek( sID ) }
+   oBrowse:goBottomBlock := { || jumptobott( sID ) }
+   oBrowse:skipBlock:=KeySkipBlock( { || espec->id }, sID )
+   oBrowse:addcolumn(tbcolumnNew('Number', { || espec->number } ) )
+   oBrowse:addcolumn(tbcolumnNew('Name', { || ecust->name } ) )
+   oBrowse:addcolumn(tbcolumnNew('Date Ord',{ || espec->date } ) )
+   oBrowse:addcolumn(tbcolumnNew('Qty Ord', { || espec->qty } ) )
+   oBrowse:addcolumn(tbcolumnNew('Qty Recv', { || espec->received } ) )
+   oBrowse:addcolumn(tbcolumnNew('Qty Supp', { || espec->delivered } ))
+   oBrowse:addcolumn(tbcolumnNew('Cust Ord',{ || espec->ordno } ) )
+   oBrowse:addcolumn(tbcolumnNew('Deposit', { || espec->deposit } ) )
+   oBrowse:addcolumn(tbcolumnNew('Comments',{ || espec->comments } ) )
+   oBrowse:freeze := 1
+   nKeyPressed := 0
+   while nKeyPressed != K_ESC .and. nKeyPressed != K_END
+    oBrowse:forcestable()
+    nKeyPressed := inkey(0)
+    navigate( oBrowse, nKeyPressed )
    enddo
   endif
   espec->( dbclosearea() )
@@ -525,7 +525,7 @@ return
 *
 
 procedure enq_appr
-local cur_dbf:=select(),sID:=master->id,sobj,keypress,okf7:=setkey( K_F7, nil )
+local cur_dbf:=select(),sID:=master->id,oBrowse,nKeyPressed,okf7:=setkey( K_F7, nil )
 local oldscr:=Box_Save(),oldcur:=setcursor(1)
 if Netuse( "customer", SHARED, 10, "ecust" )
  if Netuse( "approval", SHARED, 10, "eappr" )
@@ -535,26 +535,26 @@ if Netuse( "customer", SHARED, 10, "ecust" )
    Error('No Approval Orders found',12)
   else
    cls
-   Heading('Approval Details on id')
-   sobj := Tbrowsedb( 01, 0, 24, 79 )
-   sobj:HeadSep := HEADSEP
-   sobj:ColSep := COLSEP
-   sobj:goTopBlock := { || dbseek( sID ) }
-   sobj:goBottomBlock  := { || jumptobott( sID ) }
-   sobj:skipBlock := Keyskipblock( { || eappr->id }, sID ) 
-   sobj:addcolumn( tbcolumnnew( 'Number', { || eappr->number } ) )
-   sobj:addcolumn( tbcolumnnew( 'Customer Name', { || substr( ecust->name, 1, 20 ) } ) )
-   sobj:addcolumn( tbcolumnnew( 'Date Appr',{ || eappr->date } ) )
-   sobj:addcolumn( tbcolumnnew( 'Appr Q', { || eappr->qty } ) )
-   sobj:addcolumn( tbcolumnnew( 'Retn Q', { || eappr->received } ) )
-   sobj:addcolumn( tbcolumnnew( 'Invo Q', { || eappr->delivered } ))
-   sobj:addcolumn( tbcolumnnew( 'Comments',{ || eappr->comments } ) )
-   sobj:freeze := 1
-   keypress := 0
-   while keypress != K_ESC .and. keypress != K_END
-    sobj:forcestable()
-    keypress := inkey(0)
-    Navigate(sobj,keypress)
+   Heading( 'Approval Details on ' + ID_DESC )
+   oBrowse := Tbrowsedb( 01, 0, 24, 79 )
+   oBrowse:HeadSep := HEADSEP
+   oBrowse:ColSep := COLSEP
+   oBrowse:goTopBlock := { || dbseek( sID ) }
+   oBrowse:goBottomBlock  := { || jumptobott( sID ) }
+   oBrowse:skipBlock := Keyskipblock( { || eappr->id }, sID ) 
+   oBrowse:addcolumn( tbcolumnnew( 'Number', { || eappr->number } ) )
+   oBrowse:addcolumn( tbcolumnnew( 'Customer Name', { || substr( ecust->name, 1, 20 ) } ) )
+   oBrowse:addcolumn( tbcolumnnew( 'Date Appr',{ || eappr->date } ) )
+   oBrowse:addcolumn( tbcolumnnew( 'Appr Q', { || eappr->qty } ) )
+   oBrowse:addcolumn( tbcolumnnew( 'Retn Q', { || eappr->received } ) )
+   oBrowse:addcolumn( tbcolumnnew( 'Invo Q', { || eappr->delivered } ))
+   oBrowse:addcolumn( tbcolumnnew( 'Comments',{ || eappr->comments } ) )
+   oBrowse:freeze := 1
+   nKeyPressed := 0
+   while nKeyPressed != K_ESC .and. nKeyPressed != K_END
+    oBrowse:forcestable()
+    nKeyPressed := inkey(0)
+    Navigate(oBrowse,nKeyPressed)
    enddo
   endif
   eappr->( dbclosearea() )
@@ -570,7 +570,7 @@ return
 *
 
 procedure enq_course
-local cur_dbf:=select(),sID:=master->id,sobj,keypress,c
+local cur_dbf:=select(),sID:=master->id,oBrowse,nKeyPressed,c
 local oldscr:=Box_Save(), oldcur:=setcursor(1)
 if Netuse( "customer", SHARED, 10, "ecust" )
  if Netuse( "courlect", SHARED, 10 ,"elect" )
@@ -585,30 +585,30 @@ if Netuse( "customer", SHARED, 10, "ecust" )
     else
      cls
      Heading('Courses Attached to id')
-     sobj := tbrowsedb(01, 0, 24, 79)
-     sobj:headsep := HEADSEP
-     sobj:colsep := COLSEP
-     sobj:gotopblock := { || dbseek( sID ) }
-     sobj:gobottomblock  := { || jumptobott( sID ) }
-     sobj:skipblock:=KeySkipBlock( {|| eid->id }, sID )
-     sobj:addcolumn(tbcolumnnew('Course', { || eid->code } ) )
+     oBrowse := tbrowsedb(01, 0, 24, 79)
+     oBrowse:headsep := HEADSEP
+     oBrowse:colsep := COLSEP
+     oBrowse:gotopblock := { || dbseek( sID ) }
+     oBrowse:gobottomblock  := { || jumptobott( sID ) }
+     oBrowse:skipblock:=KeySkipBlock( {|| eid->id }, sID )
+     oBrowse:addcolumn(tbcolumnnew('Course', { || eid->code } ) )
      c:=tbcolumnnew('Name', { || ecour->name } ) 
      c:colorBlock := { || if( eid->dropped, ;
                      if( eid->core, { 8, 8 }, { 13, 10 } ), ;
                      if( eid->core, { 5, 6 }, { 1, 2 } ) ) }
-     sobj:AddColumn( c )
-     sobj:addcolumn(TBcolumnNew('Text',{ || if( eid->core ,'Text','Recm' ) } ) )
-     sobj:addcolumn(TBcolumnNew('Dropped',{ || if( eid->dropped ,'Dropped','Current' ) } ) )
-     sobj:addcolumn(TBcolumnNew('Lecturer', { || substr( ecust->name,1,15) } ) )
-     sobj:addcolumn(TBcolumnNew('Ord Prev', { || transform( eid->order_prev, '9999' ) } ) )
-     sobj:addcolumn(TBcolumnNew('Ord This', { || transform( eid->order_this, '9999' ) } ) )
-     sobj:AddColumn(TBColumnNew('Term Used', { || eid->term_used  } ) )
-     sobj:freeze := 1
-     keypress := 0
-     while keypress != K_ESC .and. keypress != K_END
-      sobj:forcestable()
-      keypress := inkey( 0 )
-      Navigate( sobj, keypress )
+     oBrowse:AddColumn( c )
+     oBrowse:addcolumn(TBcolumnNew('Text',{ || if( eid->core ,'Text','Recm' ) } ) )
+     oBrowse:addcolumn(TBcolumnNew('Dropped',{ || if( eid->dropped ,'Dropped','Current' ) } ) )
+     oBrowse:addcolumn(TBcolumnNew('Lecturer', { || substr( ecust->name,1,15) } ) )
+     oBrowse:addcolumn(TBcolumnNew('Ord Prev', { || transform( eid->order_prev, '9999' ) } ) )
+     oBrowse:addcolumn(TBcolumnNew('Ord This', { || transform( eid->order_this, '9999' ) } ) )
+     oBrowse:AddColumn(TBColumnNew('Term Used', { || eid->term_used  } ) )
+     oBrowse:freeze := 1
+     nKeyPressed := 0
+     while nKeyPressed != K_ESC .and. nKeyPressed != K_END
+      oBrowse:forcestable()
+      nKeyPressed := inkey( 0 )
+      Navigate( oBrowse, nKeyPressed )
      enddo
     endif
     eid->( dbclosearea() )
@@ -627,7 +627,7 @@ return
 *
 
 procedure enq_kit
-local cur_dbf:=select(),cur_rec:=recno(),sobj,keypress,mastprice:=master->sell_price
+local cur_dbf:=select(),cur_rec:=recno(),oBrowse,nKeyPressed,mastprice:=master->sell_price
 local sID:=master->id,oldscr:=Box_Save(), ksell, kcost
 local oldcur:=setcursor(1),mastindord:=master->( indexord() ),mscr, mrec
 local kit_master:=( master->binding = 'KI' )
@@ -648,28 +648,28 @@ if Netuse( "kit", SHARED, 10, 'ekit' )
   cls
   Heading( if( kit_master, '' + ITEM_DESC + ' on Kit # '+ sID, 'Kits id ' ;
           + trim( sID ) + ' is attached to' ) )
-  sobj := TBrowseDB( 02, 0, 24, 79)
-  sobj:HeadSep := HEADSEP
-  sobj:ColSep := COLSEP
-  sobj:goTopBlock := { || dbseek( sID ) }
-  sobj:goBottomBlock  := { || jumptobott( sID ) }
+  oBrowse := TBrowseDB( 02, 0, 24, 79)
+  oBrowse:HeadSep := HEADSEP
+  oBrowse:ColSep := COLSEP
+  oBrowse:goTopBlock := { || dbseek( sID ) }
+  oBrowse:goBottomBlock  := { || jumptobott( sID ) }
   if kit_master
-   sobj:skipBlock:=KeySkipBlock( { || ekit->id }, sID )
+   oBrowse:skipBlock:=KeySkipBlock( { || ekit->id }, sID )
   else
-   sobj:skipBlock:=KeySkipBlock( { || ekit->id }, sID )
+   oBrowse:skipBlock:=KeySkipBlock( { || ekit->id }, sID )
   endif
-  sobj:addcolumn(tbcolumnNew('id', { || idcheck( master->id ) } ) )
-  sobj:addcolumn(tbcolumnNew('Desc', { || substr(master->desc,1,40) } ) )
-  sobj:addcolumn(tbcolumnNew('Onhand', { || master->onhand } ) )
-  sobj:addcolumn(tbcolumnNew('Price', { || transform( master->sell_price, '9999.99' ) } ) )
-  sobj:addcolumn(tbcolumnNew('On order', { || master->onorder } ) )
-  sobj:freeze := 1
-  keypress := 0
-  while keypress != K_ESC .and. keypress != K_END
-   sobj:forcestable()
-   keypress := inkey(0)
-   if !navigate(sobj,keypress)
-    if keypress == K_F8
+  oBrowse:addcolumn(tbcolumnNew('id', { || idcheck( master->id ) } ) )
+  oBrowse:addcolumn(tbcolumnNew('Desc', { || substr(master->desc,1,40) } ) )
+  oBrowse:addcolumn(tbcolumnNew('Onhand', { || master->onhand } ) )
+  oBrowse:addcolumn(tbcolumnNew('Price', { || transform( master->sell_price, '9999.99' ) } ) )
+  oBrowse:addcolumn(tbcolumnNew('On order', { || master->onorder } ) )
+  oBrowse:freeze := 1
+  nKeyPressed := 0
+  while nKeyPressed != K_ESC .and. nKeyPressed != K_END
+   oBrowse:forcestable()
+   nKeyPressed := inkey(0)
+   if !navigate(oBrowse,nKeyPressed)
+    if nKeyPressed == K_F8
      mrec := recno()
      seek sID
      sum master->sell_price*ekit->qty, master->cost_price*ekit->qty ;
@@ -698,8 +698,8 @@ return
 *
 
 proc hold_em ( refresh, by_key )
-local mscr, mqty:=1, mans:=FALSE, mdate:=Bvars( B_DATE ) - 180, getlist:={}
-local oldord, currec, mkey, enqbrow, sscr, ckey, oldcur:=setcursor(1)
+local mscr, nQty:=1, mans:=FALSE, mdate:=Bvars( B_DATE ) - 180, getlist:={}
+local oldord, currec, sKey, enqbrow, sscr, ckey, oldcur:=setcursor(1)
 local sID:=master->id, saverec:=1, oldsel := select()
 
 default by_key to FALSE
@@ -761,12 +761,12 @@ else
 endif
 enqbrow:addcolumn( tbcolumnnew( "Qty", { || hold->qty } ) )
 enqbrow:addcolumn( tbcolumnnew( "Date", { || hold->date } ) )
-while mkey != K_ESC .and. mkey != K_END
+while sKey != K_ESC .and. sKey != K_END
  enqbrow:forcestable()
- mkey := inkey( 0 )
- if !navigate( enqbrow, mkey )
+ sKey := inkey( 0 )
+ if !navigate( enqbrow, sKey )
   do case
-  case mkey == K_DEL 
+  case sKey == K_DEL 
    if Isready( 3, 05, 'About to release '+Ns( hold->qty )+' item(s) held for ' + trim( left( Customer->name, 25 ) ) )
     Rec_lock( 'master' )
     master->held -= hold->qty
@@ -776,21 +776,21 @@ while mkey != K_ESC .and. mkey != K_END
     enqbrow:refreshall()
    endif
 
-  case mkey == K_INS
+  case sKey == K_INS
    if by_key .or. ( !by_key .and. CustFind( FALSE ) )
     ckey := customer->key
     sscr := Box_Save( 3, 30, 5, 50 )
-    @ 4,32 say 'Qty to Hold' get mqty pict '999'
+    @ 4,32 say 'Qty to Hold' get nQty pict '999'
     read
     Box_Restore( sscr )
-    if mqty > 0
+    if nQty > 0
      Rec_lock('master')
-     master->held += mqty
+     master->held += nQty
      master->( dbrunlock() )
      Add_rec('hold')
      hold->id := master->id
      hold->key := ckey
-     hold->qty := mqty
+     hold->qty := nQty
      hold->date := Bvars( B_DATE )
      hold->( dbrunlock() )
      hold->( dbseek( sID ) )
@@ -800,7 +800,7 @@ while mkey != K_ESC .and. mkey != K_END
    endif
    select hold
 
-  case mkey == K_SH_F10 .and. !by_key
+  case sKey == K_SH_F10 .and. !by_key
    if Secure( X_EDITFILES )
     sscr := Box_Save( 2, 06, 5, 74 )
     @ 03,10 say 'Enter date for Purge' get mdate
@@ -891,7 +891,7 @@ return nil
 *
 
 procedure StockDisp ( sID )
-local cur_dbf:=select(), cur_rec:=recno(), stkbrow, mkey
+local cur_dbf:=select(), cur_rec:=recno(), stkbrow, sKey
 local oldcur:=setcursor( 1 ), mscr
 
 if Netuse( "branch", SHARED, 10, 'eloc' )
@@ -910,10 +910,10 @@ if Netuse( "branch", SHARED, 10, 'eloc' )
    stkbrow:addcolumn( tbcolumnnew( "Branch", { || left( eloc->name, 25 ) } ) )
    stkbrow:addcolumn( tbcolumnnew( "OnHand", { || estk->onhand } ) )
    stkbrow:addcolumn( tbcolumnnew( "On Ord", { || estk->onorder } ) )
-   while mkey != K_ESC .and. mkey != K_END
+   while sKey != K_ESC .and. sKey != K_END
     stkbrow:forcestable()
-    mkey := inkey( 0 )
-    Navigate( stkbrow, mkey )
+    sKey := inkey( 0 )
+    Navigate( stkbrow, sKey )
    enddo
    Box_Restore( mscr )
   endif
@@ -930,7 +930,7 @@ return
 
 procedure StockLocs ( sID )
 local cur_dbf:=select(), cur_rec:=recno(), oldcur:=setcursor( 1 )
-local mscr, x, mqty, mchoice, oldloc, newloc
+local mscr, x, nQty, mchoice, oldloc, newloc
 local aArray, tscr, getlist := {}, stkqty, oldpos, newpos, mtemp
 if Netuse( "stoclocs", SHARED, 10, 'estk' )
  if !estk->( dbseek( sID ) )
@@ -943,18 +943,18 @@ if Netuse( "stoclocs", SHARED, 10, 'estk' )
   mscr := Box_Save( 2, 06, 17, 52 )
   @ 3, 11 say 'Loc  OH     StkT   Department'
   @ 4, 11 say replicate( chr( 196 ), 40 )
-  mqty := 0 
+  nQty := 0 
   for x := 0 to 7
    @ 7+x, 11 say Ns( x + 1 ) pict '9'
    @ 7+x, 14 say estk->( fieldget( fieldpos( 'l' + Ns( x ) ) ) ) pict QTY_PICT
    @ 7+x, 20 say estk->( fieldget( fieldpos( 'l' + Ns( x ) + 's' ) ) ) pict QTY_PICT
    @ 7+x, 30 say left( lookitup( 'dept', estk->( fieldget( fieldpos( 'l' + Ns( x ) + 'dept' ) ) ) ), 20 )
-   mqty += estk->( fieldget( fieldpos( 'l' + Ns( x ) ) ) )
+   nQty += estk->( fieldget( fieldpos( 'l' + Ns( x ) ) ) )
   next
 
   @ 06, 11 say replicate( chr( 196 ), 40 )
   @ 05, 11 say '0'  // Stock loc 0 ( default location )
-  @ 05, 14 say master->onhand - mqty pict QTY_PICT
+  @ 05, 14 say master->onhand - nQty pict QTY_PICT
   @ 05, 20 say master->stocktake pict QTY_PICT
   @ 05, 30 say Lookitup( 'dept', master->department )
   @ 15, 11 say replicate( chr( 196 ), 40 )

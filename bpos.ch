@@ -21,9 +21,9 @@ v1.24 - Current Sales File print
 
 // #include "wvtgui.ch"
 
-#define __GTWVW__
+// #define __GTWVW__
 
-#define BUILD_NO "1.24"
+#define BUILD_NO "1.25.0"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
 #define DEVELOPER_FAX "+61 2 4751 8479"
 #define SUPPORT_FAX "No Number - use email"
@@ -32,7 +32,9 @@ v1.24 - Current Sales File print
 #define EXECUTABLE "bpos.exe"
 #define SYSNAME 'BPOS'
 #define DEVELOPER 'Bluegum Software'
-
+#define SMTP_SUPPORT_EMAIL 'support@bluegumsoftware.com'
+#define SMTP_FROM_SERVER "MyName@Mail.server.com"
+#define SMTP_STRING "smtp://user+developer_smtp.com:<password>mail." + DEVELOPER + ".com"
 // BPOS Customer Information
 
 #define THELOOK
@@ -66,26 +68,26 @@ v1.24 - Current Sales File print
 #ifdef IS_BOOKSHOP
  #define STORETYPE 'Bookshop'
  #define STORENAMEDESC 'Bookshop'
- #define ITEM_DESC 'Title'
+ #define PLU_DESC 'ISBN'
  #define ID_DESC 'ISBN'
+ #define ITEM_DESC 'Title'
  #define DESC_DESC 'Title'                    // Odd name - the "description" of the description field
  #define ALT_DESC 'Author'
  #define BRAND_DESC 'Imprint'
  #define PACKAGE_DESC 'Binding'
  #define ILLUSTRATOR_DESC 'Illustrator'
- #define PLU_DESC 'ISBN'
 
 #else
  #define STORETYPE 'Store'
  #define STORENAMEDESC 'Store Name'
  #define ITEM_DESC 'Items'
+ #define PLU_DESC 'PLU'
  #define ID_DESC 'Code'
  #define DESC_DESC 'Description'
- #define ALT_DESC 'Alt. Descrpt'
+ #define ALT_DESC '2nd Descr.'
  #define BRAND_DESC 'Brand'
  #define PACKAGE_DESC 'Package'
- #define ILLUSTRATOR_DESC '2nd Description'
- #define PLU_DESC 'PLU'
+ #define ILLUSTRATOR_DESC '3rd Descr.'
  
 #endif
 
@@ -149,7 +151,7 @@ v1.24 - Current Sales File print
 #define C_CYAN    8
 #define C_BLACK   9
 
-#define C_BACKGROUND 'BG'
+#define C_BACKGROUND 'B'
 
 // Colour defines for Tbrowse objs
 //#define TB_COLOR  'GR+/' + C_BACKGROUND + ', N/W'

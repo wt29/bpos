@@ -77,6 +77,8 @@ function open_de_draw
 static lPortOpen := FALSE
 if lvars( L_AUTO_OPEN )
  do case
+ case lvars( L_CDTYPE ) = 'N'
+ 
  case lvars( L_CDTYPE ) = 'C'    // Citizen Docket Printers with cashdraw kickout
   Print_Find( "Docket" )
   set console off

@@ -139,7 +139,7 @@ field amtcur, amt30, amt60, amt90, tage, amt, amtpaid
 Heading("Charge Interest on Debtor Accounts")
 Box_Save(4,02,10,78)
 Center(05,"This option will charge interest on amounts outstanding for each account")
-Center(06,"Bluegum Software recommends that you Backup up the Accounts System First")
+Center(06, DEVELOPER + "vrecommends that you Backup up the Accounts System First")
 @ 08, 10 say 'Annual Interest Rate to be Charged' get mint_rate pict '999.99'
 read
 if Isready(14)

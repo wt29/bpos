@@ -21,7 +21,6 @@ SRC09 =
 CF = CFiles
 PROJECT = bpos.exe $(PR)
 
-
 PRGFILES = bpos.prg proclib.prg Setupdbf.prg \
  acme.prg Apcheque.prg Apeom.prg Apremit.prg Aprep.prg Aptran.prg Areom.prg Arrep.prg Arstat.prg Artran.prg \
  Dpurord.prg Errorsys.prg Fpurord.prg Invforms.prg \
@@ -29,7 +28,7 @@ PRGFILES = bpos.prg proclib.prg Setupdbf.prg \
  Receive.prg Reclist.prg Recpost.prg Returns.prg \
  Utilarch.prg Utilback.prg Utilcond.prg Utillabe.prg Utilpack.prg Utilsppa.prg Utilstoc.prg \
  s_appr.prg s_arch.prg s_cash.prg s_daily.prg s_inq1.prg s_inq2.prg s_inv1.prg s_inv2.prg s_layb.prg s_repo.prg s_spec.prg \
- PrintFunc.prg sendmail.prg s_quote.prg
+ PrintFunc.prg s_quote.prg
 
 CFILES = bpos.c proclib.c setupdbf.c\
  acme.c Apcheque.c Apeom.c Apremit.c Aprep.c Aptran.c Areom.c Arrep.c Arstat.c Artran.c \
@@ -38,7 +37,7 @@ CFILES = bpos.c proclib.c setupdbf.c\
  Fpurord.c Purckit.c Receive.c Reclist.c Recpost.c Returns.c\
  Utilarch.c Utilback.c Utilcond.c Utillabe.c Utilpack.c Utilsppa.c Utilstoc.c \
  s_appr.c s_arch.c s_cash.c s_daily.c s_inq1.c s_inq2.c s_inv1.c s_inv2.c s_layb.c s_repo.c s_spec.c \
- PrintFunc.c sendmail.c s_quote.c
+ PrintFunc.c s_quote.c
 
 OBJFILES = bpos.obj proclib.obj Setupdbf.obj \
  acme.obj Apcheque.obj Apeom.obj Apremit.obj Aprep.obj Aptran.obj Areom.obj Arrep.obj Arstat.obj Artran.obj \
@@ -47,7 +46,7 @@ OBJFILES = bpos.obj proclib.obj Setupdbf.obj \
  Receive.obj Reclist.obj Recpost.obj Returns.obj \
  Utilarch.obj Utilback.obj Utilcond.obj Utillabe.obj Utilpack.obj Utilsppa.obj Utilstoc.obj \
  s_appr.obj s_arch.obj s_cash.obj s_daily.obj s_inq1.obj s_inq2.obj s_inv1.obj s_inv2.obj s_layb.obj \
- s_repo.obj s_spec.obj PrintFunc.obj sendmail.obj s_quote.obj
+ s_repo.obj s_spec.obj PrintFunc.obj s_quote.obj
 
 
 # HFILES = bpos.ch

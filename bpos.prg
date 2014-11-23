@@ -334,6 +334,7 @@ while TRUE                                      // Main Menu Loop
    Lvarsave()
    adir := directory( '_*.*' )
    aeval( aDir, { | del_element | ferase( del_element[ 1 ] ) } )
+   cls
    quit
 
   endif

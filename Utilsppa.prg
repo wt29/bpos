@@ -97,7 +97,7 @@ endif
 @ 17,02 say 'Barcode' get aLocalVars[ L_BARCODE_NAME ] pict 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 @ 18,02 say 'Invoice' get alocalVars[ L_INVOICE_NAME ] pict 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 @ 20,04 say 'Register Name' get aLocalVars[ L_REGISTER ] pict 'XXXXXXXXXX'
-@ 20,29 say 'C/D Type' get aLocalVars[ L_CDTYPE ] pict '!' valid( aLocalVars[ L_CDTYPE ] $ 'PSCE' ) // Parallel, Serial, Citizen, Epson
+@ 20,29 say 'C/D Type' get aLocalVars[ L_CDTYPE ] pict '!' valid( aLocalVars[ L_CDTYPE ] $ 'PSCEN' ) // Parallel, Serial, Citizen, Epson, None
 @ 20,40 say 'Port' get aLocalVars[ L_CDPORT ] range 1,2
 @ 20,47 say 'Auto' get aLocalVars[ L_AUTO_OPEN ] pict 'Y'
 @ 20,58 say 'Good' get aLocalVars[ L_GOOD ] pict '999' range 100,999

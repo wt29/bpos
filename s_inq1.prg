@@ -31,7 +31,7 @@ while lMainLoop
  Heading('Master File Enquiry')
  aArray := {}
  aadd( aArray, { 'Exit', 'Return to previous option' } )
- aadd( aArray, { 'ID', 'Display item using the Item ID' } )
+ aadd( aArray, { 'ID', 'Display item using the ' + ID_DESC } )
  aadd( aArray, { DESC_DESC, 'Find item using part of the ' + DESC_DESC } )
  aadd( aArray, { ALT_DESC, 'Find item using part of the ' + ALT_DESC } )
  aadd( aArray, { 'Supplier', 'Locate item by supplier' } )
@@ -277,7 +277,7 @@ while lMainLoop
         cid:=space( ID_ENQ_LEN )
         mqty:=1
         cScreenSave:=Box_Save( 2, 10, 4, 70 )
-        @ 3,12 say 'id/Code to add to category list' get cid pict '@!'
+        @ 3,12 say ID_DESC + ' to add to category list' get cid pict '@!'
         read
         Box_Restore( cScreenSave )
         if Codefind( cid )
@@ -291,7 +291,7 @@ while lMainLoop
         endif
         select xcat
        case nKeyPressed == K_DEL
-        if Isready( 3, 12, 'Ok to delete desc from list' )
+        if Isready( 3, 12, 'Ok to delete ' + DESC_DESC + ' from list' )
          Del_rec( 'xcat', UNLOCK )
          eval( sobj:skipblock , -1 )
          sobj:refreshall()
@@ -506,7 +506,7 @@ if select( "ytdsales" ) = 0
 endif
 ytdsales->( dbseek( master->id ) )
 select master
-Heading( 'Item Inquiry' )
+Heading( ITEM_DESC + ' Inquiry' )
 @ 02, 14 - len( PLU_DESC ) say PLU_DESC
 @ 02, 52 say 'Catalog'
 @ 03, 14 - len( DESC_DESC ) say DESC_DESC
@@ -644,10 +644,11 @@ return
 *
 
 procedure EditDesc ( super, FromAddDesc )
-local getlist:={},cScreenSave,temp_id:=master->id+' ',chkval,mreplace,mrec
-local msub,o_id,lAnswer, oldcur:=setcursor(1),old_price:=master->sell_price
+local getlist:={},cScreenSave,temp_id:=master->id+' ', mreplace,mrec
+local o_id,lAnswer, oldcur:=setcursor(1),old_price:=master->sell_price
 local okf1,sFunKey3,sFunKey4,okf5,okf6,okf7,okf8,okf9,okaf8,okf10:=setkey( K_F10, { || tedit()} )
 local oktab,okafa,okaf1,tscr:=Box_Save(),bit:='',stuff_cat:=FALSE, mWasChanged := FALSE
+// local chkval, msub
 
 default super to FALSE
 default FromAddDesc to FALSE

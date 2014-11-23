@@ -195,7 +195,7 @@ while cchoice != 'A'
 
  endif
  nIntense := set( _SET_INTENSITY , TRUE )
- @ nErrbot-1, 2 say 'Notify Bluegum Software with this error.'
+ @ nErrbot-1, 2 say 'Notify ' + DEVELOPER + ' Software with this error.'
  set( _SET_INTENSITY , nIntense )
 
  nIntense:=set( _SET_INTENSITY , TRUE )
@@ -242,7 +242,7 @@ while cchoice != 'A'
 //  Printgraph( oPrinter )    // Adds the screen print to the mix
   LP( oPrinter, '' )
   LP( oPrinter, BIGCHARS )
-  LP( oPrinter, 'Please send me to Bluegum Software Email is ' + SUPPORT_EMAIL )
+  LP( oPrinter, 'Please send me to ' + DEVELOPER + ' Email is ' + SUPPORT_EMAIL )
   LP( oPrinter, NOBIGCHARS )
   LP( oPrinter, BIGCHARS )
   LP( oPrinter, 'Fax number ' + SUPPORT_FAX )
@@ -254,7 +254,7 @@ while cchoice != 'A'
   LP( oPrinter, '' )
   LP( oPrinter, 'Contact  ' + replicate( chr( 95 ), 60 ) )
   LP( oPrinter, '' )
-  LP( oPrinter, '____________________ < Bluegum Software Office Use >___________________' )
+  LP( oPrinter, '____________________ < ' + DEVELOPER + ' Office Use >___________________' )
   LP( oPrinter, '' )
   LP( oPrinter, 'Date ____________     Copies To : ______________   Log Number __________' )
   LP( oPrinter, '' )
