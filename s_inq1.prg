@@ -10,7 +10,6 @@ Procedure s_enquire
 #include "bpos.ch"
 #include "getexit.ch"
 
-
 local lMainLoop:=FALSE, nMenuChoice
 local mloop, cid, cKeyValue, nRow, nPos
 local lIsLocked, lSecHandFlag, aArray

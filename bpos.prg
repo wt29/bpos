@@ -68,7 +68,8 @@ request DBFCDX
 
 set autopen on
 set( _SET_MFILEEXT, ".FPT" )
-set( _SET_EVENTMASK, INKEY_ALL )
+// set( _SET_EVENTMASK, INKEY_ALL )
+set( _SET_EVENTMASK, INKEY_KEYBOARD )
 set( _SET_DEBUG, .t. )
 set( _SET_AUTOPEN, TRUE )
 set( _SET_AUTORDER, TRUE )
