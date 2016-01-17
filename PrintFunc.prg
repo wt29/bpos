@@ -22,13 +22,14 @@ static nDefPrinterCharWidth  // Set in Create Printer
 
 function print_find ( sPTRMain )
 local mret:=FALSE
+local sWarning := " has not been configured on this machine"
 
 sPTRMain = lower( sPTRMAIN )
 
 do case
 Case sPTRMain = "docket"
  if !PrinterExists( trim( LVars( L_DOCKET_NAME ) ) )
-  Alert( "Docket Printer " + trim( LVars( L_DOCKET_NAME ) ) + " not installed on this machine" )
+  Alert( "The docket printer " + trim( LVars( L_DOCKET_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_DOCKET_NAME ) ) )
@@ -38,7 +39,7 @@ Case sPTRMain = "docket"
 
 Case sPTRMain = "report"
  if !PrinterExists( trim( LVars( L_REPORT_NAME ) ) )
-  Alert( "Report Printer " + trim( LVars( L_REPORT_NAME ) ) + " not installed on this machine" )
+  Alert( "The report printer " + trim( LVars( L_REPORT_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_REPORT_NAME ) ) )
@@ -48,7 +49,7 @@ Case sPTRMain = "report"
 
 Case sPTRMain = "barcode"
  if !PrinterExists( trim( LVars( L_BARCODE_NAME ) ) )
-  Alert( "Barcode Printer " + trim( LVars( L_BARCODE_NAME ) ) + " not installed on this machine" )
+  Alert( "The barcode printer " + trim( LVars( L_BARCODE_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_BARCODE_NAME ) ) )
@@ -58,7 +59,7 @@ Case sPTRMain = "barcode"
 
 Case sPTRMain = "invoice"
  if !PrinterExists( trim( LVars( L_INVOICE_NAME ) ) )
-  Alert( "Invoice Printer " + trim( LVars( L_INVOICE_NAME ) ) + " not installed on this machine" )
+  Alert( "The invoice printer " + trim( LVars( L_INVOICE_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_INVOICE_NAME ) ) )
@@ -71,7 +72,6 @@ EndCase
 return mret                  // Have we found the required printer
 
 *
-
 
 function open_de_draw
 static lPortOpen := FALSE
@@ -408,7 +408,7 @@ while !eof() .and. cont
     oPrinter:SetColor( RGB_BLACK )
 
    else
-   oPrinter:Write( CRLF+CRLF+'** ' + eval( grp_head ) )
+    oPrinter:Write( CRLF+CRLF+'** ' + eval( grp_head ) )
 
    endif
 
@@ -828,10 +828,10 @@ endif
 
 if !toScreen
  oPrinter:NewLine()
- oPrinter:TextOut( replicate( chr( '=' ), oPrinter:maxcol() ) )
+ oPrinter:TextOut( replicate( DBL_ULINE, oPrinter:maxcol() ) )
 
 else
- oPrinter:Write( replicate( chr( "=" ), nTotWidth ) )
+ oPrinter:Write( replicate( DBL_ULINE, nTotWidth ) )
 
 endif
 

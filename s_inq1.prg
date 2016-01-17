@@ -525,6 +525,7 @@ Heading( ITEM_DESC + ' Inquiry' )
 @ 13, 04 say 'Sell Price'
 // @ 15, 10 say 'Nett'
 @ 17, 05 say '   Status'
+@ 18, 05 say Padl( TAX_DESC, 9)
 @ 19, 05 say ' Comments'
 @ 09, 34 say 'Qty Avail.'
 @ 10, 26 say '<F7>   On Approval'
@@ -561,6 +562,7 @@ syscolor( C_BRIGHT )
 @ 09, 15 say LookItUp( 'dept' , master->department )
 @ 13, 15 say master->sell_price pict PRICE_PICT
 @ 17, 15 say LookItUp( 'Status', master->status )
+@ 18, 15 say master->sales_tax pict 'Y'
 @ 19, 15 say left( master->comments, 35 )
 @ 09, 46 say MASTAVAIL pict QTY_PICT
 @ 09, 50 say ' (' + trim( ns( master->onhand ) ) + ')'
@@ -688,6 +690,7 @@ endif
 @ 14,15 get master->retail pict PRICE_PICT
 @ 17,15 say space( 15 )
 @ 17,15 get master->status pict '@!' valid( lastkey() = K_UP .or. dup_chk( master->status, "status" ) )
+@ 18,15 get master->taxExempt pict 'Y'
 @ 19,15 get master->comments pict '@S35'
 if super
  @ 11,46 get master->approval pict QTY_PICT
@@ -786,7 +789,7 @@ if temp_id != master->id
  if mreplace
   o_id := master->id
   cScreenSave := Box_Save( 2, 8, 5, 72 )
-  lAnswer := FALSE
+  lAnswer := TRUE   // no reason to ever not change the value - this probably should just "Do It"
   @ 3,10 say 'You Have changed the Code field do you wish to change'
   @ 4,10 say ' all occurences of ' + o_id + ' to ' + temp_id get lAnswer pict 'y'
   read

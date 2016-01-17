@@ -8,20 +8,20 @@
 
 #include "bpos.ch"
 
-// global aDocket
-
 static numtt, tt_types, tt_names, tt_cdflag, fkeys, lastfkeyhit:=0, price_conf, round_amt := 0
 
 function S_cashSales ( hdpos )
 
 local mgo:=FALSE, lMain, mgross, mcost, mSubTotal, mtotcost, firstpass, spec_done
-local mspec_no, mspec_dep, sID, mdisval, mtax, mtran_qty, disc_val, mtot
+local mspec_no, nSpecialDeposit, sID, mdisval, mtax, mtran_qty, disc_val, mtot
 local sFunKey3, sFunKey4, okf5, okf6, okf7, okf8, okf9, okf10, okaF1, okcf1, okcf2, msave, oksf10, oksf12, mscr
 local repl_rec, mitemtax, mCustName, x
 local mtrantype, mCustHistFlag, tax_exempt, retflag, specflag, qtyflag, discdone
 local mqty, mmasterprice, hasdisc, mrow, mFinalTot, msellprice, msale_type, mCustKey
 local mstype, mNoDiscTot
 local getlist := {}
+
+public aDocket := {}
 
 default hdpos to FALSE
 
@@ -60,7 +60,7 @@ while mgo
   specflag := FALSE
   discdone := FALSE
   mspec_no := 0
-  mspec_dep := 0
+  nSpecialDeposit := 0
   mqty := 1
   mitemtax := 0
   mdisval := 0
@@ -94,9 +94,14 @@ while mgo
 //   Highlight( 01, 60, 'Docket is ' , if( Lvars( L_DOCKET ), 'On', 'Off' ) )
 
    @ 02,67 say if( price_conf,'','No Confirm' )
+#ifdef MUST_USE_QTY   
+   HighLight( 4, 6, "", 'Desc                                     Price     Qty   Extend' )
+   mqty := 0
+#else
    Highlight( 4, 6, '', '  Desc                                  Price' )
 
-   okcf2 := setkey( K_CTRL_F2, { || SetSalesTax( @tax_exempt ) } )
+#endif
+   // okcf2 := setkey( K_CTRL_F2, { || SetSalesTax( @tax_exempt ) } )
    msale_type := ''
    okcf1 := setkey( K_CTRL_F1, { || Custhist( @mCustName, @mCustHistFlag, @mCustKey ) } )
 
@@ -110,8 +115,8 @@ while mgo
   Fkoff( mrow )
 
   setkey( K_ALT_F1, { || okaf1 } )
-  setkey( K_CTRL_F2, { || okcf2 } )
   setkey( K_CTRL_F1, { || okcf1 } )
+//  setkey( K_CTRL_F2, { || okcf2 } )
 
   if !updated()
    if lastkey() = K_ESC
@@ -172,11 +177,11 @@ while mgo
       else
        spec_done := TRUE
        specflag := TRUE
-       mspec_dep := special->deposit
-       if mspec_dep > 0
+       nSpecialDeposit := special->deposit
+       if nSpecialDeposit > 0
         mscr := Box_Save( 04, 25, 06, 66 )
-        @ 5,26 say 'Deposit Amt to Refund' get mspec_dep pict '9999.99';
-               valid mspec_dep <= special->deposit
+        @ 5,26 say 'Deposit Amt to Refund' get nSpecialDeposit pict '9999.99';
+               valid nSpecialDeposit <= special->deposit
         read
         Box_Restore( mscr )
        endif
@@ -185,21 +190,10 @@ while mgo
      select master
     endif
     mSellPrice := master->sell_price
-    mitemtax := 0
-    if tax_exempt
-     if master->sales_tax != 0
-      mSellprice -= master->cost_price * (Stret()/100)
-
-     endif
-
-    else
-     mItemTax := 0
-
-    endif
-
-    if mspec_dep > 0
-     mSellPrice := mSellPrice-mspec_dep
-     Highlight( mrow, 55, "Less Deposit of", Ns( mspec_dep, 6, 2 ) )
+ 
+    if nSpecialDeposit > 0
+     mSellPrice := mSellPrice-nSpecialDeposit
+     Highlight( mrow, 55, "Less Deposit of", Ns( nSpecialDeposit, 6, 2 ) )
 
     endif
     Poz( trim( master->desc ) + "$" + Ns( mSellPrice ) )
@@ -232,20 +226,30 @@ while mgo
      @ mrow+5,05 say '<F6> = '+str( Bvars( B_DISC3 ),5,2 )+'% Discount'
      @ mrow+6,05 say '<F7> = '+str( Bvars( B_DISC4 ),5,2 )+'% Discount'
      @ mrow+7,05 say '<F8> = Add your own Disc.'
+#ifndef MUST_USE_QTY 
      @ mrow+8,05 say "<F9> =  Apply Qty's"
+#endif	 
      @ mrow+9,05 say "<F10>=  Cust Returns"
      sFunKey3 := setkey( K_F3, { || Hold_em( FALSE ) } )
-     sFunKey4 := setkey( K_F4, { || CashLineDisc( @msellprice, Bvars( B_DISC1 ), K_F4, @mMasterPrice, @discdone, mrow, mspec_dep ) } )
-     okf5 := setkey( K_F5, { || CashLineDisc( @msellprice, Bvars( B_DISC2 ), K_F5, @mMasterPrice, @discdone, mrow, mspec_dep ) } )
-     okf6 := setkey( K_F6, { || CashLineDisc( @msellprice, Bvars( B_DISC3 ), K_F6, @mMasterPrice, @discdone, mrow, mspec_dep ) } )
-     okf7 := setkey( K_F7, { || CashLineDisc( @msellprice, Bvars( B_DISC4 ), K_F7, @mMasterPrice, @discdone, mrow, mspec_dep ) } )
+     sFunKey4 := setkey( K_F4, { || CashLineDisc( @msellprice, Bvars( B_DISC1 ), K_F4, @mMasterPrice, @discdone, mrow, nSpecialDeposit ) } )
+     okf5 := setkey( K_F5, { || CashLineDisc( @msellprice, Bvars( B_DISC2 ), K_F5, @mMasterPrice, @discdone, mrow, nSpecialDeposit ) } )
+     okf6 := setkey( K_F6, { || CashLineDisc( @msellprice, Bvars( B_DISC3 ), K_F6, @mMasterPrice, @discdone, mrow, nSpecialDeposit ) } )
+     okf7 := setkey( K_F7, { || CashLineDisc( @msellprice, Bvars( B_DISC4 ), K_F7, @mMasterPrice, @discdone, mrow, nSpecialDeposit ) } )
      okf8 := setkey( K_F8, { || CashLineDisc( @msellprice, 0, K_F8, @mMasterPrice, @discdone, mrow ) } )
+#ifndef MUST_USE_QTY 
      okf9 := setkey( K_F9, { || F_qty( @qtyflag, specflag, @mqty, mrow ) } )
+#else
+     mqty := 1
+#endif	 
      okf10 := setkey( K_F10, { || F_ret( @retflag, mrow ) } )
      syscolor( C_NORMAL )
      @ mrow,46 get mSellPrice pict PRICE_PICT ;
-       valid( mSellPrice < 9000 .and. if( msellprice=0, mspec_dep > 0 .or. Secure( X_SALEVOID ),TRUE ) )
-     read
+       valid( mSellPrice < 9000 .and. if( msellprice=0, nSpecialDeposit > 0 .or. Secure( X_SALEVOID ),TRUE ) )
+#ifdef MUST_USE_QTY
+	 @ mrow,61 - len( QTY_PICT ) get mqty pict QTY_PICT valid( if( specflag, mqty <= special->received - special->delivered, TRUE ) )
+     qtyFlag := TRUE
+#endif
+	 read
 
      setkey( K_F3, sFunKey3 )
      setkey( K_F4, sFunKey4 )
@@ -253,7 +257,9 @@ while mgo
      setkey( K_F6, okf6 )
      setkey( K_F7, okf7 )
      setkey( K_F8, okf8 )
+#ifndef MUST_USE_QTY 
      setkey( K_F9, okf9 )
+#endif
      setkey( K_F10, okf10 )
      Box_Restore( mscr )
 
@@ -302,13 +308,13 @@ while mgo
      firstpass := FALSE
      select cashtemp
 
-     if mspec_dep > 0
+     if nSpecialDeposit > 0   // Write a record for the Special deposit use to tender the sale.
       Add_rec( 'cashtemp' )
       cashtemp->tran_type := 'SDP'
       cashtemp->sale_date := Bvars( B_DATE )
       cashtemp->time := time()
       cashtemp->register := Lvars( L_REGISTER )
-      cashtemp->unit_price := mspec_dep
+      cashtemp->unit_price := nSpecialDeposit
       cashtemp->qty := 1
       cashtemp->cust_no := Lvars( L_CUST_NO )
       cashtemp->name := Lookitup( 'customer', special->key, 'name' )
@@ -324,10 +330,10 @@ while mgo
      cashtemp->id := master->id
      cashtemp->qty := mqty
      cashtemp->cost_price := mcost
-     cashtemp->unit_price := mMasterPrice+mspec_dep
+     cashtemp->unit_price := mMasterPrice+nSpecialDeposit
      cashtemp->discount := mdisval
      cashtemp->tran_type := mtrantype
-     cashtemp->sales_tax := mitemtax
+     cashtemp->sales_tax := if( master->taxexempt, 0, GetGSTComponent((mMasterPrice + nSpecialDeposit)) )  // this fudges it for AU GST
      cashtemp->spec_no := mspec_no
      cashtemp->key := if( mCustHistFlag, mCustKey, '' )
      cashtemp->name := if( mCustHistFlag, mCustName, '' )
@@ -351,8 +357,8 @@ while mgo
 
      endif
 
-     if mspec_dep != 0
-      Dock_line(  space( 12 )+' After Deposit Paid '+str( mspec_dep, 8, 2 ) )
+     if nSpecialDeposit != 0
+      Dock_line(  space( 12 )+' After Deposit Paid '+str( nSpecialDeposit, 8, 2 ) )
 
      endif
      if mdisval > 0
@@ -983,57 +989,37 @@ return { tt_types, tt_names, tt_cdflag, numtt }
 Procedure dock_head()
 
 aDocket := {} // Clear the global array
-// if !Lvars( L_DOCKET )
-// Dock_line(  chr( 27 ) + chr( 33 ) +chr( 1 ) )
-// Dock_line(  chr( 27 ) + chr( 99 ) + chr( 48 ) + chr( 1 ) )
-// Dock_line(  chr( 27 ) + chr( 122 ) + chr( 1 ) )
-// Error( 'Docket is set to off - Cannot reprint header', 12 )
+Dock_line(  BIGCHARS + Bvars( B_DOCKLN1 ) + NOBIGCHARS )
+if !empty( Bvars( B_DOCKLN2 ) )
+ if len( trim( Bvars( B_DOCKLN2 ) ) ) < 21
+  Dock_line(  BIGCHARS + trim( Bvars( B_DOCKLN2 ) ) + NOBIGCHARS )
 
-//else
- Dock_line(  BIGCHARS + Bvars( B_DOCKLN1 ) + NOBIGCHARS )
- if !empty( Bvars( B_DOCKLN2 ) )
-  if len( trim( Bvars( B_DOCKLN2 ) ) ) < 21
-   Dock_line(  BIGCHARS + trim( Bvars( B_DOCKLN2 ) ) + NOBIGCHARS )
-
-  else
-   Dock_line(  Bvars( B_DOCKLN2 ) )
-
-  endif
+ else
+  Dock_line(  Bvars( B_DOCKLN2 ) )
 
  endif
- Dock_line( "   Tax Invoice - ABN#" + Bvars( B_ACN ) )
 
-// endif
+endif
+Dock_line( "   Tax Invoice - ABN#" + Bvars( B_ACN ) )
 return
 *
 
 Procedure Dock_line ( p_line, lSuppSpace )
 
-/* used to print the docket line by line - now just builds the array aDocket */
-
 Default lSuppSpace to TRUE
+if '~' $ p_line         // The tilde(~) will cause this line in red
+ p_line = chr(19)+substr(p_line,1,at('~',p_line)-1)+substr(p_line,at('~',p_line)+1,40)
 
-
-
-//if Lvars( L_DOCKET )      // Docket Suppress
-// Print_find( "docket" )
- 
-// set console off
-// set print on
- if '~' $ p_line         // The tilde(~) will cause this line in red
-  p_line = chr(19)+substr(p_line,1,at('~',p_line)-1)+substr(p_line,at('~',p_line)+1,40)
+else
+ if lSuppSpace
+  p_line = space(1) + p_line
 
  else
-  if lSuppSpace
-   p_line = space(1) + p_line
-
-  else
-   p_line = p_line
-
-  endif
+  p_line = p_line
 
  endif
- aadd( aDocket, p_line )
+endif
+aadd( aDocket, p_line )
 
 return
 

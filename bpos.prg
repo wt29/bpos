@@ -23,6 +23,7 @@ local getlist:={}
 local cScreen, moff:=0
 local aMenu
 local aHelp, aDir
+local cStoreName
 
 // local nMaxRow := maxrow(), nMaxCol := maxcol()
 
@@ -119,17 +120,20 @@ Lvars( L_PRINTER, 'lpt1' )    // This is crap
 Chkfield( "Quote", "SysRec" )
 ChkField( "TaxExempt", "master" )
 
-Bvars( B_NAME, if( empty( BPOSCUST ),'No Serial No',trim( BPOSCUST ) ) )
-nLength := max( ( 20 + len( BPOSCUST ) ) /2, 16 )         // Format Box for Licencee Length
+
+cStoreName := trim( Bvars( B_NAME ) ) // , if( empty( BPOSCUST ),'No Serial No',trim( BPOSCUST ) ) )
+// nLength := max( ( 20 + len( BPOSCUST ) ) /2, 16 )         // Format Box for Licencee Length
+nLength := max( ( 20 + len( cStoreName ) ) /2, 16 )         // Format Box for Licencee Length
 
 Syscolor( 1 )
 Heading('*** Welcome to ' + SYSNAME + ' ***')
 Box_Save( 04, 79/2-1-nLength, 11, 79/2 + nLength, 8 )        // Clear Box
 Center( 05, 'Copyright ' + DEVELOPER )                // Hello
+Center( 06, cStoreName )                // Hello
 Center( 08, DEVELOPER_PHONE )
 Center( 09, SYSNAME + ' Build Number ' + BUILD_NO )
 
-Center( 10, "Licensed to -=< " + BPOSCUST + " >=-")
+// Center( 10, "Licensed to -=< " + BPOSCUST + " >=-")
 Syscolor( 1 )
 
 if !empty( getenv( 'pack' )  )

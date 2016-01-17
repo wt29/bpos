@@ -37,9 +37,20 @@ v1.24 - Current Sales File print
 #define SMTP_STRING "smtp://user+developer_smtp.com:<password>mail." + DEVELOPER + ".com"
 // BPOS Customer Information
 
-#define THELOOK
+#define LYTTLETON
+// #define THELOOK
 // #define DUCKWORTHS
 
+#ifdef LYTTLETON
+ #define BPOSCUST "Lyttleton Stores"
+ #define EPSON
+ #define MUST_USE_QTY
+ #define QTY_PICT "999.99"
+ #define QTY_LEN 6
+ #define QTY_DEC 2   
+ 
+#endif
+ 
 #ifdef THELOOK
  #define EPSON
  #define BPOSCUST "The Look"
@@ -80,7 +91,7 @@ v1.24 - Current Sales File print
 #else
  #define STORETYPE 'Store'
  #define STORENAMEDESC 'Store Name'
- #define ITEM_DESC 'Items'
+ #define ITEM_DESC 'Item'
  #define PLU_DESC 'PLU'
  #define ID_DESC 'Code'
  #define DESC_DESC 'Description'
@@ -161,7 +172,8 @@ v1.24 - Current Sales File print
 #define HEADSEP 'Í'
 #define COLSEP '³'
 
-#define ULINE  chr(95)
+#define ULINE chr(95)
+#define DBL_ULINE "="
 
 #define CRYPTKEY 'charlotte89'   // Should work if ever this is needed now uses HB_CRYPT
 
@@ -319,6 +331,11 @@ v1.24 - Current Sales File print
 
 #endif
 
+#ifndef QTY_DEC
+ #define QTY_LEN 2
+
+#endif
+
 #ifndef SALES_CODE_LEN
  #define SALES_CODE_LEN 2
 
@@ -365,6 +382,13 @@ v1.24 - Current Sales File print
  #define GST_RATE 10
 
 #endif
+
+#ifndef TAX_DESC
+ // GST is defined in an old field "Sales_tax" (L) in the master file.
+ #define TAX_DESC "GST"
+
+ #endif
+ 
  
 #ifndef CURRENCY
  #define CURRENCY 'AUS$'

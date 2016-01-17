@@ -1,26 +1,26 @@
 OBJFILES = bpos.obj proclib.obj acme.obj Apcheque.obj Apeom.obj Apremit.obj Aprep.obj Aptran.obj Areom.obj Arrep.obj \
 Arstat.obj Artran.obj Dpurord.obj Errorsys.obj Fpurord.obj Invforms.obj Maincate.obj Maincust.obj Maindept.obj \
-Mainsupp.obj MainItem.obj Proclib.obj Purckit.obj Recitem.obj Reclist.obj Recpost.obj \
+Mainsupp.obj MainItem.obj Proclib.obj Purckit.obj Receive.obj Reclist.obj Recpost.obj \
 Returns.obj Setupdbf.obj Utilarch.obj Utilback.obj Utilcond.obj Utillabe.obj Utilpack.obj \
 Utilrepr.obj Utilsppa.obj Utilstoc.obj s_appr.obj s_arch.obj s_cash.obj s_daily.obj \
 s_inq1.obj s_inq2.obj s_inv1.obj s_inv2.obj s_layb.obj s_repo.obj s_spec.obj printfunc.obj
 
 PRGFILES = bpos.prg acme.prg Apcheque.prg Apeom.prg Apremit.prg Aprep.prg Aptran.prg Areom.prg Arrep.prg \
 Arstat.prg Artran.prg Dpurord.prg Errorsys.prg Fpurord.prg Invforms.prg Maincate.prg Maincust.prg Maindept.prg \
-Mainsupp.prg Mainitem.prg proclib.prg Purckit.prg Recitem.prg Reclist.prg Recpost.prg \
+Mainsupp.prg Mainitem.prg proclib.prg Purckit.prg Receive.prg Reclist.prg Recpost.prg \
 Returns.prg Setupdbf.prg Utilarch.prg Utilback.prg Utilcond.prg Utillabe.prg Utilpack.prg \
 Utilrepr.prg Utilsppa.prg Utilstoc.prg s_appr.prg s_arch.prg s_cash.prg s_daily.prg \
 s_inq1.prg s_inq2.prg s_inv1.prg s_inv2.prg s_layb.prg s_repo.prg s_spec.prg printfunc.prg
 
 CFILES = bpos.c acme.c Apcheque.c Apeom.c Apremit.c Aprep.c Aptran.c Areom.c Arrep.c \
 Arstat.c Artran.c Dpurord.c Errorsys.c Fpurord.c Invforms.c Maincate.c Maincust.c Maindept.c \
-Mainsupp.c Mainitem.c proclib.c Purckit.c Recitem.c Reclist.c Recpost.c \
+Mainsupp.c Mainitem.c proclib.c Purckit.c Receive.c Reclist.c Recpost.c \
 Returns.c Setupdbf.c Utilarch.c Utilback.c Utilcond.c Utillabe.c Utilpack.c \
 Utilrepr.c Utilsppa.c Utilstoc.c s_appr.c s_arch.c s_cash.c s_daily.c \
 s_inq1.c s_inq2.c s_inv1.c s_inv2.c s_layb.c s_repo.c s_spec.c printfunc.c
 
 BCB = c:\borland\bcc55
-BHC = C:\xharbour.bcc
+BHC = C:\develop\xharbour\1.20
 TOPMODULE = bpos.prg
 
 #LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib pcrepos.lib \

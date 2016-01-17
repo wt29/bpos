@@ -59,7 +59,8 @@ if Netuse( "sales" )
   nGrandTot := 0
   nQty := 0
   nTotal := 0
-  oPrinter:= Win32Prn():New( Lvars( L_PRINTER) )
+  oPrinter:= Win32Prn():New()
+//  oPrinter:= Win32Prn():New( trim( Lvars( L_PRINTER ) ) )
   oPrinter:Landscape:= .F.
   oPrinter:FormType := FORM_A4
   oPrinter:Copies   := 1
@@ -398,7 +399,8 @@ if Isready( 7 )
       cSalesFile = "psales"
 
 	endif	  
-    if Netuse( cSalesFile, , ,"SalesFile" )
+//    if Netuse( cSalesFile, , ,"xxxxSalesFile" )
+    if Netuse( cSalesFile , SHARED, 10, "SalesFile" )
      set relation to SalesFile->id into master
      Center(07,'-=< Now Processing - Please Wait >=-')
      SysAudit( "DSalesRpt" )

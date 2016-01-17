@@ -231,7 +231,7 @@ if Netuse( "stkhist", SHARED, 10, 'estk' )
     in a stock history listing. It is used to select the invoice # etc to perform
     a supplier return to */
 
-/*     mrecno := recno()
+     mrecno := recno()
      go refrec
      recpos := 0
 
@@ -241,7 +241,7 @@ if Netuse( "stkhist", SHARED, 10, 'estk' )
      enddo
 
      Oddvars( RETURNS_OFFSET, recpos )
-     lReturnVal := recpos */
+     lReturnVal := recpos 
      lReturnVal := estk->( recno() )
      exit
     endcase

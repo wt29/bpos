@@ -60,7 +60,7 @@ public mDept, mOh, mlen1, mlen2, msupp
 while TRUE
  Box_Restore( oldscr )
 
- Heading( 'Desc File Print Menu' )
+ Heading( ITEM_DESC + ' File Print Menu' )
  Print_find( 'report' )
 
  aArray := {}
@@ -315,7 +315,7 @@ while TRUE
     mlen2 := len( mtitl2 )
     dbseek( mtitl1, TRUE )
     if mprntype = 'C'
-     sHeading = 'Report for ' + mcust + ' List of Items from ' + mtitl1 + ' to ' + mtitl2
+     sHeading = 'Report for ' + mcust + ' List of ' + ITEM_DESC + ' ' + mtitl1 + ' to ' + mtitl2
      Reporter( aCustomer,;                                                          //Field Array
             sHeading ,;   // Report Heading
             ,;                                                                  // Group By
@@ -328,7 +328,7 @@ while TRUE
             132 )                                                               // approx Page width
 
     else
-      sHeading = "Report for " + mcust + " List of Items from " + mtitl1 + " to " + mtitl2
+      sHeading = "Report for " + mcust + ' List of ' + ITEM_DESC + ' ' + mtitl1 + " to " + mtitl2
       Reporter( aCustomer,;                                                     //Field Array
             sHeading,;                                                          // Report Heading
             ,;                                                                  // Group By
@@ -622,8 +622,6 @@ if Isready(11)
  select Master
  master->( dbgotop() )
  
-// // Pitch17()
-
  farr := {}
  aadd( farr,{'idcheck(master->id)','id',13,0,FALSE})
  aadd( farr,{'substr(master->desc,1,30)','Desc',30,0,FALSE})

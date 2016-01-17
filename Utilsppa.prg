@@ -23,7 +23,9 @@ aLocalVars := lvarget()
 sScreen := Box_Save( 01, 00, 24, 79 )
 Heading( 'Edit Store Data' )
 
-Highlight( 02, 02, STORENAMEDESC + '  ', BPOSCUST )
+// Highlight( 02, 02, STORENAMEDESC + '  ', BPOSCUST )
+// Highlight( 02, 02, STORENAMEDESC + '  ', BPOSCUST )
+@ 02,01 say '    Store Name' get aGlobalVars[ B_NAME ] pict '!XXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 @ 04,01 say 'Address Line 1' get aGlobalVars[ B_ADDRESS1 ] pict '!XXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 @ 05,01 say '        Line 2' get aGlobalVars[ B_ADDRESS2 ] pict '!XXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 @ 06,01 say '        Line 3' get aGlobalVars[ B_SUBURB ] pict   '!XXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
@@ -170,10 +172,10 @@ local sScreen:=Box_Save( 04, 01, 13, 77 )
 Highlight( 05, 03, 'Node Address', sNodeName )
 Highlight( 06, 03, 'Compiler', version() )
 Highlight( 07, 03, 'Operating System', os() )
-Highlight( 09, 03, 'Build Version', BUILD_NO )
-Highlight( 10, 03, 'RDD', rddsetdefault() )
-Highlight( 11, 03, 'Index Ext', ordbagext() )
-Highlight( 12, 03, 'Free Pool', Ns( memory(0) ) )
+Highlight( 08, 03, 'Build Version', BUILD_NO )
+Highlight( 09, 03, 'RDD', rddsetdefault() )
+Highlight( 10, 03, 'Index Ext', ordbagext() )
+Highlight( 11, 03, 'Free Pool', Ns( memory(0) ) )
 
 Error('')
 Box_Restore( sScreen )
