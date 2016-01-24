@@ -525,7 +525,7 @@ Heading( ITEM_DESC + ' Inquiry' )
 @ 13, 04 say 'Sell Price'
 // @ 15, 10 say 'Nett'
 @ 17, 05 say '   Status'
-@ 18, 05 say Padl( TAX_DESC, 9)
+@ 18, 04 say Padl( TAX_DESC, 10)
 @ 19, 05 say ' Comments'
 @ 09, 34 say 'Qty Avail.'
 @ 10, 26 say '<F7>   On Approval'
@@ -562,7 +562,7 @@ syscolor( C_BRIGHT )
 @ 09, 15 say LookItUp( 'dept' , master->department )
 @ 13, 15 say master->sell_price pict PRICE_PICT
 @ 17, 15 say LookItUp( 'Status', master->status )
-@ 18, 15 say master->sales_tax pict 'Y'
+@ 18, 15 say master->taxExempt pict 'Y'
 @ 19, 15 say left( master->comments, 35 )
 @ 09, 46 say MASTAVAIL pict QTY_PICT
 @ 09, 50 say ' (' + trim( ns( master->onhand ) ) + ')'

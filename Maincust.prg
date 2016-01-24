@@ -599,7 +599,7 @@ while mgo
      row := 4
      pos := 1
      @ 2,1 say ' No Name                      Address               Suburb'
-     @ 3,1 say '컴컵컴컴컴컴컴컴컴컴컴컴컴컴컵컴컴컴컴컴컴컴컴컴컴컵컴컴컴컴컴컴컴컴컴컴컴컴컴�'
+     @ 3,1 say '컴컵컴컴컴컴컴컴컴컴컴컴컴컴컵컴컴컴컴컴컴컴컴컴컴컵컴컴컴컴컴컴컴컴컴컴컴컴컴'
      mflag := TRUE
      Highlight(1,02,'Records to search',NS(lastrec()))
      while mflag .and. inkey() = 0 .and. !eof()

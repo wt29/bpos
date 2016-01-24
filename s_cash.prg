@@ -90,8 +90,8 @@ while mgo
 
    Heading( 'Cash Sales' )
    Highlight( 01, 01, 'Last Tran #', Ns( Lvars( L_CUST_NO ), 4 ) )
-//   DocketStatus()
-//   Highlight( 01, 60, 'Docket is ' , if( Lvars( L_DOCKET ), 'On', 'Off' ) )
+   //  DocketStatus()
+   // Highlight( 01, 60, 'Docket is ' , if( Lvars( L_DOCKET ), 'On', 'Off' ) )
 
    @ 02,67 say if( price_conf,'','No Confirm' )
 #ifdef MUST_USE_QTY   
@@ -351,7 +351,7 @@ while mgo
      if qtyflag
       Dock_line(   substr( master->desc, 1, 18 )+' '+str( mqty, 3 ) +;
        ' @'+str( mSellPrice, 7, 2 )+' '+str( mSellPrice * mqty, 8, 2 ) )
-      Dock_line(  master->id )
+//      Dock_line(  master->id )
      else
       Dock_line(  substr( master->desc, 1, 30 -len(trim(master->id)) ) + ' ' + trim( master->id )+' '+str( mSellPrice * mqty, 8, 2 ) )
 
@@ -629,6 +629,8 @@ while mremain > 0
 
  if mamt_ten >= mremain
   if mcdflag
+    Dock_line( chr( K_ESC ) + 'p' + chr( 0 ) + chr( 25 ) + chr( 250 ) )
+
    Open_de_draw()
 
   endif
@@ -989,10 +991,14 @@ return { tt_types, tt_names, tt_cdflag, numtt }
 Procedure dock_head()
 
 aDocket := {} // Clear the global array
-Dock_line(  BIGCHARS + Bvars( B_DOCKLN1 ) + NOBIGCHARS )
+Dock_line( "" )
+// Dock_line(  PITCH_17 + Bvars( B_DOCKLN1 ) + PITCH_10 )
+
+Dock_line( BIGCHARS + Bvars( B_DOCKLN1 ) + NOBIGCHARS )
 if !empty( Bvars( B_DOCKLN2 ) )
  if len( trim( Bvars( B_DOCKLN2 ) ) ) < 21
-  Dock_line(  BIGCHARS + trim( Bvars( B_DOCKLN2 ) ) + NOBIGCHARS )
+   Dock_line(  BIGCHARS + trim( Bvars( B_DOCKLN2 ) ) + NOBIGCHARS )
+//    Dock_line(  trim( Bvars( B_DOCKLN2 ) ) )
 
  else
   Dock_line(  Bvars( B_DOCKLN2 ) )
@@ -1000,7 +1006,7 @@ if !empty( Bvars( B_DOCKLN2 ) )
  endif
 
 endif
-Dock_line( "   Tax Invoice - ABN#" + Bvars( B_ACN ) )
+Dock_line( "  Tax Invoice - ABN " + Bvars( B_ACN ) )
 return
 *
 
@@ -1064,7 +1070,7 @@ return
 
 
 Procedure Dock_print
-local x
+local x, oPrinter
 
 Print_find( "docket" )
 
@@ -1079,6 +1085,31 @@ set print off
 set console on
 
 set printer to  // Should Flush the printer
+
+/*
+Printcheck ('Docket', 'docket' )
+
+oPrinter := Win32Prn():New(Lvars( L_PRINTER ) )
+oPrinter:Landscape:= .F.
+oPrinter:FormType := FORM_A4
+oPrinter:Copies   := 1
+if !oPrinter:Create()
+ Alert( "Cannot create Printer " + LVars( L_PRINTER ) )
+ return
+
+endif
+oPrinter:StartDoc( "docket" )
+// oPrinter:SetPen( PS_SOLID, 1, RGB_RED )
+oPrinter:SetFont( 'Lucida Console', 8, {3,-50} )
+
+
+for x := 1 to len( aDocket )
+ LP( oPrinter, aDocket[x], ,TRUE )
+
+next
+oPrinter:endDoc()
+oPrinter:Destroy()
+*/
 
 RETURN
 

@@ -1878,7 +1878,7 @@ if !empty( sid )
      master->minstock := Bvars( B_REORDQTY )
      master->entered := Bvars( B_DATE )
      master->supp_code := msupp
-	 master->sales_tax := TRUE  			// Death and taxes
+	 master->taxExempt := FALSE  			// Death and taxes
      keyboard chr( K_ENTER )                // Stuff kbrd to get over id ?
 
     endif

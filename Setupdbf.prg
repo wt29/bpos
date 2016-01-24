@@ -48,13 +48,23 @@ if len( directory( Oddvars( SYSPATH ) + 'archive', 'D' ) ) = 0
 
 endif
 
-if len( directory( Oddvars( SYSPATH ) + 'comments', 'D' ) ) = 0
- DirMake( Oddvars( SYSPATH ) + 'comments' )
+// Master File Comments
+if len( directory( Oddvars( SYSPATH ) + 'mcomments', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'mcomments' )
+
+endif
+//Customer Comments
+if len( directory( Oddvars( SYSPATH ) + 'ccomments', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'ccomments' )
+
+endif
+// Supplier Comments
+if len( directory( Oddvars( SYSPATH ) + 'scomments', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'scomments' )
 
 endif
 
-
-/*
+#ifdef BRANCHES
 mscr := Box_Save( 2, 46, 4, 70 )
 @ 03,49 say 'Branch Code' get mbranch pict '@!'
 read
@@ -63,7 +73,7 @@ Bvars( B_BRANCH, mbranch )
 SysAudit( 'SetBranchCode' )
 
 Bvarsave()
-*/
+#endif
 
 if !file( Oddvars( SYSPATH ) + 'archive\archive.dbf' )
  aArray := {}

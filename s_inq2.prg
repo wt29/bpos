@@ -59,8 +59,67 @@ setcursor(oldcur)
 return
 
 *
+Function abs_edit ( mfile, sAlias, lIsLocked )
+local mscr
+local msel := select()
+local okalta := setkey( K_ALT_A, nil )
+local okalts := setkey( K_ALT_S, nil )
+local oktab := setkey( K_TAB, nil )
+local okf10 := setkey( K_F10, nil )
+local okf6 := setkey( K_F6, nil )
+local okshf6 := setkey( K_SH_F6, nil )
+local okcp := setkey( K_CTRL_P, nil )
 
-Function abs_edit ( mfile, malias )
+local cFileName
+default lIsLocked to FALSE
+
+sAlias := lower( if( sAlias == nil, mfile, sAlias ) )
+
+do case
+case sAlias = 'master'
+ cFileName = Oddvars( SYSPATH) + "mcomments\" + trim( master->id ) + ".txt"
+
+case sAlias = 'customer'
+ cFileName = Oddvars( SYSPATH) + "ccomments\" + trim( customer->key ) + ".txt"
+
+case sAlias = 'supplier'
+ cFileName = Oddvars( SYSPATH) + "scomments\" + trim( supplier->code ) + ".txt"
+
+otherwise
+ error( "Problem with comments 'alias' - Contact " + DEVELOPER, 12)
+ return nil
+
+endcase
+
+if !lIsLocked
+ rec_lock( sAlias )
+
+endif 
+mscr := Box_Save( 09, 04, 24, 76, RGB_RED )
+@ 9, 10 say '< Hit Esc to abandon Changes - Ctrl-W to save Changes>'
+MemoWrit( cFileName, MemoEdit( MemoRead( cFilename ), 10, 5, 23, 75 ) )
+
+Box_Restore( mscr )
+
+if !lIsLocked
+ (sAlias)->( dbunlock() )
+
+endif
+ 
+setkey( K_SH_F6, okshf6 )
+setkey( K_F6, okf6 )
+setkey( K_F10, okf10 )
+setkey( K_ALT_A, okalta )
+setkey( K_ALT_S, okalts )
+setkey( K_TAB, oktab )
+setkey( K_CTRL_P, okcp )
+select ( msel )
+
+return nil
+
+/*
+
+Function abs_edit ( cfile, malias )
 local mscr, cstr, msel := select()
 local okalta := setkey( K_ALT_A, nil )
 local okalts := setkey( K_ALT_S, nil )
@@ -70,11 +129,11 @@ local okf6 := setkey( K_F6, nil )
 local okshf6 := setkey( K_SH_F6, nil )
 local okcp := setkey( K_CTRL_P, nil )
 
-Box_Save( 07, 02, 23, 76 )
-Highlight( 7, 06, '', '[ Ctrl-W to save changes . Esc to Exit ' + mfile + ' entry ]' )
+mscr := Box_Save( 07, 02, 23, 76 )
+Highlight( 7, 06, '', '[ Ctrl-W to save changes . Esc to Exit ' + cfile + ' entry ]' )
 cstr := memoedit( cstr, 08, 03, 22, 75, TRUE )
 
-( malias )->( dbrunlock() )
+// ( mal )->( dbrunlock() )
 Box_Restore( mscr )
 
 setkey( K_SH_F6, okshf6 )
@@ -87,7 +146,7 @@ setkey( K_CTRL_P, okcp )
 select ( msel )
 return nil
 
-*
+*/
 
 function Abs_delete ( mfile )
 local mabs := mfile, osel := select()
@@ -184,6 +243,7 @@ func enq_hist ( lReturnVal )
 local key,mscr,o_dbf:=select(),enqbrow,getlist:={},refrec
 local oldcur:=setcursor(1), tscr, sID:=left( master->id, 12 )
 local okf5:=setkey( K_F5, nil )
+local nRecNo, nRecPos
 
 default lReturnVal to 0
 if Netuse( "stkhist", SHARED, 10, 'estk' )
@@ -231,17 +291,17 @@ if Netuse( "stkhist", SHARED, 10, 'estk' )
     in a stock history listing. It is used to select the invoice # etc to perform
     a supplier return to */
 
-     mrecno := recno()
+     nRecNo := recno()
      go refrec
-     recpos := 0
+     nRecPos := 0
 
-     while estk->id = sID .and. !estk->( eof() ) .and. estk->( recno() ) != mrecno
-      recpos++
+     while estk->id = sID .and. !estk->( eof() ) .and. estk->( recno() ) != nRecNo
+      nRecPos++
       estk->( dbskip() )
      enddo
 
-     Oddvars( RETURNS_OFFSET, recpos )
-     lReturnVal := recpos 
+     Oddvars( RETURNS_OFFSET, nRecPos )
+     lReturnVal := nRecPos 
      lReturnVal := estk->( recno() )
      exit
     endcase

@@ -999,15 +999,17 @@ return
 procedure TaxReport()
 local getlist:={}
 local aReport:={}
-local mscr:=Box_Save(10,26,13,56)
+local mscr:=Box_Save(10,26,14,56)
+local lSummary:=FALSE
 
 memvar dStartDate,dEndDate
 private dStartDate := Bvars( B_DATE ) - 13, dEndDate := Bvars( B_DATE )
 
 @ 11,29 say "Enter start date:" get dStartDate picture 'D' valid dStartDate >= ctod('01/01/80')
 @ 12,28 say "Enter finish date:" get dEndDate picture 'D' valid dEndDate >= ctod('01/01/80')
+@ 13,28 say "Summary repoort:" get lSummary picture 'L'
 read
-
+ 
 if IsReady(16)
  if Master_use()
   if Netuse( "salehist" )
@@ -1023,10 +1025,10 @@ if IsReady(16)
    Reporter( aReport,;
              TAX_DESC + ' report for ' + dtoc(dStartDate)+' to '+dtoc(dEndDate) ,;
              "salehist->date",;                                             // group by
-             "'Date:'+dtoc(salehist->date)",;  												            // group header
+             "'Date:'+dtoc(salehist->date)",;  					            // group header
              ,;                                              			    // sub grp by
              ,;  											                // sub grp header
-             FALSE,;                                    					// Summary report
+             lSummary,;                                    					// Summary report
              'salehist->date >= dStartDate .and. salehist->date <= dEndDate',;   // For cond
              '',; 														    // While cond
              80,;															// Page width

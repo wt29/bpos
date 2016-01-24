@@ -49,7 +49,7 @@ local cStoreName
 
 parameter sys_path
 
-Oddvars( SYSPATH, "\BPOS\" )
+Oddvars( SYSPATH, "\bpos\" )
 
 Oddvars( START_SCR, { Savescreen(), row(), col() } )
 
