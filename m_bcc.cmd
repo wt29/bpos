@@ -14,7 +14,7 @@ set HB_ARCHITECTURE=w32
 set HB_COMPILER=bcc
 set HB_GT_LIB=gtwvg
 
-hbmk2 -inc -obpos *.prg gtwvg.hbc hbtip.hbc xhb.hbc hbct.hbc
+hbmk2 -inc -obpos *.prg bpos.rc gtwvg.hbc hbtip.hbc xhb.hbc hbct.hbc 
 
 set path=%oldpath%
 

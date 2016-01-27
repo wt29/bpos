@@ -8,7 +8,7 @@ rem for Multi thread support, un-remark next line
 rem set HB_MT=MT
 
 rem nmake
-call m_bcc.cmd
+call xm_msvc.cmd
 if not exist bpos.exe goto noexe
 goto end
 :noexe 

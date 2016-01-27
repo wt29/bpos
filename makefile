@@ -1,5 +1,5 @@
 VERSION=BCB.01
-CC_DIR = C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC
+CC_DIR = C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC
 HB_DIR = c:\develop\xharbour\1.20
  
 RECURSE= NO 

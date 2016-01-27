@@ -21,7 +21,7 @@ v1.24 - Current Sales File print
 
 // #include "wvtgui.ch"
 
-// #define __GTWVW__
+#define __GTWVW__
 
 #define BUILD_NO "1.25.0"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
@@ -184,14 +184,20 @@ v1.24 - Current Sales File print
 #endif
 
 #define SYSTEM_MAX_RECS 100000   //How many records to keep in the audit trail
+#define ESC 27
+#define GS 29
 
 // Printing Bits
-#define BIGCHARS chr(27) + chr(33) + chr(48)
-#define VERYBIGCHARS chr(27) + chr(33) + chr(49)
-#define NOBIGCHARS chr(27) + chr(33) + chr(0)
-#define SCRIPTCHARS chr(27) + chr(33) + chr(50)
+#define BIGCHARS chr( ESC ) + chr(33) + chr(48)
+// #define BIGCHARS chr( GS ) + "!" + chr(3)
+// #define NOBIGCHARS chr( GS ) + "!" + chr(0)
+// #define BIGCHARS chr( ESC ) + "E" + chr(3)
 
-#define PAPERCUT chr(29) + "V" + chr(66) + chr(0)                            // Used in S_CASH
+#define VERYBIGCHARS chr( ESC ) + chr(33) + chr(49)
+#define NOBIGCHARS chr( ESC ) + chr(33) + chr(0)
+#define SCRIPTCHARS chr( ESC ) + chr(33) + chr(50)
+
+#define PAPERCUT chr( GS ) + "V" + chr(66) + chr(0)                            // Used in S_CASH
 
 #define ITALICS chr(27)+chr(37)+'G'
 #define NOITALICS chr(27)+chr(37)+'H'
@@ -384,10 +390,10 @@ v1.24 - Current Sales File print
 #endif
 
 #ifndef TAX_DESC
- // GST is defined in an old field "Sales_tax" (L) in the master file.
- #define TAX_DESC "GST"
+ // GST relies on the "taxExempt" field and the nominated GST rate
+ #define TAX_DESC "GST Exempt"
 
- #endif
+#endif
  
  
 #ifndef CURRENCY
