@@ -1559,9 +1559,8 @@ return nil
 *
 
 function kill ( file_name )
-local mcol := col(), mrow := row()
 if file( file_name )
- ferase( file_name )
+ erase ( file_name )
 
 endif
 return nil

@@ -47,9 +47,9 @@ local nQty := 0
 local nTotal := 0
 local aRptFields :={}
 local oPrinter
-
+local aPrintLines := {}
 if Netuse( "sales" )
- Print_find("docket","report")
+ Print_find( "docket" )
  Heading('X Report')
  if Isready(12)
   SysAudit("XReport")
@@ -59,8 +59,64 @@ if Netuse( "sales" )
   nGrandTot := 0
   nQty := 0
   nTotal := 0
+#ifdef EPSON
+  set console off
+  set print on
+
+  ? "X Report    " + dtoc( Bvars( B_DATE ) ) + "   " + time() 
+  ? replicate("=", 31 ) 
+  ? "Tender Type       Qty     Total" 
+  ? replicate( '-', 31 ) 
+  do while !sales->( eof() )
+   if empty( sales->id ) .and. !empty( sales->tend_type ) .and. sales->tran_type != 'PAY'
+    if sales->tend_type != sTendType
+      ? Padr( Tend_desc( sTendType ), 15 ) + padl( Ns( nQty, 5 ),6) + Padl( Ns( nTotal, 9, 2 ), 10 ) 
+      nGrandQty += nQty
+      nGrandTot += nTotal
+      nQty := 0
+      nTotal := 0
+      sTendType := sales->Tend_Type
+
+    endif
+    nQty += sales->qty
+    nTotal += sales->qty * sales->unit_price
+
+   endif
+   sales->( dbskip() )
+
+  enddo
+  ? Padr( Tend_desc( sTendType ), 15 ) + padl( Ns( nQty, 5 ),6) + Padl( Ns( nTotal, 9, 2 ), 10 ) 
+  nGrandQty += nQty
+  nGrandTot += nTotal
+  ? Replicate( "=", 31 )
+  ? 'Totals         ' + padl( Ns( nGrandQty, 5 ),6) + Padl( Ns( nGrandTot, 9, 2 ), 10 ) 
+  sales->( dbgotop() )
+  locate for sales->tran_type = 'PAY'
+  if found()
+   nQty := 0
+   nTotal := 0
+   ? "Debtor Payments" + dtoc( Bvars( B_DATE ) ) + " " + time() 
+   ? replicate("=", 31 ) 
+   ? "Tender Type       Qty     Total" 
+   ? replicate( '-', 31 ) 
+   do while !sales->( eof() )
+    if empty( sales->id ) .and. sales->tran_type = 'PAY'
+     nQty += sales->qty
+     nTotal += sales->qty * sales->unit_price
+
+    endif
+    sales->( dbskip() )
+
+   enddo
+   ? "Total Debtor Payments" 
+   ? "Qty " + Ns( nQty, 5 ) + "  Total:$" + ns( nTotal, 9, 2 ) 
+  endif 
+  set print off
+  set console on
+  set printer to  // Should Flush the printer
+
+#else
   oPrinter:= Win32Prn():New()
-//  oPrinter:= Win32Prn():New( trim( Lvars( L_PRINTER ) ) )
   oPrinter:Landscape:= .F.
   oPrinter:FormType := FORM_A4
   oPrinter:Copies   := 1
@@ -77,6 +133,7 @@ if Netuse( "sales" )
     sTendType := sales->Tend_Type
     oPrinter:Newline()
     oPrinter:TextOut( "X Report    " + dtoc( Bvars( B_DATE ) ) + "   " + time() )
+    aadd( aPrintLines, "X Report    " + dtoc( Bvars( B_DATE ) ) + "   " + time() )
     oPrinter:NewLine()
     oPrinter:TextOut( replicate("=", 31 ) )
     oPrinter:Newline()
@@ -147,6 +204,7 @@ if Netuse( "sales" )
    oPrinter:endDoc()
    oPrinter:Destroy()
 
+ #endif
    if Lvars( L_CUTTER )      // Cheap and nasty paper cut until I figure out oPOS
     set print on
     set console off
@@ -160,8 +218,6 @@ if Netuse( "sales" )
 
    endif
 
-
-  endif
   ordDestroy( "tend_type" )
 
  endif
@@ -330,6 +386,25 @@ if mgo
    SysAudit( "SalesClose" + Ns( mclose )+" $"+ ns( close_val )  )
 
    Print_find( "Docket" )
+   
+#ifdef EPSON    // Still need to figure out oPOS
+   set console off
+   set print on
+   ? 'Sales Close Number ' + Ns( mclose ) 
+   ?
+   ? 'Z Totals ' + Ns( close_val, 8, 2 ) 
+   if Lvars( L_CUTTER )     
+    ? replicate( CRLF, 2 )
+    ? PAPERCUT
+    ? chr(26)
+  
+   endif
+
+   set print off
+   set console on
+   set printer to 
+
+#else
    oPrinter:= Win32Prn():New(Lvars( L_PRINTER) )
    oPrinter:Landscape:= .F.
    oPrinter:FormType := FORM_A4
@@ -345,21 +420,12 @@ if mgo
     oPrinter:Textout( '          Z Totals ' + Ns( close_val, 8, 2 ) )
     oPrinter:endDoc()
     oPrinter:Destroy()
-
-    if Lvars( L_CUTTER )      // Cheap and nasty paper cut until I figure out oPOS
-     set print on
-     set console off
-     ? replicate( CRLF, 2 )
-     ? PAPERCUT
-     ?? chr(26)
-     set print off
-     set console on
-     set printer to
-
-    endif
-
+ 
    endif
-   Error( 'Sales Closed! Number = ' + Ns( mclose) + '  Value $' + Ns( close_val ), 12, ,;
+
+#endif 
+
+  Error( 'Sales Closed! Number = ' + Ns( mclose) + '  Value $' + Ns( close_val ), 12, ,;
           'Ready for trading again' )
 
   endif
@@ -373,7 +439,7 @@ return
 *
 
 procedure daily_sales ( lCurrent )
-local gst:=TRUE,mtype:='D',msum := YES,getlist:={}
+local gst:=TRUE,cRptOrder:='D',msum := YES,getlist:={}
 local mtot:=FALSE
 local aRptFields:={}
 local cSalesFile
@@ -382,7 +448,7 @@ Print_find("report")
 
 Heading( if( lCurrent, 'Current', 'Daily') + ' Sales Report')
 Box_Save( 2, 18, 8, 62 )
-@ 03,22 say 'Department or Supplier Order (D/S)' get mtype pict '!' valid( mtype $ 'DS' )
+@ 03,22 say 'Department or Supplier Order (D/S)' get cRptOrder pict '!' valid( cRptOrder $ 'DS' )
 @ 05,42 say 'Summary Format' get msum pict 'y'
 @ 07,42 say ' Total on Item' get mtot pict 'y'
 read
@@ -399,43 +465,43 @@ if Isready( 7 )
       cSalesFile = "psales"
 
 	endif	  
-//    if Netuse( cSalesFile, , ,"xxxxSalesFile" )
-    if Netuse( cSalesFile , SHARED, 10, "SalesFile" )
-     set relation to SalesFile->id into master
+	Kill( OddVars( SYSPATH ) + "psales.cdx" )
+    if Netuse( cSalesFile , SHARED, 10, "cAlias" )
+     set relation to cAlias->id into master
      Center(07,'-=< Now Processing - Please Wait >=-')
      SysAudit( "DSalesRpt" )
 
-     if mtype = 'S'
-      indx( "master->supp_code", 'temp' )
+     if cRptOrder = 'S'
+      indx( "master->supp_code", 'supp' )
 
      else
       if mtot
-       indx( "SalesFile->id", 'id' )
-       total on salesfile->id to ( Oddvars( TEMPFILE ) ) field qty for !empty( SalesFile->id )
-       Netuse( Oddvars( TEMPFILE ), EXCLUSIVE, 10, 'SalesFile', FALSE )
+       indx( "cAlias->id", 'id' )
+       total on cAlias->id to ( Oddvars( TEMPFILE ) ) field qty for !empty( cAlias->id )
+       Netuse( Oddvars( TEMPFILE ), EXCLUSIVE, 10, 'cAlias', FALSE )
 
       endif
       indx( "master->department", 'dept' )
 
      endif
 
-     aadd(aRptFields,{'idcheck(SalesFile->id)','ID',13,0,FALSE})    // 13
+     aadd(aRptFields,{'idcheck(cAlias->id)','ID',13,0,FALSE})    // 13
      aadd(aRptFields,{'substr(master->desc,1,25)','Desc',25,0,FALSE}) //25
-     aadd(aRptFields,{'SalesFile->qty','Qty;Sold',4,0,TRUE})
-     aadd(aRptFields,{'SalesFile->unit_price','Unit;Price',7,2,FALSE})
-     aadd(aRptFields,{'SalesFile->discount*SalesFile->qty','Disc.',7,2,TRUE})
-     if mtype != 'S'
-      aadd(aRptFields,{'SalesFile->discount*SalesFile->qty/((SalesFile->unit_price*SalesFile->qty)/100)','Disc%',3,1,FALSE})//3,1
+     aadd(aRptFields,{'cAlias->qty','Qty;Sold',4,0,TRUE})
+     aadd(aRptFields,{'cAlias->unit_price','Unit;Price',7,2,FALSE})
+     aadd(aRptFields,{'cAlias->discount*cAlias->qty','Disc.',7,2,TRUE})
+     if cRptOrder != 'S'
+      aadd(aRptFields,{'cAlias->discount*cAlias->qty/((cAlias->unit_price*cAlias->qty)/100)','Disc%',3,1,FALSE})//3,1
 
      endif
-     aadd(aRptFields,{'SalesFile->qty*(SalesFile->unit_price-SalesFile->discount)','Nett;Sale',9,2,TRUE})
-     aadd(aRptFields,{'SalesFile->qty*SalesFile->cost_price','Cost;Price',10,2,TRUE})
-     if mtype != 'S'
-      aadd(aRptFields,{'SalesFile->time','Time',8,0,FALSE})
+     aadd(aRptFields,{'cAlias->qty*(cAlias->unit_price-cAlias->discount)','Nett;Sale',9,2,TRUE})
+     aadd(aRptFields,{'cAlias->qty*cAlias->cost_price','Cost;Price',10,2,TRUE})
+     if cRptOrder != 'S'
+//      aadd(aRptFields,{'cAlias->time','Time',8,0,FALSE})
       aadd(aRptFields,{'master->onhand','Onhand',6,0,FALSE})      // 6
 
      endif
-     if mtype = 'S'
+     if cRptOrder = 'S'
       if msum
        Reporter( aRptFields,;
                  "Daily Sales Report by Supplier (Summary)",;
@@ -444,7 +510,7 @@ if Isready( 7 )
                  '',;
                  '',;
                  TRUE,;
-                 '!empty( SalesFile->id )')
+                 '!empty( cAlias->id )')
 
       else
         Reporter(aRptFields,;
@@ -454,7 +520,7 @@ if Isready( 7 )
                  '',;
                  '',;
                  FALSE,;
-                 '!empty( SalesFile->id )')
+                 '!empty( cAlias->id )')
 
       endif
 
@@ -467,7 +533,7 @@ if Isready( 7 )
                  '',;
                  '',;
                  TRUE,;
-                 '!empty( SalesFile->id )')
+                 '!empty( cAlias->id )')
 
 
       else
@@ -478,15 +544,15 @@ if Isready( 7 )
                 '',;
                 '',;
                 FALSE,;
-                '!empty( SalesFile->id )')
+                '!empty( cAlias->id )')
 
 
       endif
 
      endif
 
-     if mtype ="S"
-      SalesFile->( ordDestroy( "temp" ) )
+     if cRptOrder ="S"
+      cAlias->( ordDestroy( "temp" ) )
 
      endif
 
@@ -498,20 +564,22 @@ if Isready( 7 )
 
  endif
  dbcloseall()
- Kill( Oddvars( SYSPATH ) + 'SalesFile' + ordBagExt() )
-endif
+ Kill( Oddvars( SYSPATH ) + 'cAlias' + ordBagExt() )
+ Kill( OddVars( SYSPATH ) + "psales" + INDEX_EXT )
+
+ endif
 return
 
 *
 
 procedure cashbook
+
 local mbank:=NO, msum:=NO, getlist:={}
-/* Local mcash, minvs, mpays */
 local aCashBook, aInvDaily, aRptFields
-local grp := 'TranTypeDesc(SalesFile->tran_type)'
+local grp := 'TranTypeDesc(psales->tran_type)'
 local grpn := "'Totals for transaction type -> '+TranTypeDesc(psales->tran_type)"
 
-Print_find("report")
+Print_find( "report" )
 Heading('Cash Book Report')
 Box_Save( 2, 03, 09, 75 )
 Center(3,'This Module will print the daily cash book and Invoice List')
@@ -521,6 +589,7 @@ Center(3,'This Module will print the daily cash book and Invoice List')
 read
 
 if Isready(06)
+ Kill( OddVars( SYSPATH ) + "psales.cdx" )
  if Netuse( "psales", SHARED, 10, , TRUE )
   SysAudit( "CashBookRpt" )
   Center(07,'-=< Processing - Please Wait >=-')
@@ -548,18 +617,21 @@ if Isready(06)
   aadd(aInvDaily,{'register','Register',10,0,FALSE})
   aadd(aInvDaily,{'name','Customer Name',20,0,FALSE})
   aadd(aInvDaily,{'invno','Inv #',6,0,FALSE})
-  indx( "psales->tran_type + psales->tend_type", Oddvars( TEMPFILE ) )
-
+  indx( "psales->tran_type + psales->tend_type", 'payType' )
+ 
+  psales->( dbgotop() )
+ 
   if msum
    Reporter( aCashBook,;
             "Daily Cash Book (Summary)",;
-            grp,grpn,;
+            grp,;
+			grpn,;
             'Tend_desc(tend_type)',;
             "'Tender type -> '+Tend_desc(tend_type)",;
             TRUE,;
             'empty( psales->id ) .and. !empty( psales->tend_type )' )
 
-   go top
+   psales->( dbgotop() )
 
    Reporter( aInvDaily,;
             "Daily Invoice/Credit Note List (Summary)",;
@@ -579,7 +651,8 @@ if Isready(06)
             FALSE,;
             'empty( psales->id ) .and. !empty( psales->tend_type )' )
 
-   go top
+   psales->( dbGoTop() )
+   
    Reporter( aInvDaily,;
             "'Daily Invoice/Credit Note List'",;
             'TranTypeDesc(psales->tran_type)',;
@@ -616,8 +689,8 @@ if Isready(06)
    aadd(aRptFields,{'branch','Branch',20,0,FALSE})
    aadd(aRptFields,{'drawer','Drawer',20,0,FALSE})
       
-   indx( "psales->bank + psales->drawer", Oddvars( TEMPFILE ) )
-   go top
+   indx( "psales->bank + psales->drawer", 'bank' )
+   psales->( dbgotop() )
    Reporter(aRptFields,;
             "'Daily Banking List'",;
             '',;
@@ -631,8 +704,9 @@ if Isready(06)
   endif
 
  endif
- close databases
-
+ dbCloseAll()
+ Kill( OddVars( SYSPATH ) + "psales" + INDEX_EXT )
+ 
 endif
 return
 *
@@ -1032,54 +1106,54 @@ return
 
 *
 
-Function TranTypeDesc ( mtype )
-local mret := 'Unknown ('+mtype+')'
-if mtype = 'C/S'
- mret := 'Cash Sales'
-elseif mtype = 'LBD'
- mret := 'Layby Deposit'
-elseif mtype = 'LBT'
- mret := 'Layby total ( less initial Deposit )'
-elseif mtype = 'LBP'
- mret := 'Layby Payment'
-elseif mtype = 'SDT'
- mret := 'S/Order Deposit Taken'
-elseif mtype = 'SDR'
- mret := 'S/Order Deposit Refund'
-elseif mtype = 'SDP'
- mret := 'S/Order Deposit Presented'
-elseif mtype = 'LDE'
- mret := 'Layby Cancelled Refund'
-elseif mtype = 'PPC'
- mret := 'Prepack Cash Sale'
-elseif mtype = 'PAY'
- mret := 'Accounts Payments'
-elseif mtype = 'VOI'
- mret := 'Cash Sale Voids'
-elseif mtype = 'INV'
- mret := 'Invoices'
-elseif mtype = 'C/N'
- mret := 'Credit Notes'
-elseif mtype = 'DRR'
- mret := 'Debtor Receipt'
-elseif mtype = 'MIR'
- mret := 'Miscellaneous Debtor Receipt'
-elseif mtype = 'SUB'
- mret := 'Subscription Payment'
-elseif mtype = 'MOS'
- mret := 'Mail Order Sales Payment'
-elseif mtype ='B/B'
- mret := 'Second Hand Buy Back'
-elseif mtype = 'ZZZ'
- mret := 'Sales Close Z-Read'
-elseif mtype = 'ACC'
- mret := 'Account Payments'
-elseif mtype = 'SHA'
- mret := 'Share Sales'
-elseif mtype = 'PCH'
- mret := 'Petty Cash'
+Function TranTypeDesc ( cTranType )
+local cReturnVal := 'Unknown ('+cTranType+')'
+if cTranType = 'C/S'
+ cReturnVal := 'Cash Sales'
+elseif cTranType = 'LBD'
+ cReturnVal := 'Layby Deposit'
+elseif cTranType = 'LBT'
+ cReturnVal := 'Layby total ( less initial Deposit )'
+elseif cTranType = 'LBP'
+ cReturnVal := 'Layby Payment'
+elseif cTranType = 'SDT'
+ cReturnVal := 'S/Order Deposit Taken'
+elseif cTranType = 'SDR'
+ cReturnVal := 'S/Order Deposit Refund'
+elseif cTranType = 'SDP'
+ cReturnVal := 'S/Order Deposit Presented'
+elseif cTranType = 'LDE'
+ cReturnVal := 'Layby Cancelled Refund'
+elseif cTranType = 'PPC'
+ cReturnVal := 'Prepack Cash Sale'
+elseif cTranType = 'PAY'
+ cReturnVal := 'Accounts Payments'
+elseif cTranType = 'VOI'
+ cReturnVal := 'Cash Sale Voids'
+elseif cTranType = 'INV'
+ cReturnVal := 'Invoices'
+elseif cTranType = 'C/N'
+ cReturnVal := 'Credit Notes'
+elseif cTranType = 'DRR'
+ cReturnVal := 'Debtor Receipt'
+elseif cTranType = 'MIR'
+ cReturnVal := 'Miscellaneous Debtor Receipt'
+elseif cTranType = 'SUB'
+ cReturnVal := 'Subscription Payment'
+elseif cTranType = 'MOS'
+ cReturnVal := 'Mail Order Sales Payment'
+elseif cTranType ='B/B'
+ cReturnVal := 'Second Hand Buy Back'
+elseif cTranType = 'ZZZ'
+ cReturnVal := 'Sales Close Z-Read'
+elseif cTranType = 'ACC'
+ cReturnVal := 'Account Payments'
+elseif cTranType = 'SHA'
+ cReturnVal := 'Share Sales'
+elseif cTranType = 'PCH'
+ cReturnVal := 'Petty Cash'
 endif
-return mret
+return cReturnVal
 
 *
 

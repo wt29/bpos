@@ -420,6 +420,7 @@ while !eof() .and. cont
     if !empty( sub_group_by )
      if !toScreen
       oPrinter:newline()
+      oPrinter:newline()
       oPrinter:SetColor( RGB_MAGENTA )
       oPrinter:textout( '* '+eval( sub_head ) )
       oPrinter:SetColor( RGB_BLACK )
@@ -501,7 +502,6 @@ while !eof() .and. cont
 
        else
         sOut := padr( fldrec[ i, 1 ], aReport[ i, PR_FLD_LEN ] )
-
 
        endif
 
@@ -608,7 +608,8 @@ while !eof() .and. cont
        oPrinter:TextOut( '* Subsubtotal *' )
 
       else
-        oPrinter:Write( CRLF + '* Subsubtotal *' )
+	    oPrinter:NewLine()
+        oPrinter:Write( '* Subsubtotal *' )
 
       endif
 

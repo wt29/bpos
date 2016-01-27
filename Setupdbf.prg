@@ -14,23 +14,19 @@ local mfilepath := Oddvars( SYSPATH )
 cls
 
 @ 2, 2 to  12, 78
-@ 3, 04 say SYSNAME + ' has detected no Database files on this system.'
-@ 5, 04 say 'This section will set up the Database files required to run ' + SYSNAME
-@ 6, 04 say SYSNAME + ' will exit after creation - you will need to restart!'
-@ 7, 04 say 'Ok to create Database files' get lAnswer pict 'Y'
+@ 3, 04 say SYSNAME + ' has detected no Database files on this system on Path ' + OddVars( SYSPATH )
+@ 5, 04 say 'This section will set up the Database file skeletons required to run ' + SYSNAME
+@ 7, 04 say "1. Copy the skeletons (*" + NEW_DBF_EXT + " )from " + mFilePath + 'DBFSTRU to ' +mfilePath
+@ 8, 04 say "2. Rename them from *" + NEW_DBF_EXT + ' to *.dbf'
+@ 9, 04 say "3. Restart " + SYSNAME
+@ 11, 04 say 'Ok to create Database skeleton files - Path will be ' + OddVars( SYSPATH ) + "dbfstru\" get lAnswer pict 'Y'
 read
 
 if lAnswer
- lAnswer := FALSE
- @ 8, 04 say 'Again - Ok to create Database Files' get lAnswer pict 'Y'
- read
-
- if lAnswer
   SetupDirs()
-  CreateDbfs()
+  CreateDbfs( Oddvars( SYSPATH ) + "dbfstru\" )
   @ 10, 04 say 'You will need to rename the *' + NEW_DBF_EXT + ' files to *.dbf to run '+ SYSNAME + ' - Bye for now!'
 
- endif
 
 endif
 @ 13, 00 say ''
@@ -43,6 +39,13 @@ return nil
 function SetupDirs
 local getlist:={}, mbranch:=space( BRANCH_CODE_LEN ), aArray
 
+// DBD STRUcture folder
+if len( directory( Oddvars( SYSPATH ) + 'dbfstru', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'dbfstru' )
+
+endif
+
+// Archive Files
 if len( directory( Oddvars( SYSPATH ) + 'archive', 'D' ) ) = 0
  DirMake( Oddvars( SYSPATH ) + 'archive' )
 
@@ -53,11 +56,13 @@ if len( directory( Oddvars( SYSPATH ) + 'mcomments', 'D' ) ) = 0
  DirMake( Oddvars( SYSPATH ) + 'mcomments' )
 
 endif
+
 //Customer Comments
 if len( directory( Oddvars( SYSPATH ) + 'ccomments', 'D' ) ) = 0
  DirMake( Oddvars( SYSPATH ) + 'ccomments' )
 
 endif
+
 // Supplier Comments
 if len( directory( Oddvars( SYSPATH ) + 'scomments', 'D' ) ) = 0
  DirMake( Oddvars( SYSPATH ) + 'scomments' )

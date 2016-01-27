@@ -7,8 +7,7 @@
 
 #include "bpos.ch"
 
-
-Procedure Main
+Function Main()
 
 local nSelect
 local nLength
@@ -24,12 +23,13 @@ local cScreen, moff:=0
 local aMenu
 local aHelp, aDir
 local cStoreName
+local cSysPath
 
 // local nMaxRow := maxrow(), nMaxCol := maxcol()
 
 #ifdef __GTWVW__
-//  local lMainCoord
-//altd()
+ //  local lMainCoord
+ //altd()
  local lMainCoord := WVW_SetMainCoord( .t. )
  // wvW_SetWindowTitle( "Hello World")
  WVW_SetCodePage(,255)
@@ -47,9 +47,18 @@ local cStoreName
 
 #endif
 
-parameter sys_path
+cSysPath := GetENV( "BPOSPATH" )
+if !empty( cSysPath )
+ if right( trim( cSysPath ), 1 ) != '\'
+  cSysPath += '\'
+ 
+ endif
+else
+ cSysPath = '\bpos\'
+ 
+endif
 
-Oddvars( SYSPATH, "\bpos\" )
+Oddvars( SYSPATH, cSysPath )
 
 Oddvars( START_SCR, { Savescreen(), row(), col() } )
 
@@ -74,8 +83,6 @@ set( _SET_EVENTMASK, INKEY_KEYBOARD )
 set( _SET_DEBUG, .t. )
 set( _SET_AUTOPEN, TRUE )
 set( _SET_AUTORDER, TRUE )
-
-oddvars( SYSPATH, if( type( "sys_path" ) = 'U', Oddvars( SYSPATH ), upper( m->sys_path ) ) )
 
 set path to ( Oddvars( SYSPATH ) )
 
@@ -347,7 +354,7 @@ while TRUE                                      // Main Menu Loop
 
  endcase
 enddo
-return 
+return nil
 
 *
 
