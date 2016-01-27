@@ -1,2 +1,3 @@
-bpos c:\bpos\
+set BPOSPATH=c:\bpos\
+bpos
 
