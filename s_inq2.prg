@@ -7,7 +7,7 @@ Procedure Saleinq2
 
 #include "bpos.ch"
 
-procedure desc_dele
+procedure ItemDelete
 local mans:=NO,o_id,getlist:={},okf9,okf10,mscr,okaf1
 local oldcur:=setcursor(1), olddbf:=select(), oldrec:=recno(), farr, x
 
@@ -166,7 +166,7 @@ function enq_cate
 local sKey, mcode, mscr, msel:=select(), openmastcat:=FALSE
 local getlist:={}, mrec, oldcur:=setcursor(1)
 local sID := master->id, catebrow, nQty, oldntxord
-local okf6 := setkey( K_F6, nil ), okf5
+local okf6 := setkey( K_F6, nil ), okf5, cPrompt
 static lastcat
 if Netuse( "category", SHARED, 10, 'ecat' )
  if Netuse( "macatego", SHARED, 10, 'emcat' )
@@ -175,7 +175,7 @@ if Netuse( "category", SHARED, 10, 'ecat' )
   oldntxord := emcat->( ordsetfocus( BY_ID ) )
   set relation to emcat->code into ecat
   dbseek( sID )
-  Heading('Category/id Maintenance')
+  Heading('Category on ' + ID_DESC + ' Maintenance')
   Box_Save(1,39,24-2,79-3)
   catebrow:=tbrowsedb(2,42,24-3,79-4)
   catebrow:HeadSep := HEADSEP
@@ -186,17 +186,18 @@ if Netuse( "category", SHARED, 10, 'ecat' )
   catebrow:addcolumn(tbcolumnnew("Code",{||emcat->code}))
   catebrow:addcolumn(tbcolumnnew("Category Name",{||ecat->name}))
   sKey:=0
- // Something to do with automatic category maint from Add desc !!
+ // Something to do with automatic category maint from Add Item !!
   while sKey != K_ESC .and. sKey != K_END
    catebrow:forcestable()
    sKey:=inkey( 0 )
    if !Navigate( catebrow, sKey )
     do case
     case sKey == K_INS
-     mscr := Box_Save( 02, 02, 05, 28 )
+	 cPrompt = 'Category to add to this ' + ITEM_DESC
+     mscr := Box_Save( 02, 02, 05, 3 + len( cPrompt ) + 2 + CATEGORY_CODE_LEN )
      mcode := space(6)
      okf5 := setkey( K_F5, { || Stuffcat( lastcat ) } )
-     @ 03,05 say 'Category to Add' get mcode pict '@!' valid( dup_chk( mcode, "category" ) )
+     @ 03,03 say cPrompt get mcode pict '@!' valid( dup_chk( mcode, "category" ) )
      read
      setkey( K_F5, okf5 )
      if !empty( mcode )
@@ -213,7 +214,7 @@ if Netuse( "category", SHARED, 10, 'ecat' )
      emcat->( dbseek( sID ) )
      catebrow:refreshall()
     case sKey == K_DEL
-     if Isready( 3, 5, 'Ok to delete code ' + emcat->code )
+     if Isready( 3, 5, 'Ok to delete category ' + trim( emcat->code ) + ' from this item?' )
       Del_rec( 'emcat', UNLOCK )
       seek sID
       catebrow:refreshall()

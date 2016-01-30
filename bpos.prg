@@ -96,7 +96,6 @@ if len( directory( Oddvars( SYSPATH ) + 'errors', 'D' ) ) = 0   // Create a dire
 
 endif
 
-
 Lvarget()                   // Set up Local Arrays
 Bvarget()                   // Set up the Bvars Array
 // altD(1)                  // Turns on Debug

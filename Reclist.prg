@@ -569,7 +569,7 @@ while mgo
       top_mar:=0
       bot_mar:=10
       col_head1 := 'Desc                    Author         Sta OrdQ BacQ SpeQ Ord Dat'
-      col_head2 := 'ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ ÄÄÄ ÄÄÄÄ ÄÄÄÄ ÄÄÄÄ ÄÄÄÄÄÄÄ'
+      col_head2 := 'ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ?ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ ÄÄ?ÄÄÄÄ ÄÄÄÄ ÄÄÄÄ ÄÄÄÄÄÄ'
       report_name := 'Items not Supplied on Orders / Unfilled Special Orders'
       Print_find( "report" )
       set device to printer

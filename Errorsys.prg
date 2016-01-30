@@ -195,7 +195,7 @@ while cchoice != 'A'
 
  endif
  nIntense := set( _SET_INTENSITY , TRUE )
- @ nErrbot-1, 2 say 'Notify ' + DEVELOPER + ' Software with this error.'
+ @ nErrbot-1, 2 say 'Notify ' + DEVELOPER + ' with this error.'
  set( _SET_INTENSITY , nIntense )
 
  nIntense:=set( _SET_INTENSITY , TRUE )

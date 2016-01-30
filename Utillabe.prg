@@ -1,3 +1,4 @@
+
 /*
 
  BPOS - Bluegum Software
@@ -107,7 +108,11 @@ for x = 1 to mqty
   mstr += '^FD' + left( sBarcode, 12 ) + CRLF
 
  else
+#ifdef THE_LOOK
   mstr += '^B2N,40,Y,N,N' + CRLF
+#else
+  mstr += '^B3N,N,40,Y,N' + CRLF
+#endif
   mstr += '^FD' + trim( sBarcode ) + CRLF
 
  endif

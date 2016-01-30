@@ -12,6 +12,19 @@ procedure s_daily
 #include "set.ch"
 
 local choice, oldscr := Box_Save(), aArray
+local lSalesRecs := FALSE, lPSalesRecs := FALSE
+
+if NetUse( 'psales')
+ iif( psales->( reccount() ) > 0, lPSalesRecs := TRUE, nil ) 
+ close pSales
+
+endif
+
+if NetUse( 'Sales' )
+ iif( sales->( reccount() ) > 0, lSalesRecs := TRUE, nil ) 
+  close Sales
+
+endif
 
 while TRUE
  Box_Restore( oldscr )
@@ -22,10 +35,10 @@ while TRUE
  aadd( aArray, { 'Graphic', 'Graphic of Days Sales', { || Salegraph() }, X_SALESREPORTS } )
  aadd( aArray, { 'X Report', 'Drawer Status Reports', { || Xreport() }, X_SALESREPORTS } )
  aadd( aArray, { 'Current', 'Current Sales', { || Daily_Sales( TRUE ) }, X_SALESREPORTS } )
- aadd( aArray, { 'Sales Close', 'Close Sales for the day', { || Saleclose() }, X_SUPERVISOR } )
+ aadd( aArray, { 'Sales Close' + if( lSalesRecs, '*', ''), 'Close Sales for the day', { || Saleclose() }, X_SUPERVISOR } )
  aadd( aArray, { 'All Sales', 'Print all ' + ITEM_DESC + ' sold today', { || Daily_sales( FALSE ) }, X_SALESREPORTS } )
  aadd( aArray, { 'Cash Book', 'Print Daily Cash Book', { || Cashbook() }, X_SALESREPORTS } )
- aadd( aArray, { 'Post', "Post today's sales", { || SalePost() }, X_SUPERVISOR } )
+ aadd( aArray, { 'Post' + if( lPSalesRecs, '*', ''), "Post today's sales", { || SalePost() }, X_SUPERVISOR } )
  choice := MenuGen( aArray, 08, 35, 'Daily' )
  if choice < 2
   return
@@ -43,74 +56,114 @@ procedure xreport
 local sTendType
 local nGrandQty := 0
 local nGrandTot := 0
-local nQty := 0
-local nTotal := 0
-local aRptFields :={}
-local oPrinter
+local nTendQty := 0
+local nTendTotal := 0
+local nRegTotal := 0
+local nRegQty := 0
+#ifdef EPSON
+local sRName := "", lFirstPass := TRUE
+#else
+local oPrinter 
 local aPrintLines := {}
+local aRptFields :={}
+#endif
 if Netuse( "sales" )
  Print_find( "docket" )
  Heading('X Report')
  if Isready(12)
   SysAudit("XReport")
-  indx( "sales->tend_type",'tend_type' )
+  indx( "sales->register + sales->tend_type", 'tend_type' )
   sales->( dbgotop() )
-  nGrandQty := 0
-  nGrandTot := 0
-  nQty := 0
-  nTotal := 0
+  sTendType := sales->tend_type
+  // sRName := "" // sales->register
 #ifdef EPSON
   set console off
   set print on
-
   ? "X Report    " + dtoc( Bvars( B_DATE ) ) + "   " + time() 
   ? replicate("=", 31 ) 
   ? "Tender Type       Qty     Total" 
-  ? replicate( '-', 31 ) 
+  ? replicate( '-', 31 )
+
   do while !sales->( eof() )
-   if empty( sales->id ) .and. !empty( sales->tend_type ) .and. sales->tran_type != 'PAY'
-    if sales->tend_type != sTendType
-      ? Padr( Tend_desc( sTendType ), 15 ) + padl( Ns( nQty, 5 ),6) + Padl( Ns( nTotal, 9, 2 ), 10 ) 
-      nGrandQty += nQty
-      nGrandTot += nTotal
-      nQty := 0
-      nTotal := 0
-      sTendType := sales->Tend_Type
+   if empty( sales->id ) .and. !empty( sales->tend_type ) .and. !empty( sales->register ) .and. sales->tran_type != 'PAY'
+    if trim( sales->register ) <> trim( sRName ) .or. lFirstPass
+	 if !lFirstPass
+      ? Padr( Tend_desc( sTendType ), 15 ) + padl( Ns( nTendQty, 5 ),6) + Padl( Ns( nTendTotal, 9, 2 ), 10 ) 
+      ? replicate( '-', 31 )
+	  ? space( 15 ) + padl( Ns( nRegQty, 5 ),6) + Padl( Ns( nRegTotal, 9, 2 ), 10 ) 
+      ? replicate( '-', 31 )
+    
+     else
+       lFirstPass := FALSE
+
+     endif	   
+	 sRName := sales->register
+	 sTendType := sales->tend_type
+	  
+     ? "Register: " + sRName
+	 nRegQty := 0
+	 nRegTotal := 0
+	 nTendQty := 0
+	 nTendTotal := 0
+	
+	endif 
+    
+	if sales->tend_type != sTendType
+     ? Padr( Tend_desc( sTendType ), 15 ) + padl( Ns( nTendQty, 5 ),6) + Padl( Ns( nTendTotal, 9, 2 ), 10 ) 
+	 nTendQty := 0
+     nTendTotal := 0
+     sTendType := sales->Tend_Type
 
     endif
-    nQty += sales->qty
-    nTotal += sales->qty * sales->unit_price
 
+    nTendQty += sales->qty
+    nTendTotal += sales->qty * sales->unit_price
+
+    nGrandQty += sales->qty
+    nGrandTot += sales->qty * sales->unit_price
+
+    nRegQty += sales->qty
+    nRegTotal += sales->qty * sales->unit_price
+   
    endif
    sales->( dbskip() )
 
   enddo
-  ? Padr( Tend_desc( sTendType ), 15 ) + padl( Ns( nQty, 5 ),6) + Padl( Ns( nTotal, 9, 2 ), 10 ) 
-  nGrandQty += nQty
-  nGrandTot += nTotal
+  ? Padr( Tend_desc( sTendType ), 15 ) + padl( Ns( nTendQty, 5 ),6) + Padl( Ns( nTendTotal, 9, 2 ), 10 ) 
+  ? replicate( '-', 31 )
+  ? space( 15 ) + padl( Ns( nRegQty, 5 ),6) + Padl( Ns( nRegTotal, 9, 2 ), 10 ) 
+  ? replicate( '-', 31 )
+  nGrandQty += nTendQty
+  nGrandTot += nTendTotal
   ? Replicate( "=", 31 )
   ? 'Totals         ' + padl( Ns( nGrandQty, 5 ),6) + Padl( Ns( nGrandTot, 9, 2 ), 10 ) 
   sales->( dbgotop() )
   locate for sales->tran_type = 'PAY'
   if found()
-   nQty := 0
-   nTotal := 0
+   nTendQty := 0
+   nTendTotal := 0
    ? "Debtor Payments" + dtoc( Bvars( B_DATE ) ) + " " + time() 
    ? replicate("=", 31 ) 
    ? "Tender Type       Qty     Total" 
    ? replicate( '-', 31 ) 
    do while !sales->( eof() )
     if empty( sales->id ) .and. sales->tran_type = 'PAY'
-     nQty += sales->qty
-     nTotal += sales->qty * sales->unit_price
+     nTendQty += sales->qty
+     nTendTotal += sales->qty * sales->unit_price
 
     endif
     sales->( dbskip() )
 
    enddo
    ? "Total Debtor Payments" 
-   ? "Qty " + Ns( nQty, 5 ) + "  Total:$" + ns( nTotal, 9, 2 ) 
+   ? "Qty " + Ns( nTendQty, 5 ) + "  Total:$" + ns( nTendTotal, 9, 2 ) 
   endif 
+  ? 
+  ?
+  if Lvars( L_CUTTER )      // Cheap and nasty paper cut until I figure out oPOS
+    ? PAPERCUT
+  endif
+
   set print off
   set console on
   set printer to  // Should Flush the printer
@@ -205,18 +258,6 @@ if Netuse( "sales" )
    oPrinter:Destroy()
 
  #endif
-   if Lvars( L_CUTTER )      // Cheap and nasty paper cut until I figure out oPOS
-    set print on
-    set console off
-    ? replicate( CRLF, 2 )
-    ? PAPERCUT
-    ? replicate( CRLF, 2 )
-    ?? chr(26)
-    set print off
-    set console on
-    set printer to
-
-   endif
 
   ordDestroy( "tend_type" )
 

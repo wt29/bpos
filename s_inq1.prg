@@ -452,11 +452,11 @@ okf12 := setkey( K_F12, { || F12OrderIt() } )
 if master->binding = "KI"
  oksf10 := setkey( K_SH_F10, { || Enq_kit() } )
 endif
-okaf1 := setkey( K_ALT_F1, { || Desc_dele() } )
+okaf1 := setkey( K_ALT_F1, { || ItemDelete() } )
 DispItem()
 if go_to_edit
-// EditDesc( @dump_flag, @append_all, nil, FromAddDesc )
- EditDesc( nil )
+// EditItem( @dump_flag, @append_all, nil, FromAddDesc )
+ EditItem( nil )
 
 else
  while TRUE
@@ -638,13 +638,13 @@ return nil
 
 proc f10edit
 F11Costs()   // Will display hidden field Headings.
-EditDesc()
+EditItem()
 DispItem()  // Force a redisplay
 return
 
 *
 
-procedure EditDesc ( super, FromAddDesc )
+procedure EditItem ( super, FromAddDesc )
 local getlist:={},cScreenSave,temp_id:=master->id+' ', mreplace,mrec
 local o_id,lAnswer, oldcur:=setcursor(1),old_price:=master->sell_price
 local okf1,sFunKey3,sFunKey4,okf5,okf6,okf7,okf8,okf9,okaf8,okf10:=setkey( K_F10, { || tedit()} )
@@ -744,7 +744,7 @@ if super
   @ 24,68 get ytdsales->per12
  endif
 endif
-okaf8 := setkey( K_ALT_F8, { || EditDesc( TRUE ) } )
+okaf8 := setkey( K_ALT_F8, { || EditItem( TRUE ) } )
 Rec_lock( 'master' )
 read
 mWasChanged := updated()

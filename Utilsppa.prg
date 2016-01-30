@@ -112,7 +112,7 @@ aArray := {}
 
 aadd( aArray, { '<Alt-F2>', 'Set System Numbers' } )
 aadd( aArray, { '<Alt-F3>', 'Open to Buy Report' } )
-aadd( aArray, { '<Alt-F4>', 'Set the GST Rate' } )
+// aadd( aArray, { '<Alt-F4>', 'Set the GST Rate' } )
 aadd( aArray, { '<Alt-F5>', 'Point of Sale Function Keys' } )
 aadd( aArray, { '<Alt-F6>', 'Reports/System Variables' } )
 aadd( aArray, { '<Alt-F9>', 'Set Transaction Types' } )
@@ -193,29 +193,29 @@ Heading('Set up POS Function Keys')
 @ 5,20 say 'Scan Value'
 @ 5,42 say 'Label'
 @ 5,55 say 'Margin'
-@ 6,04 say 'Function Key #3' get aLocalVars[ L_F3 ] pict FUNC_PICT
-@ 6,42 get aLocalVars[ L_F3N ] pict '!!!!!!!!!'
+@ 6,04 say 'Function Key  #3' get aLocalVars[ L_F3 ] pict FUNC_PICT
+@ 6,42 get aLocalVars[ L_F3N ] // pict '!!!!!!!!!'
 @ 6,55 get aLocalVars[ L_F3MARGIN ] pict '999.99'
-@ 7,04 say 'Function Key #4' get aLocalVars[ L_F4 ] pict FUNC_PICT
-@ 7,42 get aLocalVars[ L_F4N ] pict '!!!!!!!!!'
+@ 7,04 say 'Function Key  #4' get aLocalVars[ L_F4 ] pict FUNC_PICT
+@ 7,42 get aLocalVars[ L_F4N ] // pict '!!!!!!!!!'
 @ 7,55 get aLocalVars[ L_F4MARGIN ] pict '999.99'
-@ 8,04 say 'Function Key #5' get aLocalVars[ L_F5 ] pict FUNC_PICT
-@ 8,42 get aLocalVars[ L_F5N ] pict '!!!!!!!!!'
+@ 8,04 say 'Function Key  #5' get aLocalVars[ L_F5 ] pict FUNC_PICT
+@ 8,42 get aLocalVars[ L_F5N ] // pict '!!!!!!!!!'
 @ 8,55 get aLocalVars[ L_F5MARGIN ] pict '999.99'
-@ 9,04 say 'Function Key #6' get aLocalVars[ L_F6 ] pict FUNC_PICT
-@ 9,42 get aLocalVars[ L_F6N ] pict '!!!!!!!!!'
+@ 9,04 say 'Function Key  #6' get aLocalVars[ L_F6 ] pict FUNC_PICT
+@ 9,42 get aLocalVars[ L_F6N ] // pict '!!!!!!!!!'
 @ 9,55 get aLocalVars[ L_F6MARGIN ] pict '999.99'
-@ 10,04 say 'Function Key #7'get aLocalVars[ L_F7 ] pict FUNC_PICT
-@ 10,42 get aLocalVars[ L_F7N ] pict '!!!!!!!!!'
+@ 10,04 say 'Function Key  #7'get aLocalVars[ L_F7 ] pict FUNC_PICT
+@ 10,42 get aLocalVars[ L_F7N ] // pict '!!!!!!!!!'
 @ 10,55 get aLocalVars[ L_F7MARGIN ] pict '999.99'
-@ 11,04 say 'Function Key #8' get aLocalVars[ L_F8 ] pict FUNC_PICT
-@ 11,42 get aLocalVars[ L_F8N ] pict '!!!!!!!!!'
+@ 11,04 say 'Function Key  #8' get aLocalVars[ L_F8 ] pict FUNC_PICT
+@ 11,42 get aLocalVars[ L_F8N ] // pict '!!!!!!!!!'
 @ 11,55 get aLocalVars[ L_F8MARGIN ] pict '999.99'
-@ 12,04 say 'Function Key #9' get aLocalVars[ L_F9 ] pict FUNC_PICT
-@ 12,42 get aLocalVars[ L_F9N ] pict '!!!!!!!!!'
+@ 12,04 say 'Function Key  #9' get aLocalVars[ L_F9 ] pict FUNC_PICT
+@ 12,42 get aLocalVars[ L_F9N ] // pict '!!!!!!!!!'
 @ 12,55 get aLocalVars[ L_F9MARGIN ] pict '999.99'
 @ 13,04 say 'Function Key #10'get aLocalVars[ L_F10 ] pict FUNC_PICT
-@ 13,42 get aLocalVars[ L_F10N ] pict '!!!!!!!!!'
+@ 13,42 get aLocalVars[ L_F10N ] // pict '!!!!!!!!!'
 @ 13,55 get aLocalVars[ L_F10MARGIN ] pict '999.99'
 Read
 
@@ -435,7 +435,8 @@ if Secure( X_SUPERVISOR )
  @ 03,26 say '  Default Min Stock' get aGlobalVars[ B_REORDQTY ] pict '9'
  @ 04,26 say 'Items are Firm Sale' get aGlobalVars[ B_SALERET ] pict 'Y'
  @ 05,26 say '            Beep On' get aGlobalVars[ B_BELLS ] pict 'Y'
- @ 06,26 say 'Sales Period Length' get aGlobalVars[ B_PERLEN ] pict '999'
+ Highlight( 6, 30, '', 'Misc' )
+ @ 07,26 say 'Sales Period Length' get aGlobalVars[ B_PERLEN ] pict '999'
  @ 08,26 say '     GRN Sort Order' get aGlobalVars[ B_NEWSORT ] pict '!' valid aGlobalVars[ B_NEWSORT ] $ 'TN'
  @ 09,26 say ' Balance BF Debtors' get aGlobalVars[ B_OPENITEM ] pict 'Y'
  @ 10,26 say 'Balance BF Creditor' get aGlobalVars[ B_OPENCRED ] pict 'Y'
@@ -471,12 +472,12 @@ if Secure( X_SUPERVISOR )
  //@ 02,03 say '          Branch Code' get aGlobalVars[ B_BRANCH ] pict '@!' valid( len( trim( aGlobalVars[ B_BRANCH ] ) ) = BRANCH_CODE_LEN )
 // @ 09,03 say '     Barcode Label L1' get aGlobalVars[ B_BARLINE1 ] pict 'XXXXXXXXXXXXXXXXXXXX'
 // @ 10,03 say '     Barcode Label L2' get aGlobalVars[ B_BARLINE2 ] pict 'XXXXXXXXXXXXXXXXXXXX'
- @ 11,03 say 'Def Spec Order Report' get aGlobalVars[ B_SPECCOMM ] pict '!XXXXXXXXXXXXXXXXXXXXXXXXX'
- @ 12,03 say '   Default Po Comment' get aGlobalVars[ B_POINST ] pict '!XXXXXXXXXXXXXXXXX'
- @ 13,03 say '     Docket Head Ln 1' get aGlobalVars[ B_DOCKLN1 ] pict 'XXXXXXXXXXXXXXXXXXXX'
- @ 14,03 say '     Docket Head Ln 2' get aGlobalVars[ B_DOCKLN2 ] pict 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
- @ 15,03 say '        Docket Footer' get aGlobalVars[ B_GREET ] pict '@S40'
- @ 17,03 say '             GST Rate' get aGlobalVars[ B_GSTRATE ] pict '99.9'
+ @ 11,03 say 'Special Order Comments' get aGlobalVars[ B_SPECCOMM ] pict '!XXXXXXXXXXXXXXXXXXXXXXXXX'
+ @ 12,03 say '    Default Po Comment' get aGlobalVars[ B_POINST ] pict '!XXXXXXXXXXXXXXXXX'
+ @ 13,03 say '      Docket Head Ln 1' get aGlobalVars[ B_DOCKLN1 ] pict 'XXXXXXXXXXXXXXXXXXXX'
+ @ 14,03 say '      Docket Head Ln 2' get aGlobalVars[ B_DOCKLN2 ] pict 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+ @ 15,03 say '         Docket Footer' get aGlobalVars[ B_GREET ] pict '@S40'
+ @ 17,03 say '              GST Rate' get aGlobalVars[ B_GSTRATE ] pict '99.9'
 
  oksf10 := setkey( K_SH_F10, { || SetBranchCode( aGlobalVars ) } )
 
@@ -651,7 +652,7 @@ if Netuse( 'exchrate' )
  oTBrowse:HeadSep := HEADSEP
  oTBrowse:ColSep := COLSEP
  oTBrowse:addcolumn( tbcolumnnew( "Code", { || exchrate->code } ))
- oTBrowse:addcolumn( tbcolumnnew( "Name", { || exchrate->name } ))
+ oTBrowse:addcolumn( tbcolumnnew( "Name", { || substr( exchrate->name, 1, 20 ) } ))
  oTBrowse:addcolumn( tbcolumnnew( "Rate", { || exchrate->rate } ))
  dbgotop()
  while TRUE
@@ -668,7 +669,7 @@ if Netuse( 'exchrate' )
     Build_help( aHelpLines )
 
    case key == K_ESC .or. key == K_END
-    exit
+    exit 
 
    case key == K_DEL
     if Isready( 12,,'Ok to delete '+trim( exchrate->name )+' from file')
