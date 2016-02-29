@@ -21,6 +21,7 @@ local mtrantype, mCustHistFlag, tax_exempt, retflag, specflag, qtyflag, discdone
 local nQuantity, mmasterprice, hasdisc, nRowNum, mFinalTot, nSellPrice, msale_type, mCustKey
 local mstype, mNoDiscTot
 local getlist := {}
+local sPrompt
 
 
 
@@ -291,7 +292,7 @@ while mgo
       @ nRowNum,62 say nSellPrice * nQuantity pict '99999.99'
 
      endif
-     if !hdpos .and. master->onhand - nQuantity < -100
+     if !hdpos .and. master->onhand - nQuantity <= MAXNEGSTOCK
       Error( "Lower Limit for Negative Stock exceeded", 12 )
       SysAudit( "LowLim" + master->id )
 

@@ -558,7 +558,7 @@ else
 
 endif
 
-inkey( erwait )
+inkey( erwait, INKEY_ALL )
 
 Syscolor( 1 )           
 Box_Restore( sScreen )
@@ -1437,7 +1437,7 @@ return nil
 
 function line_clear ( line_no )
 @ line_no,0 say space(79+1)
-return ""
+return "" 
 
 *
 
@@ -1465,7 +1465,7 @@ case p_colour = C_BRIGHT
  setcolor( 'w+/' + C_BACKGROUND + ', w+' )
 
 case p_colour = C_MAUVE    // 4
- setcolor( 'w/rb,w+/r,,,w/r', 'w+' )
+ setcolor( 'w/rb,w+/r,w/rb,w/rb,w/rb' )
 
 case p_colour = C_GREY     // 5
  setcolor( 'w+/w', 'w+' )
@@ -1477,7 +1477,7 @@ case p_colour = C_GREEN    // 7
  setcolor( 'w+/g', 'w+' )
 
 case p_colour = C_CYAN     // 8
- setcolor( 'w/bg+,w+/gr,,,bg+/bg', 'w+' )
+ setcolor( 'w/bg+,w+/gr,,,bg+/bg' )
 
 endcase
 

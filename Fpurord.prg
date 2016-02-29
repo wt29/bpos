@@ -108,6 +108,7 @@ while TRUE
    Heading( 'Select Po Number Sequence' )
    aArray := { Bvars( B_PO1NAME ), Bvars( B_PO2NAME ), Bvars( B_PO3NAME ), Bvars( B_PO4NAME ), Bvars( B_PO5NAME ) } 
    mscr := Box_Save( 07, 10, 13, 23 )
+   @ 6, 12 say "<PO Number Seq>"
    mseq := Achoice( 08, 11, 12, 22, aArray )
    Box_Restore( mscr )
 
@@ -680,7 +681,7 @@ procedure fpoadj ( lalias, halias )
 
 */
 
-local mscr:=Box_Save( 08, 02, 13, 77 , C_GREY ), getlist:={}
+local mscr:=Box_Save( 08, 02, 13, 77 , C_MAUVE ), getlist:={}
 local mcomments := master->comments, mstatus := master->status
 local mdate := ( lalias )->ship_date, mpocomm := ( lalias )->comment
 local mqty := ( lalias)->qty, oldqty
@@ -731,7 +732,7 @@ procedure poprint ( msupp )
 
 local mpo, choice, getlist:={}, msummary, mnum, tscr
 local mcost, msell, mqty, mtcost, mtsell, mtqty, apo, indisp, mscr, aHelpLines
-local element, mkey, mtname, aArray, oldscr:=Box_Save(), farr
+local element, mkey, mtname, aArray, oldscr:=Box_Save(), aReport
 
 memvar mdate, mrpthead, mbackord, msuppx
 
@@ -749,36 +750,36 @@ while TRUE
  aadd( aArray, { 'Value', 'Value Orders Outstanding' } )
  choice := MenuGen( aArray, 08, 19, 'Reports' )
 
- farr := {}
+ aReport := {}
  if choice = 3 .or. choice = 4
-  aadd( farr,{'pohead->supp_code','Supp;Code',SUPP_CODE_LEN,0,FALSE})
+  aadd( aReport,{'pohead->supp_code','Supp;Code',SUPP_CODE_LEN,0,FALSE})
  endif 
- aadd( farr,{'idcheck(poline->id)','id',13,0,FALSE})
- aadd( farr,{'left(master->desc,20)','Desc',20,0,FALSE})
- aadd( farr,{'left(master->alt_desc,15)','Alt Desc',15,0,FALSE})
- aadd( farr,{'pohead->date_ord','Date of;Order',8,0,FALSE})
+ aadd( aReport,{'idcheck(poline->id)','id',13,0,FALSE})
+ aadd( aReport,{'left(master->desc,20)','Desc',20,0,FALSE})
+ aadd( aReport,{'left(master->alt_desc,15)','Alt Desc',15,0,FALSE})
+ aadd( aReport,{'pohead->date_ord','Date of;Order',8,0,FALSE})
  if choice = 5 .or. choice = 6
-  aadd( farr,{'poline->date_bord','Date of;Back Ord',8,0,FALSE})
-  aadd( farr,{'poline->qty_ord','Qty;Order',5,0,TRUE})
+  aadd( aReport,{'poline->date_bord','Date of;Back Ord',8,0,FALSE})
+  aadd( aReport,{'poline->qty_ord','Qty;Order',5,0,TRUE})
  endif
  if choice = 3 .or. choice = 4
-  aadd( farr,{'poline->qty','Qty;Ord.',5,0,FALSE})
+  aadd( aReport,{'poline->qty','Qty;Ord.',5,0,FALSE})
  endif
  if choice = 5 .or. choice = 6
-  aadd( farr,{'poline->qty',"Qty on ;B'Order",7,0,TRUE})
+  aadd( aReport,{'poline->qty',"Qty on ;B'Order",7,0,TRUE})
  endif
- aadd( farr,{'master->cost_price','Last;Inv Cost',8,2,FALSE})
+ aadd( aReport,{'master->cost_price','Last;Inv Cost',8,2,FALSE})
  if choice = 5 .or. choice = 6
-  aadd( farr,{'master->cost_price*(poline->qty_ord-poline->qty)','Inv Cost;Extended',10,2,TRUE})
+  aadd( aReport,{'master->cost_price*(poline->qty_ord-poline->qty)','Inv Cost;Extended',10,2,TRUE})
  else 
-  aadd( farr,{'poline->qty*master->cost_price','Inv Cost;Extended',8,2,TRUE})
+  aadd( aReport,{'poline->qty*master->cost_price','Inv Cost;Extended',8,2,TRUE})
  endif 
- aadd( farr,{'master->retail','Current; R.R.P.',7,2,FALSE})
+ aadd( aReport,{'master->retail','Current; R.R.P.',7,2,FALSE})
  if choice = 5 .or. choice = 6
-  aadd( farr,{'master->retail*(poline->qty_ord-poline->qty)','Current;RRP Ext',10,2,TRUE})
+  aadd( aReport,{'master->retail*(poline->qty_ord-poline->qty)','Current;RRP Ext',10,2,TRUE})
  else 
-  aadd( farr,{'master->sell_price','Sell;Price',7,2,TRUE})
-  aadd( farr,{'poline->comment','Purchase Order;Comments',15,0,FALSE})
+  aadd( aReport,{'master->sell_price','Sell;Price',7,2,TRUE})
+  aadd( aReport,{'poline->comment','Purchase Order;Comments',15,0,FALSE})
  endif
 
  do case
@@ -840,7 +841,7 @@ while TRUE
     + if( msupp = '*', 'All Suppliers', Lookitup( "supplier", msupp ) )
     
 
-   Reporter(farr,mrpthead, 'pohead->supp_code','"Supplier -> "+pohead->supp_code',;
+   Reporter(aReport,mrpthead, 'pohead->supp_code','"Supplier -> "+pohead->supp_code',;
                  'number','"Purchase Order No -> "+str(number)',msummary,;
                  '( pohead->date_ord < mdate + 1 ) .and. if( !mbackord, .t., back_ord )', ;
                  'if( msuppx = "*", .t., pohead->supp_code = msuppx)' )

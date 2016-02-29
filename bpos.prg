@@ -36,9 +36,9 @@ local cSysPath
 
  WVW_SetFont(,"Lucida Console",28,-12)
  //WVT_GTGetFont("Lucida Console",28,-12)
- //  WVW_SBcreate( 0 )
- //  WVW_SBaddPart( 0, '20', 20, 0, .t. )
- //  WVW_SBSetText(,,'Hello' )
+   WVW_SBcreate( 0 )
+   WVW_SBaddPart( 0, '20', 20, 0, .t. )
+   WVW_SBSetText(,,'Hello' )
  //wvw_showwindow()
  //wait
 
@@ -205,7 +205,7 @@ while TRUE                                      // Main Menu Loop
  @ 03, 18 prompt 'Purchasing' message line_clear( 24 ) + 'Purchase and Returns'
  @ 03, 34 prompt '  Sales   ' message line_clear( 24 ) + 'Sales Related Activities'
  @ 03, 50 prompt ' Utility  ' message line_clear( 24 ) + 'Utility Functions, Pack, Index'
- @ 03, 69 prompt ' Modules  ' message line_clear( 24 ) + 'Extra Modules / Accounting Operations'
+ @ 03, 65 prompt ' Account  ' message line_clear( 24 ) + 'Accounting Operations'
  line_clear( 24 )
 
  Syscolor( C_NORMAL )

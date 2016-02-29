@@ -274,7 +274,8 @@ enddo
 
 // Try to save the error locally
 
-nHandle = HB_FTempCreate( OddVars( SYSPATH ) + 'errors' )
+// nHandle = HB_FTempCreate( OddVars( SYSPATH ) + 'errors' )
+nHandle = FCreate( OddVars( SYSPATH ) + 'errors\' + strTran( time(), ':' ) + strTran( dtoc( date() ), "/" )  +'.log' )
 for x = 1 to len( aErrors )
    Fwrite( nHandle, aErrors[ x ] + CRLF )
 

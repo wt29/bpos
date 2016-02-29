@@ -37,7 +37,7 @@ if Master_use()
     Box_Save( 2, 08, 15, 72 )
     Heading('Print Extra Barcodes')
     sID := space( ID_ENQ_LEN )
-    @ 3,10 say 'Scan Code or Enter ID' + ID_DESC get sID pict '@!'
+    @ 3,10 say 'Scan Code or Enter ' + ID_DESC get sID pict '@!'
     read
     if !updated()
      exit
@@ -86,45 +86,52 @@ return TRUE
 
 *
 
-procedure code_print ( sBarCode, mqty )
+procedure code_print ( sBarcode, mqty )
 
-local mstr := '', x
-sBarCode := trim( sBarCode )
+local x, sString := ''
+sBarcode := trim( sBarcode )
 
 set console off
 set print on
 
 for x = 1 to mqty
 
- mstr += '^XA' + CRLF
- mstr += '^PW250' + CRLF
- mstr += '^FO10, 18' + CRLF
- mstr += '^ABN,25,15' + CRLF
- mstr += '^FD' + trim( BVars( B_NAME ) ) + CRLF
- mstr += '^FS' + CRLF
- mstr += '^FO10,45' + CRLF
+ sString += '^XA' + CRLF
+ sString += '^PW250' + CRLF
+ sString += '^FO10, 18' + CRLF
+ sString += '^ABN,30,15' + CRLF
+ sString += '^FD' + trim( BVars( B_NAME ) ) + CRLF
+ sString += '^FS' + CRLF
+ sString += '^FO10,55' + CRLF
  if len( trim( sBarcode ) ) >= 12
-  mstr += '^BEN,50,Y,N' + CRLF
-  mstr += '^FD' + left( sBarcode, 12 ) + CRLF
+  sString += '^BEN,50,Y,N' + CRLF
+  sString += '^FD' + left( sBarcode, 12 ) + CRLF
 
  else
 #ifdef THE_LOOK
-  mstr += '^B2N,40,Y,N,N' + CRLF
+  sString += '^B2N,40,Y,N,N' + CRLF
 #else
-  mstr += '^B3N,N,40,Y,N' + CRLF
+  sString += '^B3N,N,60,Y,N' + CRLF
 #endif
-  mstr += '^FD' + trim( sBarcode ) + CRLF
+  sString += '^FD' + trim( sBarcode ) + CRLF
 
  endif
- mstr += '^FS' + CRLF
- mstr += '^FO10,115' + CRLF
- mstr += '^ADN,30,25' + CRLF
- mstr += '^FD$' + ltrim( ns( master->sell_price, 10, 2 ) ) + CRLF
- mstr += '^XZ' + CRLF
+ // Print Price
+ sString += '^FS' + CRLF
+ sString += '^FO10,145' + CRLF
+ sString += '^ADN,30,25' + CRLF
+ sString += '^FD$' + ltrim( ns( master->sell_price, 10, 2 ) ) + CRLF
+ // Print Description
+ sString += '^FS' + CRLF
+ sString += '^FO10,190' + CRLF
+ sString += '^ADN,12,12' + CRLF
+ sString += '^FD' + trim( master->desc ) + CRLF
+ 
+ sString += '^XZ' + CRLF
 
 next x
 
-? mStr
+? sString
 
 set console on
 set print off

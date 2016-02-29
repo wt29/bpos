@@ -23,7 +23,7 @@ v1.24 - Current Sales File print
 
 #define __GTWVW__
 
-#define BUILD_NO "1.25.0"
+#define BUILD_NO "1.25.1"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
 #define DEVELOPER_FAX "+61 2 4751 8479"
 #define SUPPORT_FAX "No Number - use email"
@@ -45,7 +45,7 @@ v1.24 - Current Sales File print
  #define BPOSCUST "Lyttleton Stores"
  #define EPSON
  #define MUST_USE_QTY
- #define QTY_PICT "999.99"
+ #define QTY_PICT "999.999"
  #define QTY_LEN 6
  #define QTY_DEC 2   
  
@@ -75,7 +75,6 @@ v1.24 - Current Sales File print
 
 #endif
 
-
 #ifdef IS_BOOKSHOP
  #define STORETYPE 'Bookshop'
  #define STORENAMEDESC 'Bookshop'
@@ -92,8 +91,8 @@ v1.24 - Current Sales File print
  #define STORETYPE 'Store'
  #define STORENAMEDESC 'Store Name'
  #define ITEM_DESC 'Item'
- #define PLU_DESC 'PLU'
- #define ID_DESC 'Code'
+ #define PLU_DESC 'Item ID'
+ #define ID_DESC 'Item ID'
  #define DESC_DESC 'Description'
  #define ALT_DESC '2nd Descr.'
  #define BRAND_DESC 'Brand'
@@ -104,6 +103,7 @@ v1.24 - Current Sales File print
 
 #define MEMO_EXT 'fpt'
 #define NEW_DBF_EXT '.bps'
+#define INDEX_EXT '.cdx' 
 
 #define FORM_A4 9
 
@@ -342,6 +342,11 @@ v1.24 - Current Sales File print
 
 #endif
 
+#ifndef CATEGORY_CODE_LEN
+ #define CATEGORY_CODE_LEN 6
+
+#endif
+
 #ifndef SALES_CODE_LEN
  #define SALES_CODE_LEN 2
 
@@ -362,7 +367,7 @@ v1.24 - Current Sales File print
 #endif
 
 #ifndef MAXNEGSTOCK    // This is how far we will let negative stock go - used in invoicing
- #define MAXNEGSTOCK -999
+ #define MAXNEGSTOCK -99
 
 #endif
  
@@ -395,13 +400,12 @@ v1.24 - Current Sales File print
 
 #endif
  
- 
 #ifndef CURRENCY
  #define CURRENCY 'AUS$'
 
 #endif
  
-// Some defines for easy handling of index relations
+// Some defines for easy handling of index relation
 #define NATURAL         ''
 #define BY_ID           'ID'
 #define BY_DESC         'desc'

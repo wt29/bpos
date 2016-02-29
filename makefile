@@ -1,6 +1,12 @@
+#BCC
 VERSION=BCB.01
-CC_DIR = C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC
-HB_DIR = c:\develop\xharbour\1.20
+!ifndef CC_DIR
+CC_DIR = $(MAKE_DIR)
+!endif
+
+!ifndef HB_DIR
+HB_DIR = $(HARBOUR_DIR)
+!endif
  
 RECURSE= NO 
  
@@ -13,99 +19,78 @@ WARNINGLEVEL =  0
 USERDEFINE = 
 USERINCLUDE = 
 USERLIBS = 
-EDITOR = edit
-GTWVW = YES
+EDITOR = notepad
+GTWVW = 
+CGI = NO
 GUI = YES
 MT = NO
-SRC09 = 
-CF = CFiles
-PROJECT = bpos.exe $(PR)
-
-PRGFILES = bpos.prg proclib.prg Setupdbf.prg \
- acme.prg Apcheque.prg Apeom.prg Apremit.prg Aprep.prg Aptran.prg Areom.prg Arrep.prg Arstat.prg Artran.prg \
- Dpurord.prg Errorsys.prg Fpurord.prg Invforms.prg \
- Maincate.prg Maincust.prg Maindept.prg Mainsupp.prg Mainitem.prg \
- Receive.prg Reclist.prg Recpost.prg Returns.prg \
- Utilarch.prg Utilback.prg Utilcond.prg Utillabe.prg Utilpack.prg Utilsppa.prg Utilstoc.prg \
- s_appr.prg s_arch.prg s_cash.prg s_daily.prg s_inq1.prg s_inq2.prg s_inv1.prg s_inv2.prg s_layb.prg s_repo.prg s_spec.prg \
- PrintFunc.prg s_quote.prg
-
-CFILES = bpos.c proclib.c setupdbf.c\
- acme.c Apcheque.c Apeom.c Apremit.c Aprep.c Aptran.c Areom.c Arrep.c Arstat.c Artran.c \
- Dpurord.c Errorsys.c Invforms.c \
- Maincate.c Maincust.c Maindept.c Mainsupp.c Mainitem.c \
- Fpurord.c Purckit.c Receive.c Reclist.c Recpost.c Returns.c\
- Utilarch.c Utilback.c Utilcond.c Utillabe.c Utilpack.c Utilsppa.c Utilstoc.c \
- s_appr.c s_arch.c s_cash.c s_daily.c s_inq1.c s_inq2.c s_inv1.c s_inv2.c s_layb.c s_repo.c s_spec.c \
- PrintFunc.c s_quote.c
-
-OBJFILES = bpos.obj proclib.obj Setupdbf.obj \
- acme.obj Apcheque.obj Apeom.obj Apremit.obj Aprep.obj Aptran.obj Areom.obj Arrep.obj Arstat.obj Artran.obj \
- Dpurord.obj Errorsys.obj Fpurord.obj Invforms.obj \
- Maincate.obj Maincust.obj Maindept.obj Mainsupp.obj Mainitem.obj \
- Receive.obj Reclist.obj Recpost.obj Returns.obj \
- Utilarch.obj Utilback.obj Utilcond.obj Utillabe.obj Utilpack.obj Utilsppa.obj Utilstoc.obj \
- s_appr.obj s_arch.obj s_cash.obj s_daily.obj s_inq1.obj s_inq2.obj s_inv1.obj s_inv2.obj s_layb.obj \
- s_repo.obj s_spec.obj PrintFunc.obj s_quote.obj
-
-
-# HFILES = bpos.ch
-
-RESFILES = bpos.res
-RESDEPEN = 
+SRC04 = obj 
+PROJECT = bpos.exe $(PR) 
+OBJFILES = $(SRC04)\BPOS.obj $(SRC04)\ACME.obj $(SRC04)\APCHEQUE.obj $(SRC04)\APEOM.obj $(SRC04)\APREMIT.obj //
+ $(SRC04)\APREP.obj $(SRC04)\APTRAN.obj $(SRC04)\AREOM.obj $(SRC04)\ARREP.obj $(SRC04)\ARSTAT.obj //
+ $(SRC04)\ARTRAN.obj $(SRC04)\DPURORD.obj $(SRC04)\ERRORSYS.obj $(SRC04)\FPURORD.obj $(SRC04)\INVFORMS.obj //
+ $(SRC04)\MAINCATE.obj $(SRC04)\MAINCUST.obj $(SRC04)\MAINDEPT.obj $(SRC04)\MAINITEM.obj $(SRC04)\MAINSUPP.obj //
+ $(SRC04)\PRINTFUNC.obj $(SRC04)\PROCLIB.obj $(SRC04)\PURCKIT.obj $(SRC04)\RECEIVE.obj $(SRC04)\RECLIST.obj //
+ $(SRC04)\RECPOST.obj $(SRC04)\RETURNS.obj $(SRC04)\SETUPDBF.obj $(SRC04)\S_APPR.obj $(SRC04)\S_ARCH.obj //
+ $(SRC04)\S_CASH.obj $(SRC04)\S_DAILY.obj $(SRC04)\S_INQ1.obj $(SRC04)\S_INQ2.obj $(SRC04)\S_INV1.obj //
+ $(SRC04)\S_INV2.obj $(SRC04)\S_LAYB.obj $(SRC04)\S_QUOTE.obj $(SRC04)\S_REPO.obj $(SRC04)\S_SPEC.obj //
+ $(SRC04)\UTILARCH.obj $(SRC04)\UTILBACK.obj $(SRC04)\UTILCOND.obj $(SRC04)\UTILLABE.obj $(SRC04)\UTILPACK.obj //
+ $(SRC04)\UTILREPR.obj $(SRC04)\UTILSPPA.obj $(SRC04)\UTILSTOC.obj $(OB) 
+PRGFILES = BPOS.PRG ACME.PRG APCHEQUE.PRG APEOM.PRG APREMIT.PRG //
+ APREP.PRG APTRAN.PRG AREOM.PRG ARREP.PRG ARSTAT.PRG //
+ ARTRAN.PRG DPURORD.PRG ERRORSYS.PRG FPURORD.PRG INVFORMS.PRG //
+ MAINCATE.PRG MAINCUST.PRG MAINDEPT.PRG MAINITEM.PRG MAINSUPP.PRG //
+ PRINTFUNC.PRG PROCLIB.PRG PURCKIT.PRG RECEIVE.PRG RECLIST.PRG //
+ RECPOST.PRG RETURNS.PRG SETUPDBF.PRG S_APPR.PRG S_ARCH.PRG //
+ S_CASH.PRG S_DAILY.PRG S_INQ1.PRG S_INQ2.PRG S_INV1.PRG //
+ S_INV2.PRG S_LAYB.PRG S_QUOTE.PRG S_REPO.PRG S_SPEC.PRG //
+ UTILARCH.PRG UTILBACK.PRG UTILCOND.PRG UTILLABE.PRG UTILPACK.PRG //
+ UTILREPR.PRG UTILSPPA.PRG UTILSTOC.PRG $(PS) 
+OBJCFILES = $(OBC) 
+CFILES = $(CF)
+RESFILES = BPOS.RES
+RESDEPEN = BPOS.RES
 TOPMODULE = BPOS.PRG
-GTLIB = GTWVW.LIB
-HBLIBS = 
-
-HBLIBS = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib \
-         pcrepos.lib common.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib hbsix.lib hbzip.lib \
-         tip.lib debug.lib zlib.lib $(GTLIB)
-
-CLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comctl32.lib comdlg32.lib \
-        advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib mpr.lib \
-        uuid.lib vfw32.lib winmm.lib ws2_32.lib shell32.lib user32.lib winspool.lib \
-        ole32.lib oleaut32.lib ws2_32.lib kernel32.lib gdi32.lib comctl32.lib comdlg32.lib \
-        advapi32.lib
-
+LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib common.lib gtwvw.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib hbsix.lib zlib.lib
+#LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfcdx.lib common.lib gtwvw.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib zlib.lib
 EXTLIBFILES =
 DEFFILE = 
-HARBOURFLAGS = -w2 /b
-
-#CFLAGS = /c /MT /W3
-CFLAGS = /c /W3 /MT
-
-RFLAGS =
-LFLAGS= /NODEFAULTLIB:LIBC /NODEFAULTLIB:LIBC
-# LFLAGS = /Nodefaultlib:LIBCMT
-LFLAGS = $(LFLAGS) /MERGE:.CRT=.data
+HARBOURFLAGS = -w1
+CFLAG1 =  -OS $(SHELL)  $(CFLAGS) -d -c -L$(HB_DIR)\lib 
+CFLAG2 =  -I$(HB_DIR)\include;$(CC_DIR)\include
+RFLAGS = 
+LFLAGS = -L$(CC_DIR)\lib\obj;$(CC_DIR)\lib;$(HB_DIR)\lib -Gn -M -m -s -Tpe -x -aa
 IFLAGS = 
-
-LINKER = link
-.SUFFIXES: .c .obj .prg 
-
-ALLOBJ = $(OBJFILES) $(OBJCFILES)
+LINKER = ilink32
+ 
+ALLOBJ = c0w32.obj $(OBJFILES) $(OBJCFILES)
 ALLRES = $(RESDEPEN)
-ALLLIB = $(HBLIBS) $(CLIBS)
-
+ALLLIB = $(USERLIBS) $(LIBFILES) import32.lib cw32.lib
+.autodepend
+ 
 #DEPENDS
  
 #COMMANDS
-#{}.c{$(SRC09)}.obj:
-#.c{$(SRC09)}.obj:
-
-.c.obj:
- cl -I$(HB_DIR)\include $(CFLAGS) -Fo$* $**
-
-.prg.c:
- $(HB_DIR)\bin\harbour /D__EXPORT__ /n /I$(HB_DIR)\include $(HARBOURFLAGS) /gc $** -O$*
+.cpp.obj:
+$(CC_DIR)\BIN\bcc32 $(CFLAG1) $(CFLAG2) -o$* $**
  
-.rc.res:
- $(CC_DIR)\rc $(RFLAGS) $<
+.c.obj:
+$(CC_DIR)\BIN\bcc32 -I$(HB_DIR)\include $(CFLAG1) $(CFLAG2) -o$* $**
+ 
+.prg.obj:
+$(HB_DIR)\bin\harbour -D__EXPORT__ -n -go -I$(HB_DIR)\include $(HARBOURFLAGS) -o$* $**
+ 
+#.rc.res:
+# $(CC_DIR)\BIN\brcc32 $(RFLAGS) $<
  
 #BUILD
-#$(CFILES) $(RESDEPEN) $(DEFFILE)
-bpos.exe: $(PRGFILES) $(CFILES) $(OBJFILES) $(RESFILES)
-        link $(OBJFILES) $(HB_DIR)\obj\vc\mainwin.obj $(ALLLIB) $(RESFILES) /out:bpos.exe /map:bpos.map $(LFLAGS)
-
-#link $(OBJFILES) $(ALLLIB) /out:bpos.exe /map:bpos.map $(LFLAGS)
-     
+ 
+$(PROJECT): $(CFILES) $(OBJFILES) $(RESDEPEN) $(DEFFILE)
+    $(CC_DIR)\BIN\$(LINKER) @&&!  
+    $(LFLAGS) +
+    $(ALLOBJ), +
+    $(PROJECT),, +
+    $(ALLLIB), +
+    $(DEFFILE), +
+    $(ALLRES) 
+!

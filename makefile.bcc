@@ -48,13 +48,14 @@ PRGFILES = BPOS.PRG ACME.PRG APCHEQUE.PRG APEOM.PRG APREMIT.PRG //
  UTILREPR.PRG UTILSPPA.PRG UTILSTOC.PRG $(PS) 
 OBJCFILES = $(OBC) 
 CFILES = $(CF)
-RESFILES = 
-RESDEPEN = 
+RESFILES = BPOS.RES
+RESDEPEN = BPOS.RES
 TOPMODULE = BPOS.PRG
-LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib common.lib gtwvw.lib  codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib hbsix.lib zlib.lib
+LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib common.lib gtwvw.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib hbsix.lib zlib.lib
+#LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfcdx.lib common.lib gtwvw.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib zlib.lib
 EXTLIBFILES =
 DEFFILE = 
-HARBOURFLAGS =  -w0
+HARBOURFLAGS = -w1
 CFLAG1 =  -OS $(SHELL)  $(CFLAGS) -d -c -L$(HB_DIR)\lib 
 CFLAG2 =  -I$(HB_DIR)\include;$(CC_DIR)\include
 RFLAGS = 
@@ -79,8 +80,8 @@ $(CC_DIR)\BIN\bcc32 -I$(HB_DIR)\include $(CFLAG1) $(CFLAG2) -o$* $**
 .prg.obj:
 $(HB_DIR)\bin\harbour -D__EXPORT__ -n -go -I$(HB_DIR)\include $(HARBOURFLAGS) -o$* $**
  
-.rc.res:
-$(CC_DIR)\BIN\brcc32 $(RFLAGS) $<
+#.rc.res:
+# $(CC_DIR)\BIN\brcc32 $(RFLAGS) $<
  
 #BUILD
  
