@@ -590,7 +590,7 @@ while TRUE
 
         endif
         mscr := Box_Save( 7, 00, 10, 79 )
-        @ 07,03 say 'Desc ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Price ÄÄ DiscÄÄ Ord Supp Ä ExtendÄ %Ä Av'
+        @ 07,03 say 'Desc ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ?Price ÄÄ DiscÄÄ Ord Supp ?Extend?%?Av'
  #ifndef NO_NETT_DISCOUNTS
         @ 8,01 say substr( master->desc, 1, 38 ) 
  #else
@@ -1954,6 +1954,8 @@ endif
 
 return nil
 
+/*
+
 static function MakeDocketLines( cName, aItems, lQtyFlag )
   // Puts together lines for docket printing!
   // cName := customer name
@@ -2001,3 +2003,4 @@ static function Items( )
 
 return( aItems)
 
+*/

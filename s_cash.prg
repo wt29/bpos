@@ -1,39 +1,42 @@
 /*
-   SaleCash.prg - Cash Sales
-   Last change:  APG  14 Sep 2004   10:03 pm
 
+ SaleCash.prg - Cash Sales
 
-   Last change:  TG   29 Apr 2011    4:13 pm
-*/
+ Last change:  TG   29 Apr 2011    4:13 pm
+
+ */
 
 #include "bpos.ch"
 
 static numtt, tt_types, tt_names, tt_cdflag, fkeys, lastfkeyhit:=0, price_conf, round_amt := 0
 static aDocket := {}, lPrintDocket
 
-function S_cashSales ( hdpos )
+memvar nTotalCost, nTotalSale, nTotalSalesTax, nTotalFullPrice
 
-local mgo:=FALSE, lMain, mgross, nCostPrice, nSubTotal, nTotalCost, firstpass, spec_done
+function S_CashSales ( hdpos )
+
+local lMainLoop:=FALSE, lMain, nFullPrice, nCostPrice, nSubTotal, firstpass, spec_done
 local mspec_no, nSpecialDeposit, sID, nDiscountValue, nTaxValue, mtran_qty, disc_val, mtot
-local sFunKey3, sFunKey4, okF1, okf5, okf6, okf7, okf8, okf9, okf10, okaF1, okcf1, okcf2, msave, oksf10, oksf12, mscr
-local repl_rec, nItemTax, mCustName, x
+local sFunKey3, sFunKey4, bKeyF1, bKeyF5, bKeyF6, bKeyF7, bKeyF8, bKeyF9, bKeyF10, bKeyF12
+local bKeyAltF1, bKeyCtrlf1, bKeyCtrlf2, msave, bKeyShiftF10, bKeyShiftF12, cScreen
+local nReplRec, nItemTax, mCustName, x
 local mtrantype, mCustHistFlag, tax_exempt, retflag, specflag, qtyflag, discdone
-local nQuantity, mmasterprice, hasdisc, nRowNum, mFinalTot, nSellPrice, msale_type, mCustKey
+local nQuantity, mmasterprice, hasdisc, nRowNum, nFinalTot, nSellPrice, msale_type, mCustKey
 local mstype, mNoDiscTot
 local getlist := {}
 local sPrompt
 
-
+private nTotalCost, nTotalSale, nTotalSalesTax, nTotalFullPrice
 
 default hdpos to FALSE
 
 if Master_use()
- mgo := Netuse( 'sales' ) 
- repl_rec := lastrec()
+ lMainLoop := Netuse( 'sales' ) 
+ nReplRec := lastrec()
 
 endif
 
-if mgo
+if lMainLoop
  if select( "cashtemp" ) != 0
   cashtemp->( dbclosearea() )
  endif
@@ -41,21 +44,23 @@ if mgo
  copy stru to ( Oddvars( TEMPFILE ) )
  if !Netuse( Oddvars( TEMPFILE ), EXCLUSIVE, 10, "cashtemp" ) 
   Error( "Cannot open " + Oddvars( TEMPFILE ), 12 )
-  mgo := FALSE
+  lMainLoop := FALSE
 
+ else
+  set relation to cashtemp->id into master
+  
  endif
 
 endif
 
 price_conf := TRUE
 
-while mgo
+while lMainLoop
 
  lMain := TRUE
  firstpass := TRUE
 
  while lMain
-
   LastFKeyHit := 0
   retflag := FALSE
   qtyflag := FALSE
@@ -69,12 +74,11 @@ while mgo
   round_amt := 0
   
   if firstpass
-
    cls
 //   Print_find( "Docket" )
    Dock_Head()   // Set up the header and clear docket array
    nTaxValue := 0
-   mgross := 0
+   nFullPrice := 0
    nTotalCost := 0
    nSubTotal := 0
    mNoDiscTot := 0         // The total sales proportion that is not discountable
@@ -87,46 +91,56 @@ while mgo
    mTranType := 'C/S'
    mSType := '20'
 
-   okf1 := setkey( K_F1, { || CSalesHelp(1) } )
-   oksf10 := setkey( K_SH_F10, { || RePrintDock() } )
-   oksf12 := setkey( K_SH_F12, { || ConToggle() } )
+   bKeyF1 := setkey( K_F1, { || CSalesHelp(1) } )
+   bKeyShiftF10 := setkey( K_SH_F10, { || RePrintDock() } )
+   bKeyShiftF12 := setkey( K_SH_F12, { || ConToggle() } )
+   bKeyCtrlF1 := setkey( K_CTRL_F1, { || Custhist( @mCustName, @mCustHistFlag, @mCustKey ) } )
 
    Heading( 'Cash Sales' )
    Highlight( 01, 01, 'Last Tran #', Ns( Lvars( L_CUST_NO ), 4 ) )
-   //  DocketStatus()
+   // DocketStatus()
    // Highlight( 01, 60, 'Docket is ' , if( Lvars( L_DOCKET ), 'On', 'Off' ) )
 
    @ 02,67 say if( price_conf,'','No Confirm' )
 #ifdef MUST_USE_QTY   
-   HighLight( 4, 6, "", 'Desc                                     Price     Qty   Extend' )
+   HighLight( 4, 6, "", 'Item Desc                                Price     Qty   Extend' )
    nQuantity := 0
 #else
-   Highlight( 4, 6, '', '  Desc                                  Price' )
+   Highlight( 4, 6, '', 'Item Desc                                Price' )
 
 #endif
-   // okcf2 := setkey( K_CTRL_F2, { || SetSalesTax( @tax_exempt ) } )
+   // bKeyCtrlf2 := setkey( K_CTRL_F2, { || SetSalesTax( @tax_exempt ) } )
    msale_type := ''
-   okcf1 := setkey( K_CTRL_F1, { || Custhist( @mCustName, @mCustHistFlag, @mCustKey ) } )
 
-  endif
+  endif   //  FirstPass
+
+  bKeyF10 := setkey( K_F12, { || EditCashSale() } )
+  bKeyAltF1 := setkey( K_ALT_F1, { || Is_Special( @mspec_no, retflag, @specflag, nRowNum ) } )
 
   sID := space( ID_ENQ_LEN )
-  okaf1 := setkey( K_ALT_F1, { || Is_Special( @mspec_no, retflag, @specflag, nRowNum ) } )
   sPrompt := 'Scan Barcode / Enter ' + ID_DESC
-  @ 02, ( maxcol() / 2 ) - ( len( sPrompt ) + ID_CODE_LEN ) / 2 say sPrompt get sID pict '@!'
+  @ 02, 10 say sPrompt get sID pict '@!'
+//  @ 02, ( maxcol() / 2 ) - ( len( sPrompt ) + ID_CODE_LEN ) / 2 say sPrompt get sID pict '@!'
   Fkon( nRowNum )
   read
   Fkoff( nRowNum )
 
-  setkey( K_ALT_F1, { || okaf1 } )
-  setkey( K_CTRL_F1, { || okcf1 } )
-  setkey( K_F1, { || okF1 } )
-//  setkey( K_CTRL_F2, { || okcf2 } )
+  setkey( K_ALT_F1, { || bKeyAltF1 } )
+  setkey( K_F12, { || bKeyF12 } )
+  
+   if firstpass
+    setkey( K_SH_F10, { || bKeyShiftF10 } )
+    setkey( K_SH_F12, { || bKeyShiftF12 } )
+    setkey( K_CTRL_F1, { || bKeyCtrlf1 } )
+    setkey( K_F1, { || bKeyF1 } )
+//  setkey( K_CTRL_F2, { || bKeyCtrlf2 } )
+ 
+   endif
 
   if !updated()
    if lastkey() = K_ESC
     if firstpass
-     mgo := FALSE
+     lMainLoop := FALSE
      exit
     else
      if Salevoid()
@@ -136,6 +150,7 @@ while mgo
     endif
    else
     Line_clear( 2 )
+	CalcTotalSale()
     lMain := FALSE
    endif
   else
@@ -145,17 +160,16 @@ while mgo
     mtot := 0
     mtrantype := 'EPP'
     mCustName := space( 20 )
-    mscr := Box_Save( 01, 38, 04, 77 )
+    cScreen := Box_Save( 01, 38, 04, 77 )
     @ 02,40 say 'Payout Amount' get mtot pict '9999.99' valid( if( mtot < 0, Secure( X_SALEVOID ), mtot < 9000 ) )
     @ 03,40 say 'Customer' get mCustName
     read
-    Box_Restore( mscr )
+    Box_Restore( cScreen )
     if mtot != 0
-     Dock_line( padr( if( mtot > 0, 'EFTPOS Payout', 'EFTPOS Decline' ), 31 );
-                + ' ' + str( mtot, 8, 2 ) )
+     Dock_line( padr( if( mtot > 0, 'EFTPOS Payout', 'EFTPOS Decline' ), 31 ) + ' ' + str( mtot, 8, 2 ) )
      firstpass = FALSE
      lMain := FALSE
-     nSubTotal := mgross := -mtot
+     nSubTotal := nFullPrice := -mtot
      loop
 
     endif
@@ -167,7 +181,7 @@ while mgo
 
    else
     Line_clear( nRowNum )
-    Line_clear( nRowNum+1 )
+//    Line_clear( nRowNum+1 )
     if specflag
      specflag := FALSE
      select special
@@ -184,11 +198,11 @@ while mgo
        specflag := TRUE
        nSpecialDeposit := special->deposit
        if nSpecialDeposit > 0
-        mscr := Box_Save( 04, 25, 06, 66 )
+        cScreen := Box_Save( 04, 25, 06, 66 )
         @ 5,26 say 'Deposit Amt to Refund' get nSpecialDeposit pict '9999.99';
                valid nSpecialDeposit <= special->deposit
         read
-        Box_Restore( mscr )
+        Box_Restore( cScreen )
        endif
       endif
      endif
@@ -201,7 +215,7 @@ while mgo
      Highlight( nRowNum, 55, "Less Deposit of", Ns( nSpecialDeposit, 6, 2 ) )
 
     endif
-    Poz( trim( master->desc ) + "$" + Ns( nSellPrice ) )
+    PoleDisplay( trim( master->desc ) + "$" + Ns( nSellPrice ) )
     @ nRowNum,06 say substr( master->desc, 1, 40 )
     if !hdpos
      @ nRowNum,76 say master->onhand pict '9999'
@@ -224,7 +238,7 @@ while mgo
     mMasterPrice := nSellPrice
 
     if price_conf
-     mscr := Box_Save( nRowNum+1, 3, nRowNum+10, 30, 5 )
+     cScreen := Box_Save( nRowNum+1, 3, nRowNum+10, 30, 5 )
      @ nRowNum+2,05 say '<F3> = Hold System'
      @ nRowNum+3,05 say '<F4> = '+str( Bvars( B_DISC1 ),5,2 )+'% Discount'
      @ nRowNum+4,05 say '<F5> = '+str( Bvars( B_DISC2 ),5,2 )+'% Discount'
@@ -237,16 +251,16 @@ while mgo
      @ nRowNum+9,05 say "<F10>=  Cust Returns"
      sFunKey3 := setkey( K_F3, { || Hold_em( FALSE ) } )
      sFunKey4 := setkey( K_F4, { || CashLineDisc( @nSellPrice, Bvars( B_DISC1 ), K_F4, @mMasterPrice, @discdone, nRowNum, nSpecialDeposit ) } )
-     okf5 := setkey( K_F5, { || CashLineDisc( @nSellPrice, Bvars( B_DISC2 ), K_F5, @mMasterPrice, @discdone, nRowNum, nSpecialDeposit ) } )
-     okf6 := setkey( K_F6, { || CashLineDisc( @nSellPrice, Bvars( B_DISC3 ), K_F6, @mMasterPrice, @discdone, nRowNum, nSpecialDeposit ) } )
-     okf7 := setkey( K_F7, { || CashLineDisc( @nSellPrice, Bvars( B_DISC4 ), K_F7, @mMasterPrice, @discdone, nRowNum, nSpecialDeposit ) } )
-     okf8 := setkey( K_F8, { || CashLineDisc( @nSellPrice, 0, K_F8, @mMasterPrice, @discdone, nRowNum ) } )
+     bKeyF5 := setkey( K_F5, { || CashLineDisc( @nSellPrice, Bvars( B_DISC2 ), K_F5, @mMasterPrice, @discdone, nRowNum, nSpecialDeposit ) } )
+     bKeyF6 := setkey( K_F6, { || CashLineDisc( @nSellPrice, Bvars( B_DISC3 ), K_F6, @mMasterPrice, @discdone, nRowNum, nSpecialDeposit ) } )
+     bKeyF7 := setkey( K_F7, { || CashLineDisc( @nSellPrice, Bvars( B_DISC4 ), K_F7, @mMasterPrice, @discdone, nRowNum, nSpecialDeposit ) } )
+     bKeyF8 := setkey( K_F8, { || CashLineDisc( @nSellPrice, 0, K_F8, @mMasterPrice, @discdone, nRowNum ) } )
 #ifndef MUST_USE_QTY 
-     okf9 := setkey( K_F9, { || F_qty( @qtyflag, specflag, @nQuantity, nRowNum ) } )
+     bKeyF9 := setkey( K_F9, { || F_qty( @qtyflag, specflag, @nQuantity, nRowNum ) } )
 #else
      nQuantity := 1
 #endif	 
-     okf10 := setkey( K_F10, { || F_ret( @retflag, nRowNum ) } )
+     bKeyF10 := setkey( K_F10, { || F_ret( @retflag, nRowNum ) } )
      syscolor( C_NORMAL )
      @ nRowNum,46 get nSellPrice pict PRICE_PICT ;
        valid( nSellPrice < 9000 .and. if( nSellPrice=0, nSpecialDeposit > 0 .or. Secure( X_SALEVOID ),TRUE ) )
@@ -258,15 +272,15 @@ while mgo
 
      setkey( K_F3, sFunKey3 )
      setkey( K_F4, sFunKey4 )
-     setkey( K_F5, okf5 )
-     setkey( K_F6, okf6 )
-     setkey( K_F7, okf7 )
-     setkey( K_F8, okf8 )
+     setkey( K_F5, bKeyF5 )
+     setkey( K_F6, bKeyF6 )
+     setkey( K_F7, bKeyF7 )
+     setkey( K_F8, bKeyF8 )
 #ifndef MUST_USE_QTY 
-     setkey( K_F9, okf9 )
+     setkey( K_F9, bKeyF9 )
 #endif
-     setkey( K_F10, okf10 )
-     Box_Restore( mscr )
+     setkey( K_F10, bKeyF10 )
+     Box_Restore( cScreen )
 
     else
      @ nRowNum,46 say nSellPrice pict PRICE_PICT 
@@ -305,10 +319,9 @@ while mgo
      if firstpass
       Lvars( L_CUST_NO, Custnum() )    // Increment the customer number
       Highlight( 01, 01, 'This Tran #', Ns( Lvars( L_CUST_NO ), 4 ) )
+	//  cScreen = Box_save( 05, 02, 23, 77 )
 
-//      @ 01,01 say 'This Tran #' + Ns( Lvars( L_CUST_NO ),4 )
-
-     endif
+	 endif
 
      firstpass := FALSE
      select cashtemp
@@ -367,51 +380,67 @@ while mgo
       Dock_line(  space( 12 )+' After Deposit Paid '+str( nSpecialDeposit, 8, 2 ) )
 
      endif
-     if nDiscountValue > 0
+
+	 if nDiscountValue > 0
       Dock_line(  space( 7 ) +'Inc Discount of '+str( nDiscountValue / ( mMasterPrice / 100 ), 4, 1 );
-       +'%  $-'+str( nDiscountValue*nQuantity, 8, 2 ) )
+       + '%  $-' + str( nDiscountValue*nQuantity, 8, 2 ) )
 
      endif
+
      mNoDiscTot += if( master->NoDisc, nSellPrice * nQuantity, 0 )
-     mgross    += mMasterPrice * nQuantity
-     nTotalCost  += nCostPrice * nQuantity
-     nSubTotal += nSellPrice * nQuantity
-     nTaxValue      += nItemTax * nQuantity
+     nFullPrice += mMasterPrice * nQuantity
+     // nTotalCost += nCostPrice * nQuantity
+     // nSubTotal += nSellPrice * nQuantity
+     // nTaxValue += nItemTax * nQuantity
 
-     if( nRowNum > 24 - 10, nRowNum := 5, nRowNum++ )
-      @ nRowNum,0 clear
-      @ nRowNum+1,37 say 'Sub Total        ' + str( nSubTotal, 7, 2 )
-      Poz( 'Sub Total$' + Ns( nSubTotal, 8, 2 ) )
+  	 DisplaySales()
+	 CalcTotalSale()
 
+	 // Highlight( 2, 60, 'Sub Total',  str( CalcTotalSale(), 7, 2 ) )
+
+	
+//     if nRowNum > 14
+//	  nRowNum := 5
+	
+//     else
+//	  nRowNum++ 
+	 
+//     endif	 
+//	 @ nRowNum,0 clear
+//	 @ nRowNum+1,37 say 'Sub Total        ' + str( nSubTotal, 7, 2 )
+//	 PoleDisplay( 'Sub Total$' + Ns( nSubTotal, 8, 2 ) )
+ 
     endif
    endif
   endif  // Updated()
  enddo
  if !firstpass
   hasdisc := NO
-  nSubTotal := Nocents( nSubTotal )
-  mFinalTot := nSubTotal
-  msave := Box_Save( nRowNum+1,3,nRowNum+7,30,4 )
+  nSubTotal := Nocents( nTotalSale )
+  nFinalTot := nSubTotal
+  msave := Box_Save( nRowNum+1,3,nRowNum+7,70,4 )
   @ nRowNum+2,05 say '<F4> = '+str( Bvars( B_DISC1 ), 5, 2 ) + '% Discount'
   @ nRowNum+3,05 say '<F5> = '+str( Bvars( B_DISC2 ), 5, 2 ) + '% Discount'
   @ nRowNum+4,05 say '<F6> = '+str( Bvars( B_DISC3 ), 5, 2 ) + '% Discount'
   @ nRowNum+5,05 say '<F7> = '+str( Bvars( B_DISC4 ), 5, 2 ) + '% Discount'
   @ nRowNum+6,05 say '<F8> = Add Your Own Disc'
-  syscolor( C_NORMAL )
-  sFunKey4 := setkey( K_F4, { || CashTotDisc( nRowNum, Bvars( B_DISC1 ), K_F4, @hasdisc, @mFinalTot ) } )
-  okf5 := setkey( K_F5, { || CashTotDisc( nRowNum, Bvars( B_DISC2 ), K_F5, @hasdisc, @mFinalTot ) } )
-  okf6 := setkey( K_F6, { || CashTotDisc( nRowNum, Bvars( B_DISC3 ), K_F6, @hasdisc, @mFinalTot ) } )
-  okf7 := setkey( K_F7, { || CashTotDisc( nRowNum, Bvars( B_DISC4 ), K_F7, @hasdisc, @mFinalTot ) } )
-  okf8 := setkey( K_F8, { || CashTotDisc( nRowNum, 0 , K_F8, @hasdisc, @mFinalTot ) } )
-  @ nRowNum+2,37 say 'Total Sale      ' get mFinalTot pict '9999.99';
-      valid( if( hasdisc, YES, mFinalTot = nSubTotal ) )
+//  syscolor( C_NORMAL )
+  sFunKey4 := setkey( K_F4, { || CashTotDisc( nRowNum, Bvars( B_DISC1 ), K_F4, @hasdisc, @nFinalTot ) } )
+  bKeyF5 := setkey( K_F5, { || CashTotDisc( nRowNum, Bvars( B_DISC2 ), K_F5, @hasdisc, @nFinalTot ) } )
+  bKeyF6 := setkey( K_F6, { || CashTotDisc( nRowNum, Bvars( B_DISC3 ), K_F6, @hasdisc, @nFinalTot ) } )
+  bKeyF7 := setkey( K_F7, { || CashTotDisc( nRowNum, Bvars( B_DISC4 ), K_F7, @hasdisc, @nFinalTot ) } )
+  bKeyF8 := setkey( K_F8, { || CashTotDisc( nRowNum, 0 , K_F8, @hasdisc, @nFinalTot ) } )
+  @ nRowNum+2, 46 say 'Total Sale' 
+  @ nRowNum+2, 57 get nFinalTot pict '9999.99' valid( if( hasdisc, YES, nFinalTot = nSubTotal ) )
   read
   Box_Restore( msave )
   setkey( K_F4, sFunKey4 )
-  setkey( K_F5, okf5 )
-  setkey( K_F6, okf6 )
-  setkey( K_F7, okf7 )
-  setkey( K_F8, okf8 )
+  setkey( K_F5, bKeyF5 )
+  setkey( K_F6, bKeyF6 )
+  setkey( K_F7, bKeyF7 )
+  setkey( K_F8, bKeyF8 )
+  syscolor( C_NORMAL )
+
   if lastkey() = K_ESC
    if Salevoid()
     loop
@@ -420,11 +449,11 @@ while mgo
 
   endif
 
-  Poz('Total Sale$' + Ns( mFinalTot, 8, 2 ) )
+  PoleDisplay('Total Sale$' + Ns( nFinalTot, 8, 2 ) )
 
   select cashtemp
-  if nSubTotal != mFinalTot  // Approportion Discounts
-   disc_val := 100 - Zero( mFinalTot, zero( nSubTotal, 100 ) )
+  if nSubTotal != nFinalTot  // Approportion Final Discounts to each item 
+   disc_val := 100 - Zero( nFinalTot, zero( nSubTotal, 100 ) )
    cashtemp->( dbgotop() )
    while !cashtemp->( eof() )
     if !empty( cashtemp->id )
@@ -439,12 +468,12 @@ while mgo
 
   endif
 
-  mtran_qty := if( mFinalTot >= 0, 1, -1 )
+  mtran_qty := if( nFinalTot >= 0, 1, -1 )
 
   Dock_line(  space( 16 ) + 'Total sale    ' + str( nSubTotal, 10, 2 ) )
 
-  if mFinalTot != nSubTotal
-   nDiscountValue := nSubTotal - mFinalTot
+  if nFinalTot != nSubTotal
+   nDiscountValue := nSubTotal - nFinalTot
    if nDiscountValue > 0
     Dock_line(  space( 5 ) + 'Total Discount of ' +Ns( ( nDiscountValue / ( nSubTotal / 100 ) ), 4, 1 ) + ;
        '%  $-' + str( nDiscountValue, 8, 2 ) )
@@ -453,7 +482,7 @@ while mgo
   endif
 
   lPrintDocket := FALSE
-  Tender( mFinalTot, mGross, nTaxValue, nTotalCost, mtran_qty, "cashtemp", mtrantype, nRowNum, mCustName, mNoDiscTot, mSType, @lPrintDocket )
+  Tender( nFinalTot, nFullPrice, nTotalSalesTax, nTotalCost, mtran_qty, "cashtemp", mtrantype, nRowNum, mCustName, mNoDiscTot, mSType, @lPrintDocket )
 
   if cashtemp->( reccount() ) > 15
    Box_Save( 10, 10, 12, 70 )
@@ -524,22 +553,22 @@ while mgo
   sales->( dbcommit() )  
   
   Error('')
-  Poz()
+  PoleDisplay()
 
  endif
 enddo
 
-setkey( K_SH_F10, { || oksf10 } )
-setkey( K_SH_F12, { || oksf12 } )
+setkey( K_SH_F10, { || bKeyShiftF10 } )
+setkey( K_SH_F12, { || bKeyShiftF12 } )
 dbcloseall()
 
 return nil
 
 *
 
-proc tender ( mFinalTot, nSubTotal, nTaxValue, nCostPrice, mtran_qty, mfile, mtran, nRowNum, mname, mStype, mcustkey, aPreLines, lPrintDocket )
-local mbnkbranch, mbank, mdrawer, mremain:=abs(mFinalTot), mamt_ten, mchange, mcdflag
-local mtran_amt, tscr, mscr, mvoucher
+proc tender ( nFinalTot, nSubTotal, nTaxValue, nCostPrice, mtran_qty, mfile, mtran, nRowNum, mname, mStype, mcustkey, aPreLines, lPrintDocket )
+local mbnkbranch, mbank, mdrawer, mremain:=abs(nFinalTot), mamt_ten, mchange, mcdflag
+local mtran_amt, tscr, cScreen, mvoucher
 local mopscr
 local mtend := 'CAS'
 local x, getlist:={}
@@ -586,7 +615,7 @@ while mremain > 0
  next
 
  Syscolor( C_NORMAL )
- mscr:=Box_Save( nRowNum+3, 35, nRowNum+8, 70 )
+ cScreen:=Box_Save( nRowNum+3, 35, nRowNum+8, 70 )
  set confirm off
  mtend := 'CAS'
  @ nRowNum+4, 42 say 'Tender Type' get mtend pict '!!!' valid( ascan( tt_types, mtend ) != 0 )
@@ -638,7 +667,7 @@ while mremain > 0
       if( mamt_ten * mtran_qty > 0, ' Amount Tendered ', ' Amount Refunded ' ) ;
       + str( mamt_ten * mtran_qty, 8, 2 ) )
 
-//  mpozDisc += mDisctemp
+//  mPoleDisplayDisc += mDisctemp
 
  if mamt_ten >= mremain
   if mcdflag
@@ -649,7 +678,7 @@ while mremain > 0
   mchange := ( mamt_ten - mremain ) * mtran_qty
   @ nRowNum + 6, 37 say 'Change           ' + str( mchange, 7, 2 )
   Dock_line( padr( 'Change', 32 ) + str( mchange, 8, 2 ) )
-  Poz( 'Change$' + Ns( mchange, 8, 2 ) )
+  PoleDisplay( 'Change$' + Ns( mchange, 8, 2 ) )
   mtran_amt := mremain
 
  else
@@ -678,7 +707,7 @@ while mremain > 0
  ( mfile )->voucher := mvoucher
  ( mfile )->key := mcustkey
  if -Vs( mremain ) <= 0
-  ( mfile )->discount := nSubTotal-mfinaltot
+  ( mfile )->discount := nSubTotal-nFinalTot
   ( mfile )->unit_price := mtran_amt
     
  endif
@@ -721,7 +750,7 @@ return
 *
 
 procedure custhist ( mCustName, mCustHistFlag, mCustKey )
-local mscr := Box_Save()
+local cScreen := Box_Save()
 if CustFind( FALSE )
  Highlight( 1, 1, 'Customer ', trim( customer->name ) )
  mCustHistFlag := TRUE
@@ -731,13 +760,13 @@ if CustFind( FALSE )
  mCustName := customer->name
  mCustKey := customer->key
 endif
-Box_Restore( mscr )
+Box_Restore( cScreen )
 return
 
 *
 
 Function Is_special ( temp_spec, retflag, specflag, nRowNum )
-local mscr,dbsel:=select(),getlist:={}
+local cScreen,dbsel:=select(),getlist:={}
 if select( "special" ) = 0
  if !Netuse( "special" )
   return FALSE
@@ -747,7 +776,7 @@ if select( "special" ) = 0
 endif
 special->( ordsetfocus( 'number' ) )
 if !retflag
- mscr := Box_Save( 3, 25, 6, 55 )
+ cScreen := Box_Save( 3, 25, 6, 55 )
  temp_spec := 0
  @ 4,26 say 'Special Order No.' get temp_spec pict '999999'
  read
@@ -759,7 +788,7 @@ if !retflag
   Highlight( nRowNum, 75, '', 'S' )
 
  endif
- Box_Restore( mscr )
+ Box_Restore( cScreen )
 
 endif
 select ( dbsel )
@@ -792,7 +821,6 @@ return new_amt
 function RePrintDock
 local getlist:={},tran_no:=0,msave:=Box_Save(02,10,04,70)
 local odbf:=select(),mgo:=TRUE,currec,tcount:=0,mtot:=0
-
 
 @ 03,12 say 'Transaction Number to reprint' get tran_no pict '99999'
 read
@@ -868,29 +896,14 @@ return nil
 *
 
 func SaleVoid
-local voi_tot := 0, voidret := FALSE, mscr
+local voi_tot := 0, voidret := FALSE, cScreen
+#ifdef LYTTLETON
+if isReady( 19, ,"Are you sure you want to void this sale?" )
+#endif
 if Secure( X_SALEVOID )
- if select("cashtemp") = 0
-  if select( 'buyback' ) != 0
-   Box_Save( 8, 8, 10, 72, C_BRIGHT )
-   Center(9,'-=< Voiding Sale - Please Wait >=-')
-   select buyback
-   zap
-   Error( 'Sale Voided', 12 )
-   voidret := TRUE
-
-  else
-   Error("No sales void function available here",12)
-
-  endif
-
- else
-  mscr := Box_Save( 8, 8, 10, 72, C_MAUVE )
-  Center( 9, '-=< Voiding Sale - Please Wait >=-')
-
   select cashtemp
   sum cashtemp->unit_price * cashtemp->qty to voi_tot
-  SysAudit( "SalVoi"+Ns( voi_tot,7,2 ) )
+  SysAudit( "SalVoi" + Ns( voi_tot, 7, 2 ) )
   zap         //  And Clear it !!
 
   Add_rec( 'sales' )
@@ -906,15 +919,16 @@ if Secure( X_SALEVOID )
   Error( 'Sale Voided', 12 )
 
   voidret := TRUE
-  Box_Restore( mscr )
 
- endif
 endif
+#ifdef LYTTLETON
+endif
+#endif
 return voidret
 
 *
 
-procedure CashTotDisc ( nRowNum, mdisc, mkey, hasdisc, mFinalTot )
+procedure CashTotDisc ( nRowNum, mdisc, mkey, hasdisc, nFinalTot )
 local getlist := {}, mdisctot:=0
 if mkey == K_F8
  @ nRowNum+3,37 say '  Enter Discount %' get mdisc pict '99.9'
@@ -931,13 +945,13 @@ while !cashtemp->( eof() )
  endif
  cashtemp->( dbskip() )
 enddo 
-mFinaltot := Nocents( mFinalTot - round( mdisctot,2 ) )
+nFinalTot := Nocents( nFinalTot - round( mdisctot,2 ) )
 #else
-mFinalTot := Nocents( mFinalTot - round( ( mFinalTot / 100 * mdisc ), 2 ) )
+nFinalTot := Nocents( nFinalTot - round( ( nFinalTot / 100 * mdisc ), 2 ) )
 #endif
-@ nRowNum+2,37 say 'Total Sale       ' + str( mFinalTot, 7, 2 )
+@ nRowNum+2,37 say 'Total Sale       ' + str( nFinalTot, 7, 2 )
 @ nRowNum+2,62 say '(Less '+str( mdisc, 4, 1 ) + '% Disc)'
-mdisctot := mdisc   // was mtotdisc DAC
+mdisctot := mdisc   
 hasdisc := TRUE
 return
 
@@ -964,7 +978,6 @@ if !discdone
  nSellPrice -= round( ( ( nSellPrice+spec_dep )/ 100 * mdisc ), 2 ) 
 endif
 return nil
-
 
 *
 
@@ -1020,6 +1033,7 @@ if !empty( Bvars( B_DOCKLN2 ) )
 endif
 Dock_line( "  Tax Invoice - ABN " + Bvars( B_ACN ) )
 return
+
 *
 
 Procedure Dock_line ( p_line, lSuppSpace )
@@ -1079,7 +1093,6 @@ endif
 return
 
 *
-
 
 Procedure Dock_print
 local x, oPrinter
@@ -1158,16 +1171,12 @@ fkeys[ 9, 2 ] := Lvars( L_F9MARGIN )
 fkeys[ 10, 1 ] := setkey( K_F10, { || keyret( Lvars( L_F10 ) ) } )
 fkeys[ 10, 2 ] := Lvars( L_F10MARGIN )
 return nil
-
 *
-
 function keyret ( l_bit )
 keyboard l_bit + chr(13)
 LastFkeyHit := lastkey()
 return nil
-
 *
-
 function keystuff ( l_bit )
 keyboard l_bit
 return nil
@@ -1241,7 +1250,7 @@ return ( retval )
 *
 /*
 func mktg_type
-local mstype, mscr,x // := Box_Save( 2, 10, 10, 40 ), x
+local mstype, cScreen,x // := Box_Save( 2, 10, 10, 40 ), x
 static mktg_types, mktg_names
 if mktg_types = nil
  if Netuse( "sysrec", SHARED, 0 )  // Must wait - About to set up Marketing Types
@@ -1260,13 +1269,13 @@ if mktg_types = nil
   dbclosearea()                                 // Close sysrec file
  endif
 endif
-mscr := Box_Save( 2, 10, 2+len(mktg_names)+1, 40 )
+cScreen := Box_Save( 2, 10, 2+len(mktg_names)+1, 40 )
 Heading( 'Select Sales Type' )
 for x := 1 to len( mktg_names )
  @ x+2,12 prompt mktg_names[ x ]
 next
 menu to mstype
-Box_Restore( mscr )
+Box_Restore( cScreen )
 return if( mstype != 0, mktg_types[ mstype ], '' )
 
 */
@@ -1278,9 +1287,9 @@ return nil
 
 *
 
-function poz ( disp_text )
+function PoleDisplay ( disp_text )
 static portopen:=FALSE
-#define POZ_PORT 2   // Only temporary
+#define PoleDisplay_PORT 2   // Only temporary
 /*
    Epson DM-D202 Customer displays are two lines. This function looks for the
    $ sign and attempt to place it ( and following data ) on the second line 
@@ -1288,32 +1297,32 @@ static portopen:=FALSE
 if Lvars( L_POZ )
 #ifndef __HARBOUR__
  if !portopen
-  tp_open( POZ_PORT, 32, 128, 9600, 8, 'N', 1 )
+  tp_open( PoleDisplay_PORT, 32, 128, 9600, 8, 'N', 1 )
   portopen := TRUE
  endif
  if disp_text = nil
   if !empty( Bvars( B_GREET ) )
- #ifdef EPSON_POZ
-   tp_send( POZ_PORT, FF + BPOSCUST )
+ #ifdef EPSON_PoleDisplay
+   tp_send( PoleDisplay_PORT, FF + BPOSCUST )
  #else
-   tp_send( POZ_PORT, chr( 22 ) + chr( 17 ) + trim( Bvars( B_GREET ) ) + chr( 16 ) )
+   tp_send( PoleDisplay_PORT, chr( 22 ) + chr( 17 ) + trim( Bvars( B_GREET ) ) + chr( 16 ) )
  #endif
   endif
  else
- #ifndef EPSON_POZ
+ #ifndef EPSON_PoleDisplay
   if '$' $ disp_text
-   tp_send( POZ_PORT, chr( 3 ) + padr( left( disp_text, at( '$', disp_text ) - 1 ), 10 ) + ;
+   tp_send( PoleDisplay_PORT, chr( 3 ) + padr( left( disp_text, at( '$', disp_text ) - 1 ), 10 ) + ;
             padl( trim( substr( disp_text, at( '$', disp_text ), 10 ) ), 10 ) )
   else
-   tp_send( POZ_PORT, chr( 3 ) + substr( disp_text, 1, 22 ) )
+   tp_send( PoleDisplay_PORT, chr( 3 ) + substr( disp_text, 1, 22 ) )
   endif
  #else
   if '$' $ disp_text
-   tp_send( POZ_PORT, FF + left( disp_text, min( at( '$', disp_text ) - 1, 19 ) ) + ;
+   tp_send( PoleDisplay_PORT, FF + left( disp_text, min( at( '$', disp_text ) - 1, 19 ) ) + ;
             CRLF + padl( trim( substr( disp_text, at( '$', disp_text ), 20 ) ), 20 ) )
   else
-//   tp_send( POZ_PORT, FF + substr( disp_text, 1, 20 ) )
-   tp_send( POZ_PORT, FF + disp_text )
+//   tp_send( PoleDisplay_PORT, FF + substr( disp_text, 1, 20 ) )
+   tp_send( PoleDisplay_PORT, FF + disp_text )
   endif          
  #endif
  endif
@@ -1335,3 +1344,119 @@ EndCase
 Build_help( aArray ) 
 
 return nil
+
+*
+
+Function EditCashSale
+/* Allows an inline update of a sale - basically edits the saletemp file */
+local oSaleTemp, nKeyPressed, cScreen, cScreen1, aHelpLines
+local getlist:={}
+
+if cashtemp->( reccount() ) > 0
+ cScreen = Box_save( 03, 02, 23, 77 )
+ oSaleTemp:= TBrowseDB( 04, 3, 22, 76 )
+ oSaleTemp:colorspec := TB_COLOR
+ oSaleTemp:HeadSep := HEADSEP
+ oSaleTemp:ColSep := COLSEP
+ oSaleTemp:goTopBlock := { || cashtemp->( dbgotop() ) }
+ oSaleTemp:goBottomBlock := { || cashtemp->( dbgobottom() ) }
+ // oSaleTemp:addcolumn( TBColumnNew( PLU_DESC, { || cashtemp->id } ) )
+ oSaleTemp:addcolumn( TBColumnNew( DESC_DESC ,{ || left( master->desc, 20) } ) )
+ oSaleTemp:addcolumn( TBColumnNew( 'Sale Price', { || ns( cashtemp->unit_price - cashtemp->discount, 7, 2 ) } ) )
+ oSaleTemp:addcolumn( TBColumnNew( 'Qty',  { || cashtemp->qty } ) )
+ oSaleTemp:addcolumn( TBColumnNew( 'Extend',  { || ns( ( cashTemp->unit_price - cashtemp->discount ) * cashtemp->qty, 7, 2) } ) )
+ oSaleTemp:addcolumn( TBColumnNew( 'Onhand',  { || master->onhand } ) )
+ oSaleTemp:goTop()
+ nKeyPressed := 0
+ while nKeyPressed != K_ESC .and. nKeyPressed != K_END
+  oSaleTemp:forcestable()
+  nKeyPressed := inkey(0)
+  if !navigate( oSaleTemp, nKeyPressed )
+   do case
+   case nKeyPressed == K_F1
+    aHelpLines := { ;
+                  { 'Esc', 'Escape from function' }, ;
+                  { 'Del', 'Delete Item' }, ;
+                  }
+    Build_help( aHelpLines )
+/*
+   case nKeyPressed == K_ENTER
+    select cashtemp
+	Rec_lock()
+    cScreen1 := Box_Save( 10, 2, 13, 77 )
+    @ 11,05 say 'Price' get cashtemp->unit_price pict PRICE_PICT
+	@ 12,05 say 'Qty' get cashtemp->qty pict QTY_PICT
+	read
+    cashtemp->( dbrunlock() )
+    CalcTotalSale()
+	Box_Restore( cScreen1 )
+    oSaleTemp:refreshcurrent()
+ */ 
+   case nKeyPressed == K_DEL
+ //   cScreen1 := Box_Save( 15, 2, 17, 77 )
+ //   @ 16,05 say 'OK to delete ==> ' + left( master->desc, 45 )
+    if Isready( 18, nil, 'OK to delete ==> ' + left( master->desc, 45 ) )
+     del_rec( 'cashtemp' )
+     CalcTotalSale()
+    
+	endif
+    // Box_Restore( cScreen1 )
+	cashtemp->( dbgotop() )
+    oSaleTemp:refreshAll()
+
+   endcase
+
+  endif
+ enddo
+ Box_Restore( cScreen )
+ DisplaySales()
+endif 
+return nil
+
+*
+
+Function CalcTotalSale
+local nCurrentRec:=cashtemp->( recno() )
+
+nTotalSale:=0
+nTotalCost:=0
+nTotalSalesTax:=0
+nTotalFullPrice:=0
+
+cashtemp->(dbgotop())
+while !cashtemp->(eof())
+ if !cashtemp->( deleted() )
+  nTotalSale += ( cashtemp->unit_price - cashtemp->discount ) * cashtemp->qty
+  nTotalCost += cashtemp->cost_price * cashtemp->qty 
+  nTotalSalesTax += cashtemp->sales_tax * cashtemp->qty
+  nTotalFullPrice += master->sell_price * cashtemp->qty
+  
+ endif
+ cashtemp->( dbskip() )
+enddo
+
+Highlight( 2, 60, 'Sub Total',  str( nTotalSale, 7, 2 ) )
+cashtemp->( dbgoto( nCurrentRec ) )
+// Displaysales()
+return nTotalSale
+
+*
+
+Procedure DisplaySales()
+local nRow := 6
+@ 5,0 clear to 22,79
+@ nRow, 0 say "<F12>"
+cashtemp->( dbgobottom() )
+while !cashtemp->( bof() ) .and. nRow < 22
+  if !cashtemp->( deleted() )
+   @ nRow, 06 say substr( master->desc, 1, 40 )
+   @ nRow, 46 say cashtemp->unit_price - cashtemp->discount pict PRICE_PICT
+   @ nRow, 54 say cashtemp->qty pict QTY_PICT
+   @ nRow, 63 say ( cashtemp->unit_price - cashtemp->discount ) * cashtemp->qty pict PRICE_PICT
+   @ nRow, 73 say master->onhand pict QTY_PICT
+   nRow++
+  endif
+  cashtemp->( dbskip(-1) )
+
+enddo
+return

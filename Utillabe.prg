@@ -100,7 +100,11 @@ for x = 1 to mqty
  sString += '^PW250' + CRLF
  sString += '^FO10, 18' + CRLF
  sString += '^ABN,30,15' + CRLF
+#ifdef LYTTLETON
+ sString += '^FDLyttleton' + CRLF
+#else 
  sString += '^FD' + trim( BVars( B_NAME ) ) + CRLF
+#endif
  sString += '^FS' + CRLF
  sString += '^FO10,55' + CRLF
  if len( trim( sBarcode ) ) >= 12

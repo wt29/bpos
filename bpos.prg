@@ -127,8 +127,7 @@ Chkfield( "Quote", "SysRec" )
 ChkField( "TaxExempt", "master" )
 
 
-cStoreName := trim( Bvars( B_NAME ) ) // , if( empty( BPOSCUST ),'No Serial No',trim( BPOSCUST ) ) )
-// nLength := max( ( 20 + len( BPOSCUST ) ) /2, 16 )         // Format Box for Licencee Length
+cStoreName := trim( Bvars( B_NAME ) ) 
 nLength := max( ( 20 + len( cStoreName ) ) /2, 16 )         // Format Box for Licencee Length
 
 Syscolor( 1 )
@@ -139,7 +138,6 @@ Center( 06, cStoreName )                // Hello
 Center( 08, DEVELOPER_PHONE )
 Center( 09, SYSNAME + ' Build Number ' + BUILD_NO )
 
-// Center( 10, "Licensed to -=< " + BPOSCUST + " >=-")
 Syscolor( 1 )
 
 if !empty( getenv( 'pack' )  )
@@ -182,7 +180,7 @@ setkey( K_ALT_L, { || Login( TRUE ) } )         // Allow an Operator Add
 
 #endif
 
-Poz( BPOSCUST )                                 // Init the pole display if used
+PoleDisplay( BPOSCUST )                                 // Init the pole display if used
 
 //BPOSSendmail()
 
@@ -341,7 +339,7 @@ while TRUE                                      // Main Menu Loop
   if Isready( 19,,'Exit ' + SYSNAME + '?' )     // Clean up
 
    Dbcloseall()
-   Poz( 'Register not in use' )
+   PoleDisplay( 'Register not in use' )
    Lvarsave()
    adir := directory( '_*.*' )
    aeval( aDir, { | del_element | ferase( del_element[ 1 ] ) } )

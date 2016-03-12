@@ -23,7 +23,7 @@ v1.24 - Current Sales File print
 
 #define __GTWVW__
 
-#define BUILD_NO "1.25.1"
+#define BUILD_NO "1.25.2"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
 #define DEVELOPER_FAX "+61 2 4751 8479"
 #define SUPPORT_FAX "No Number - use email"
@@ -48,6 +48,7 @@ v1.24 - Current Sales File print
  #define QTY_PICT "999.999"
  #define QTY_LEN 6
  #define QTY_DEC 2   
+ #define NONEGSTOCKWARN
  
 #endif
  
@@ -162,7 +163,7 @@ v1.24 - Current Sales File print
 #define C_CYAN    8
 #define C_BLACK   9
 
-#define C_BACKGROUND 'B'
+#define C_BACKGROUND 'B+'
 
 // Colour defines for Tbrowse objs
 //#define TB_COLOR  'GR+/' + C_BACKGROUND + ', N/W'
@@ -368,7 +369,7 @@ v1.24 - Current Sales File print
 
 #ifndef MAXNEGSTOCK    // This is how far we will let negative stock go - used in invoicing
  #define MAXNEGSTOCK -99
-
+ 
 #endif
  
 #ifndef CREDPICT

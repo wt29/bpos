@@ -89,7 +89,7 @@ function add_rec ( cFileName ) // Bugger it add the record or else !!
 default cFileName to alias()
 (cFileName)->( dbappend() )
 while neterr()             // Error from last attempt
- Error('Attempting to append new record to ' + cFileName , 12, 5 ) // Warn 'em
+ Error('Attempting to append new record to ' + cFileName , 12, 5 ) // Warn em
  (cFileName)->( dbappend() )   // Attempt to add again
 enddo                      // Test and loop ?
 return TRUE                // OK so back we go
@@ -237,8 +237,9 @@ local nOrigSelect := select()
 
 if mqty != nil
  if master->onhand + mqty < MAXNEGSTOCK
+#ifndef NONEGSTOCKWARN
   Error( 'Negative Stock limit Exceeded on ' + DESC_DESC, 12, ,trim( left( master->desc, 40 ) ) )
-
+#endif
  else
   master->onhand += mqty
 

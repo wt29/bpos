@@ -18,7 +18,7 @@ set HB_GT_LIB=gtwvw
 rem hbmk2 -inc -obpos -xhb -arch=win *.prg %HB%\obj\b32\mainwin.obj vm.lib gtwvg.lib tip.lib ct.lib lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib common.lib gtwvw.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib sixcdx.lib zlib.lib
 
 copy makefile.bcc makefile
-rem rem copy mfbcc makefile
+rem copy mfbcc makefile
 hbmake makefile
 
 set path=%oldpath%
