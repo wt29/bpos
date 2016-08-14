@@ -10,6 +10,8 @@ rem set HB_MT=MT
 rem Make using MSVC
 rem nmake
 rem Make using Borland
+rem call m_bcc.cmd
+rem Make using Borland and xHarbour- Seems to have better printer detection and GTVWV
 call xm_bcc.cmd
 if not exist bpos.exe goto noexe
 goto end

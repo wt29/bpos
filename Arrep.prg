@@ -215,9 +215,9 @@ customer->( dbgotop() )
 totcur:=tot30:=tot60:=tot90:=totytd:=0
 while !customer->( eof() )
  if prow() = 0
-  apos := ( ( 136-len( BPOSCUST ) )/2 ) - 8
+  apos := ( ( 136-len( trim( BVars( B_NAME ) ) ) )/2 ) - 8
   bpos := ( ( 136-len( report_desc ) )/2 ) - 7
-  @ prow()+1,01 say dtoc( Bvars( B_DATE ) ) + space( apos ) + BPOSCUST
+  @ prow()+1,01 say dtoc( Bvars( B_DATE ) ) + space( apos ) + trim( BVars( B_NAME ) )
   @ prow()+2,00 say 'Page ' + Ns( mpage,2 ) + space( bpos ) + report_desc
   @ prow()+2,00 say "Debtor Id#   Name                             Phone" ;
      + "          Current $    30 Days $    60 Days $" ;
@@ -251,7 +251,7 @@ enddo
 if prow() > 52
  eject
  mpage++
- @ 01,00 say dtoc( Bvars( B_DATE ) ) + space( apos ) + BPOSCUST
+ @ 01,00 say dtoc( Bvars( B_DATE ) ) + space( apos ) + trim( BVars( B_NAME ) )
  @ 03,00 say 'Page '+Ns(mpage,2)+space(bpos)+report_desc
  @ 05,00 say " Debtor Id#    Debtor Name                Phone " ;
     + "            Current $    30 Days $    60 Days $" ;
@@ -296,7 +296,7 @@ enddo
 
 // Pitch10()
 
-@ 00,00 say dtoc( Bvars( B_DATE ) ) + padc( BPOSCUST, 60 ) + 'Page ' + Ns( mpage, 3 )
+@ 00,00 say dtoc( Bvars( B_DATE ) ) + padc( trim( BVars( B_NAME ) ), 60 ) + 'Page ' + Ns( mpage, 3 )
 @ 01,00 say padc( 'Debtors Trial Balance SysAudit Report', 80 )
 
 @ 03,10 say 'Opening Balance.... '+str( Oddvars( DEB_OP_BAL ), 10, 2 )

@@ -40,7 +40,7 @@ if Master_use()
  endif
 endif
 
-line_clear(24)
+line_clear( 24 )
 
 while supploop
 

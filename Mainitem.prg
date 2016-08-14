@@ -1384,7 +1384,7 @@ return ( price > 0 )
 
 proc sphead
 set device to print
-@ prow(),00 say padc( trim( BPOSCUST ) + ' Special Desc List', 80 )
+@ prow(),00 say padc( trim( trim( BVars( B_NAME ) ) ) + ' Special Desc List', 80 )
 @ prow()+2,02 say 'Desc'
 @ prow(),  43 say 'Author'
 @ prow(),  74 say 'Price'

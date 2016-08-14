@@ -1361,6 +1361,7 @@ aadd( aArray, { "x_charges", "n", 10, 2 } )
 aadd( aArray, { "freight", "n", 10, 2 } )
 aadd( aArray, { "consign", "l", 1, 0 } )
 aadd( aArray, { "operator", "c", OPERATOR_CODE_LEN, 0 } )
+aadd( aArray, { "gst", "n", 10, 2 } )
 dbcreate( sSysPath + "recvhead" + NEW_DBF_EXT, aArray )
 
 // companys

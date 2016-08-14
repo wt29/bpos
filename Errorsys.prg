@@ -228,7 +228,7 @@ while cchoice != 'A'
   LP( oPrinter, SYSNAME + ' Build ' + BUILD_NO + ' Error Report   #' + Ns( Sysinc( 'Fax', 'I', 1 ) ) )
   LP( oPrinter, NOBIGCHARS )
   LP( oPrinter, BIGCHARS )
-  LP( oPrinter, 'From ' + BPOSCUST)
+  LP( oPrinter, 'From ' + trim( BVars( B_NAME ) ))
   LP( oPrinter, NOBIGCHARS )
   LP( oPrinter, BIGCHARS )
   LP( oPrinter, 'Time ' + time() + '  Ph.' + Bvars( B_PHONE ) )
@@ -275,7 +275,7 @@ enddo
 // Try to save the error locally
 
 // nHandle = HB_FTempCreate( OddVars( SYSPATH ) + 'errors' )
-nHandle = FCreate( OddVars( SYSPATH ) + 'errors\') + strTran( dtoc( date() ), "/" )  + strTran( time(), ':'  + '.log' )
+nHandle = FCreate( OddVars( SYSPATH ) + 'errors\' + strTran( dtoc( date() ), "/" ) + strTran( time(), ':' ) + '.log' ) 
 for x = 1 to len( aErrors )
    Fwrite( nHandle, aErrors[ x ] + CRLF )
 

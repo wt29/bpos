@@ -21,7 +21,7 @@
 static nDefPrinterCharWidth  // Set in Create Printer
 
 function print_find ( sPTRMain )
-local mret:=FALSE
+local lReturn := FALSE
 local sWarning := " has not been configured on this machine"
 
 sPTRMain = lower( sPTRMAIN )
@@ -34,7 +34,8 @@ Case sPTRMain = "docket"
  else
   set printer to ( trim( LVars( L_DOCKET_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_DOCKET_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 Case sPTRMain = "report"
@@ -44,7 +45,8 @@ Case sPTRMain = "report"
  else
   set printer to ( trim( LVars( L_REPORT_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_REPORT_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 Case sPTRMain = "barcode"
@@ -54,7 +56,8 @@ Case sPTRMain = "barcode"
  else
   set printer to ( trim( LVars( L_BARCODE_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_BARCODE_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 Case sPTRMain = "invoice"
@@ -64,12 +67,13 @@ Case sPTRMain = "invoice"
  else
   set printer to ( trim( LVars( L_INVOICE_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_INVOICE_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 EndCase
 
-return mret                  // Have we found the required printer
+return lReturn                  // Have we found the required printer
 
 *
 
@@ -80,24 +84,28 @@ if lvars( L_AUTO_OPEN )
  case lvars( L_CDTYPE ) = 'N'
  
  case lvars( L_CDTYPE ) = 'C'    // Citizen Docket Printers with cashdraw kickout
-  Print_Find( "Docket" )
-  set console off
-  set print on
-  ?? chr( 7 )
-  set print off
-  set console on
-  set printer to
+  if Print_Find( "Docket" )
+   set console off
+   set print on
+   ?? chr( 7 )
+   set print off
+   set console on
+   set printer to
+  
+  endif
 
  case lvars( L_CDTYPE ) = 'E'    // Epson Docket Printers with cashdraw kickout
-  Print_Find( "Docket" )
-  set console off
-  set print on
-  ?? chr( K_ESC ) + 'p' + chr( 0 ) + chr( 25 ) + chr( 250 )
-  ??
-  set print off
-  set console on
-  set printer to
-
+  if Print_Find( "Docket" )
+   set console off
+   set print on
+   ?? chr( K_ESC ) + 'p' + chr( 0 ) + chr( 25 ) + chr( 250 )
+   ??
+   set print off
+   set console on
+   set printer to
+   
+  endif
+  
  endcase
 
 endif
@@ -811,7 +819,7 @@ nTotWidth = max( nTotWidth, page_width )
 if report_name != nil
  if !toScreen
   oPrinter:NewLine()
-  oPrinter:TextOut( BPOSCUST )
+  oPrinter:TextOut( bVars( B_NAME) )
   oprinter:setpos( (oPrinter:maxcol - len(a) ) * oPrinter:CharWidth )
   oPrinter:TextOut( a )
   oPrinter:NewLine()
@@ -820,7 +828,7 @@ if report_name != nil
   oPrinter:TextOut( b )
 
  else
-  oPrinter:Write( BPOSCUST + space( nTotWidth - len( BPOSCUST ) - len(a) ) + a + CRLF )
+  oPrinter:Write( bVars( B_NAME) + space( nTotWidth - len( bVars( B_NAME ) ) - len(a) ) + a + CRLF )
   oPrinter:Write( report_name + space( nTotWidth - len( report_name ) - len(b) ) + b + CRLF )
 
  endif
@@ -1042,10 +1050,10 @@ return ''
 Function PageHead( oPrinter, rptName, page_width, page, col_head1, col_head2 )
 local a := dtoc( date() ) + " "
 local b := time() + " Page " + Ns( page )
-local mlicense := BPOSCUST
+// local mlicense := trim( BVars( B_NAME ) )
 
 if rptName != nil
- oPrinter:TextOut( mlicense )
+ oPrinter:TextOut( BVars( B_NAME ) )
  oPrinter:SetPos( (page_width -len(a)) * oPrinter:CharWidth )
  oPrinter:TextOut( a )
  oPrinter:NewLine()

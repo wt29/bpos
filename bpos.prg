@@ -31,14 +31,14 @@ local cSysPath
  //  local lMainCoord
  //altd()
  local lMainCoord := WVW_SetMainCoord( .t. )
- // wvW_SetWindowTitle( "Hello World")
+ // WVW_SetWindowTitle( "Hello World")
  WVW_SetCodePage(,255)
 
  WVW_SetFont(,"Lucida Console",28,-12)
  //WVT_GTGetFont("Lucida Console",28,-12)
-   WVW_SBcreate( 0 )
-   WVW_SBaddPart( 0, '20', 20, 0, .t. )
-   WVW_SBSetText(,,'Hello' )
+ WVW_SBcreate( 0 )
+ WVW_SBaddPart( 0, '20', 20, 0, .t. )
+ WVW_SBSetText(,,'Hello' )
  //wvw_showwindow()
  //wait
 
@@ -62,7 +62,7 @@ Oddvars( SYSPATH, cSysPath )
 
 Oddvars( START_SCR, { Savescreen(), row(), col() } )
 
-cls
+// cls
 ?? 'Initialising ' + SYSNAME + '....  Please Wait'
 
 set scoreboard off   // No <Ins> etc
@@ -180,7 +180,7 @@ setkey( K_ALT_L, { || Login( TRUE ) } )         // Allow an Operator Add
 
 #endif
 
-PoleDisplay( BPOSCUST )                                 // Init the pole display if used
+PoleDisplay( trim( BVars( B_NAME ) ) )                                 // Init the pole display if used
 
 //BPOSSendmail()
 

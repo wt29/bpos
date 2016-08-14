@@ -1452,7 +1452,7 @@ while !special->( eof() ) ;
 
 enddo
 @ prow()+1, 0 say replicate( chr(196) ,80 )
-@ prow()+3, 0 say 'For and on Behalf of ' + BPOSCUST + ' _____________________'
+@ prow()+3, 0 say 'For and on Behalf of ' + trim( BVars( B_NAME ) ) + ' _____________________'
 eject
 set device to screen
 return
@@ -1464,7 +1464,7 @@ setprc(0,0)
 
 @ 0,0 say BIGCHARS + 'Special Order Status Report'
 @ prow()+1,60 say BIGCHARS + dtoc(Bvars( B_DATE ) ) + NOBIGCHARS
-@ prow()+1,0 say chr(27)+chr(31)+chr(1)+chr(14)+BPOSCUST;
+@ prow()+1,0 say chr(27)+chr(31)+chr(1)+chr(14)+trim( BVars( B_NAME ) );
             +chr(27)+chr(31)+chr(0)
 @ prow()+1,0 say Bvars( B_ADDRESS1 )
 if !empty( Bvars( B_ADDRESS2 ) )

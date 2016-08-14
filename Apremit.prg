@@ -150,9 +150,9 @@ local mdate := dtoc( Bvars( B_DATE ) )
 if page_no > 1
  @ 1,0 say 'Page No ' + Ns( page_no, 3 )
 endif
-@ 03,05 say trim( BPOSCUST ) + chr( 20 ) + chr( 13 )
+@ 03,05 say trim( trim( BVars( B_NAME ) ) ) + chr( 20 ) + chr( 13 )
 setprc(3,0)
-@ prow(),54 say substr( BPOSCUST,1,24)
+@ prow(),54 say substr( trim( BVars( B_NAME ) ),1,24)
 @ 04,10 say Bvars( B_ADDRESS1 )
 @ 04,54 say substr(Bvars( B_ADDRESS1 ), 1, 24 )
 if !empty( Bvars( B_ADDRESS2 ) )

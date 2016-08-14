@@ -227,7 +227,7 @@ oPrinter:NewLine()
 LP( oPrinter, PRN_GREEN )
 LP( oPrinter, BOLD )
 LP( oPrinter, VERYBIGCHARS )
-LP( oPrinter, upper( BPOSCUST ), 20 )
+LP( oPrinter, upper( trim( BVars( B_NAME ) ) ), 20 )
 LP( oPrinter, NOBIGCHARS )
 LP( oPrinter, NOBOLD )
 LP( oPrinter, PRN_BLACK )
@@ -369,7 +369,7 @@ LP( oPrinter,'Supply to the order of :', 0, NONEWLINE )
 LP( oPrinter, BIGCHARS )
 LP( oPrinter, BOLD )
 LP( oPrinter, PRN_GREEN )
-LP( oPrinter, BPOSCUST, 25 )
+LP( oPrinter, trim( BVars( B_NAME ) ), 25 )
 LP( oPrinter, PRN_BLACK )
 LP( oPrinter, NOBOLD )
 LP( oPrinter, NOBIGCHARS )
@@ -497,7 +497,7 @@ return
 procedure poheader ( oPrinter, ponum, page_no )
 if page_no > 1
  LP( oPrinter, DRAWLINE )
- LP( oPrinter, BPOSCUST, 0, NONEWLINE )
+ LP( oPrinter, trim( BVars( B_NAME ) ), 0, NONEWLINE )
  LP( oPrinter, 'Order No: ' + Ns( ponum, 6 ), 32, NONEWLINE )
  LP( oPrinter, 'Page No: ' + Ns( page_no, 3 ), 66  )
 
@@ -517,7 +517,7 @@ set console off
 // Pitch10()
 @ 0,0 say BIGCHARS + 'Special Order No ' + Ns( specordno ) + NOBIGCHARS
 @ prow()+1,60 say BIGCHARS + dtoc(Bvars( B_DATE ) )
-@ prow()+1,0 say chr(27)+chr(31)+chr(1)+BIGCHARS+BPOSCUST + NOBIGCHARS;
+@ prow()+1,0 say chr(27)+chr(31)+chr(1)+BIGCHARS+trim( BVars( B_NAME ) ) + NOBIGCHARS;
             +chr(27)+chr(31)+chr(0)
 @ prow()+1,0 say Bvars( B_ADDRESS1 )
 if !empty( Bvars( B_ADDRESS2 ) )
@@ -568,7 +568,7 @@ endif
 @ prow()+1,0 say 'ready (MasterCard, Visa, Amex, Diners or Bankcard) and we will be happy to'
 @ prow()+1,0 say 'forward your order.'
 @ prow()+2,0 say 'Yours Faithfully'
-@ prow()+5,0 say 'For ' + BPOSCUST
+@ prow()+5,0 say 'For ' + trim( BVars( B_NAME ) )
 @ prow()+4,0 say 'Please Note.'
 @ prow()+1,0 say chr( K_ESC )+'E'+'We would appreciate if the books could be collected within two weeks'
 @ prow()+1,0 say 'or telephone us if there will be a delay.'+chr( K_ESC )+'F'
@@ -658,7 +658,7 @@ endif
 
 if nPage > 1
  LP( oPrinter, DRAWLINE )
- LP( oPrinter, BPOSCUST, 0, NONEWLINE )
+ LP( oPrinter, trim( BVars( B_NAME ) ), 0, NONEWLINE )
  LP( oPrinter, 'Quotation No: ' + Ns( nQuoteNo, 6 ), 32, NONEWLINE )
  LP( oPrinter, 'Page No: ' + Ns( nPage, 3 ), 66 )
  LP( oPrinter, DRAWLINE )
@@ -684,7 +684,7 @@ else
  LP( oPrinter, PRN_GREEN )
  LP( oPrinter, BOLD )
  LP( oPrinter, BIGCHARS )
- LP( oPrinter, BPOSCUST, 20 )
+ LP( oPrinter, trim( BVars( B_NAME ) ), 20 )
  LP( oPrinter, NOBIGCHARS )
  LP( oPrinter, NOBOLD )
  LP( oPrinter, PRN_BLACK )

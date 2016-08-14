@@ -12,6 +12,8 @@ v1.21 - Last of the converted Forms. Errorsys now writes files into errors
 v1.22 - Fixed the stocktake forms - did some work around the GST printing problems
 v1.23 - Work around Invoices and GST
 v1.24 - Current Sales File print
+v1.25.0 - Edit the POS and voids require confirmation
+v1.25.3 - PrintHead doesn't work any more
 
 
 */
@@ -23,7 +25,7 @@ v1.24 - Current Sales File print
 
 #define __GTWVW__
 
-#define BUILD_NO "1.25.2"
+#define BUILD_NO "1.25.3"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
 #define DEVELOPER_FAX "+61 2 4751 8479"
 #define SUPPORT_FAX "No Number - use email"

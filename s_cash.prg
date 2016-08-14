@@ -1303,7 +1303,7 @@ if Lvars( L_POZ )
  if disp_text = nil
   if !empty( Bvars( B_GREET ) )
  #ifdef EPSON_PoleDisplay
-   tp_send( PoleDisplay_PORT, FF + BPOSCUST )
+   tp_send( PoleDisplay_PORT, FF + trim( BVars( B_NAME ) ) )
  #else
    tp_send( PoleDisplay_PORT, chr( 22 ) + chr( 17 ) + trim( Bvars( B_GREET ) ) + chr( 16 ) )
  #endif
