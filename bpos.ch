@@ -15,7 +15,6 @@ v1.24 - Current Sales File print
 v1.25.0 - Edit the POS and voids require confirmation
 v1.25.3 - PrintHead doesn't work any more
 
-
 */
 
 #include "inkey.ch"
@@ -684,4 +683,16 @@ v1.25.3 - PrintHead doesn't work any more
 #define MB_RET_OK                   1
 #define MB_RET_YES                  6
 #define MB_RET_NO                   7
+
+#ifdef NDL
+
+#else
+
+ #define HDG_CASHSALES  	'Cash Sales'
+ #define LBL_PLU_LOOKUP 	'Scan Barcode / Enter ' + ID_DESC
+ #define LBL_CS_SCR_HEAD_Q 	'Item Desc                                Price     Qty   Extend'
+ #define LBL_CS_SCR_HEAD	'Item Desc                                Price'
+ 
+#endif 
+
 // Eof - bpos.ch

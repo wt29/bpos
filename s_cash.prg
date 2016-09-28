@@ -103,10 +103,10 @@ while lMainLoop
 
    @ 02,67 say if( price_conf,'','No Confirm' )
 #ifdef MUST_USE_QTY   
-   HighLight( 4, 6, "", 'Item Desc                                Price     Qty   Extend' )
+   HighLight( 4, 6, "", LBL_CS_SCR_HEAD_Q  )
    nQuantity := 0
 #else
-   Highlight( 4, 6, '', 'Item Desc                                Price' )
+   Highlight( 4, 6, '', LBL_CS_SCR_HEAD )
 
 #endif
    // bKeyCtrlf2 := setkey( K_CTRL_F2, { || SetSalesTax( @tax_exempt ) } )
@@ -118,7 +118,7 @@ while lMainLoop
   bKeyAltF1 := setkey( K_ALT_F1, { || Is_Special( @mspec_no, retflag, @specflag, nRowNum ) } )
 
   sID := space( ID_ENQ_LEN )
-  sPrompt := 'Scan Barcode / Enter ' + ID_DESC
+  sPrompt := LBL_PLU_LOOKUP
   @ 02, 10 say sPrompt get sID pict '@!'
 //  @ 02, ( maxcol() / 2 ) - ( len( sPrompt ) + ID_CODE_LEN ) / 2 say sPrompt get sID pict '@!'
   Fkon( nRowNum )
