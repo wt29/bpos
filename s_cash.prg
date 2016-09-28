@@ -96,7 +96,7 @@ while lMainLoop
    bKeyShiftF12 := setkey( K_SH_F12, { || ConToggle() } )
    bKeyCtrlF1 := setkey( K_CTRL_F1, { || Custhist( @mCustName, @mCustHistFlag, @mCustKey ) } )
 
-   Heading( 'Cash Sales' )
+   Heading( HDG_CASHSALES )
    Highlight( 01, 01, 'Last Tran #', Ns( Lvars( L_CUST_NO ), 4 ) )
    // DocketStatus()
    // Highlight( 01, 60, 'Docket is ' , if( Lvars( L_DOCKET ), 'On', 'Off' ) )

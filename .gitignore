@@ -43,3 +43,5 @@ bluepos-code/
 *.exe
 *.lib
 *.txt
+*.log
+bpos.tds
