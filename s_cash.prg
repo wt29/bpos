@@ -833,14 +833,14 @@ if updated()
   Error( "Transaction Number not Found", 12 )
 
  else
-  if !Lvars( L_DOCKET )
-   DocketStatus()
+//  if !Lvars( L_DOCKET )
+//   DocketStatus()
 
-  endif
+//  endif
   while !sales->( eof() ) .and. tcount < 40
    master->( dbseek( sales->id ) )
    select sales
-   Dock_head()
+   Dock_head()   // This also clears the aDocket array
    if tran_no = sales->tran_num .and. sales->register = Lvars( L_REGISTER )
     if !empty(sales->id)
      if sales->qty > 1
@@ -1289,44 +1289,48 @@ return nil
 
 function PoleDisplay ( disp_text )
 static portopen:=FALSE
-#define PoleDisplay_PORT 2   // Only temporary
+#define PoleDisplayPort 2   // Only temporary
 /*
    Epson DM-D202 Customer displays are two lines. This function looks for the
    $ sign and attempt to place it ( and following data ) on the second line 
 */   
 if Lvars( L_POZ )
-#ifndef __HARBOUR__
+// #ifndef __HARBOUR__
  if !portopen
-  tp_open( PoleDisplay_PORT, 32, 128, 9600, 8, 'N', 1 )
+  tp_open( PoleDisplayPort, 32, 128, 9600, 8, 'N', 1 )
   portopen := TRUE
  endif
  if disp_text = nil
   if !empty( Bvars( B_GREET ) )
- #ifdef EPSON_PoleDisplay
-   tp_send( PoleDisplay_PORT, FF + trim( BVars( B_NAME ) ) )
+ #ifdef EPSON_POLEDISPLAY
+   tp_send( PoleDisplayPort, FF + trim( BVars( B_NAME ) ) )
  #else
-   tp_send( PoleDisplay_PORT, chr( 22 ) + chr( 17 ) + trim( Bvars( B_GREET ) ) + chr( 16 ) )
+   tp_send( PoleDisplayPort, chr( 22 ) + chr( 17 ) + trim( Bvars( B_GREET ) ) + chr( 16 ) )
  #endif
   endif
- else
- #ifndef EPSON_PoleDisplay
-  if '$' $ disp_text
-   tp_send( PoleDisplay_PORT, chr( 3 ) + padr( left( disp_text, at( '$', disp_text ) - 1 ), 10 ) + ;
-            padl( trim( substr( disp_text, at( '$', disp_text ), 10 ) ), 10 ) )
+
   else
-   tp_send( PoleDisplay_PORT, chr( 3 ) + substr( disp_text, 1, 22 ) )
-  endif
- #else
+
+ #ifdef EPSON_POLEDISPLAY
   if '$' $ disp_text
-   tp_send( PoleDisplay_PORT, FF + left( disp_text, min( at( '$', disp_text ) - 1, 19 ) ) + ;
+   tp_send( PoleDisplayPort, FF + left( disp_text, min( at( '$', disp_text ) - 1, 19 ) ) + ;
             CRLF + padl( trim( substr( disp_text, at( '$', disp_text ), 20 ) ), 20 ) )
   else
-//   tp_send( PoleDisplay_PORT, FF + substr( disp_text, 1, 20 ) )
-   tp_send( PoleDisplay_PORT, FF + disp_text )
+   tp_send( PoleDisplayPort, FF + disp_text )
+
   endif          
+ 
+ #else  
+  if '$' $ disp_text
+   tp_send( PoleDisplayPort, chr( 3 ) + padr( left( disp_text, at( '$', disp_text ) - 1 ), 10 ) + ;
+            padl( trim( substr( disp_text, at( '$', disp_text ), 10 ) ), 10 ) )
+  else
+   tp_send( PoleDisplayPort, chr( 3 ) + substr( disp_text, 1, 22 ) )
+  endif
+ 
  #endif
  endif
-#endif
+// #endif
 disp_text := nil
 endif
 return nil
