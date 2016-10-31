@@ -1294,7 +1294,7 @@ static portopen:=FALSE
    Epson DM-D202 Customer displays are two lines. This function looks for the
    $ sign and attempt to place it ( and following data ) on the second line 
 */   
-if Lvars( L_POZ )
+if Lvars( L_POSDISPLAY )
 // #ifndef __HARBOUR__
  if !portopen
   tp_open( PoleDisplayPort, 32, 128, 9600, 8, 'N', 1 )

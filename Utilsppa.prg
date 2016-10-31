@@ -103,7 +103,7 @@ endif
 @ 20,58 say 'Good' get aLocalVars[ L_GOOD ] pict '999' range 100,999
 @ 20,68 say 'Bad' get aLocalVars[ L_BAD ] pict '999' range 100,999
 @ 21,04 say 'Docket Cutter' get aLocalVars[ L_CUTTER ] pict 'y'
-@ 21,29 say 'POS Display' get aLocalVars[ L_POZ ] pict 'y'
+@ 21,29 say 'POS Display' get aLocalVars[ L_POSDISPLAY ] pict 'y'
 // @ 21,47 say 'Barcode Printer Type' get aGlobalVars[ B_BCPTR ] pict '!'
 
 aArray := {}

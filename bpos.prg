@@ -78,7 +78,7 @@ request DBFCDX
 
 set autopen on
 set( _SET_MFILEEXT, ".FPT" )
-// set( _SET_EVENTMASK, INKEY_ALL )
+// set( _SET_EVENTMASK, INKEY_ALL )  // Turn this on for mice etc
 set( _SET_EVENTMASK, INKEY_KEYBOARD )
 set( _SET_DEBUG, .t. )
 set( _SET_AUTOPEN, TRUE )
@@ -125,7 +125,9 @@ Lvars( L_PRINTER, 'lpt1' )    // This is crap
 
 Chkfield( "Quote", "SysRec" )
 ChkField( "TaxExempt", "master" )
-
+ChkField( "pdport", "nodes")
+ChkField( "scale", "nodes")
+ChkField( "scaleport", "nodes")
 
 cStoreName := trim( Bvars( B_NAME ) ) 
 nLength := max( ( 20 + len( cStoreName ) ) /2, 16 )         // Format Box for Licencee Length

@@ -575,7 +575,7 @@ v1.25.3 - PrintHead doesn't work any more
 #define L_F10MARGIN     37
 #define L_DATE          38
 #define L_CUST_NO       39
-#define L_CDTYPE        40
+#define L_CDTYPE        40 
 #define L_AUTO_OPEN     41
 #define L_CDPORT        42
 #define L_DOCKET        43
@@ -600,8 +600,11 @@ v1.25.3 - PrintHead doesn't work any more
 #define L_C8            62
 #define L_C9            63
 #define L_COLOR         64
-#define L_POZ           65
+#define L_POSDISPLAY    65   // do we have a POS Display?
 #define L_ONP           66
+#define L_POSDISPPORT   67   // what port
+#define L_SCALE			68   // Do we have a scale?
+#define L_SCALEPORT     69   // What port is it on
 
 // X - Security defines 
 #define X_SUPERVISOR    1

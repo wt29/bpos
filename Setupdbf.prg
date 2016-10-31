@@ -1613,13 +1613,12 @@ aadd( aArray, { "c6", "c", 20, 0 } )
 aadd( aArray, { "c7", "c", 20, 0 } )
 aadd( aArray, { "c8", "c", 20, 0 } )
 aadd( aArray, { "c9", "c", 20, 0 } )
-aadd( aArray, { "color", "l", 1, 0 } )
-aadd( aArray, { "PoleDisplay", "l", 1, 0 } )
+aadd( aArray, { "color", "l", 1, 0 } )   //64
+aadd( aArray, { "poledisplay", "l", 1, 0 } )
 aadd( aArray, { "onp", "l", 1, 0 } )
-aadd( aArray, { "modem", "l", 1, 0 } )
-aadd( aArray, { "mport", "n", 1, 0 } )
-aadd( aArray, { "mbaud", "n", 6, 0 } )
-aadd( aArray, { "minit", "c", 20, 0 } )
+aadd( aArray, { "pdport", "n", 2, 0 } )
+aadd( aArray, { "scale", "l", 1, 0 } )
+aadd( aArray, { "scaleport", "n", 2, 0 } )
 dbcreate( sSysPath + "nodes" + NEW_DBF_EXT, aArray )
 
 // cretrans
