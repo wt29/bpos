@@ -189,7 +189,7 @@ local getlist := {}
 
 Heading('Set up POS Function Keys')
 #define FUNC_PICT '@!'
-@ 5,20 say 'Scan Value'
+@ 5,21 say 'Scan Value'
 @ 5,42 say 'Label'
 @ 5,55 say 'Margin'
 @ 6,04 say 'Function Key  #3' get aLocalVars[ L_F3 ] pict FUNC_PICT

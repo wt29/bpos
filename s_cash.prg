@@ -303,7 +303,7 @@ while lMainLoop
 
      endif
      if qtyflag
-      @ nRowNum,62 say nSellPrice * nQuantity pict '99999.99'
+      @ nRowNum,62 say nSellPrice * nQuantity pict QTY_DISP_PICT
 
      endif
      if !hdpos .and. master->onhand - nQuantity <= MAXNEGSTOCK
@@ -360,14 +360,14 @@ while lMainLoop
      cashtemp->sale_type := msale_type
 
      cashtemp->( dbrunlock() )
-
+ 
      if mCustHistFlag .and. firstpass
       Dock_line(  '~Customer : ' + left( customer->name, 26 ) )
 
      endif
 
      if qtyflag
-      Dock_line( substr( master->desc, 1, 18 )+' '+str( nQuantity, 3 ) + ' @'+str( nSellPrice, 7, 2 )+' '+str( nSellPrice * nQuantity, 8, 2 ) )
+      Dock_line( substr( master->desc, 1, 18 )+' '+str( nQuantity, QTY_LEN ) + ' @'+str( nSellPrice, 7, 2 )+' '+str( nSellPrice * nQuantity, QTY_LEN, QTY_DEC ) )
 #ifdef THE_LOOK
 	  Dock_line(  master->id )
 #endif	  
@@ -383,7 +383,7 @@ while lMainLoop
 
 	 if nDiscountValue > 0
       Dock_line(  space( 7 ) +'Inc Discount of '+str( nDiscountValue / ( mMasterPrice / 100 ), 4, 1 );
-       + '%  $-' + str( nDiscountValue*nQuantity, 8, 2 ) )
+       + '%  $-' + str( nDiscountValue*nQuantity, QTY_LEN, QTY_DEC ) )
 
      endif
 

@@ -26,9 +26,9 @@ while mgo
  aArray := {}
  aadd( aArray, { 'File', 'Return to file maintenance menu', nil, nil } )
  aadd( aArray, { 'Add', 'Add New Items', { || add_item() }, nil } )
- aadd( aArray, { 'Print', 'Print Item Details', { || Descprint() }, nil } )
- aadd( aArray, { 'Value', 'Stock Valuation', { || Descvalue() }, nil } )
- aadd( aArray, { 'Markdown', 'Markdown Stock', { || Descmarkdn() }, nil } )
+ aadd( aArray, { 'Print', 'Print Item Details', { || ItemPrint() }, nil } )
+ aadd( aArray, { 'Value', 'Stock Valuation', { || ItemValue() }, nil } )
+ aadd( aArray, { 'Markdown', 'Markdown Stock', { || ItemMarkDown() }, nil } )
  aadd( aArray, { 'Catalogue', 'Catalogue Production System', { || Catalog() }, nil } )
  choice := MenuGen( aArray, 03, 02, 'Desc' )
  if choice < 2
@@ -45,17 +45,15 @@ return
 
 *
 
-procedure descprint
+procedure ItemPrint
 local mprntype,choice,mscr,sAltDesc1,sAltDesc2,mchoice
-local mtitl1, mtitl2, mcat, mcust, mimpr
+local mcat, mcust, mimpr
 local oldscr:=Box_Save(), sID, deptloop
 local getlist:={}, supploop, sHeading
-local cutoff, firstpass, aArray
-local aCustomer, aDetail
-local sHead, sFor, sWhile
+local firstpass, aArray, aCustomer, aDetail, sHead, sFor, sWhile
 
-memvar mDept, mOh, mlen1, mlen2, msupp
-public mDept, mOh, mlen1, mlen2, msupp
+memvar mDept, mOh, mlen1, mlen2, msupp, mtitl, mtitl1, mtitl2, cutoff
+public mDept, mOh, mlen1, mlen2, msupp, mtitl, mtitl1, mtitl2, cutoff
 
 while TRUE
  Box_Restore( oldscr )
@@ -161,8 +159,8 @@ while TRUE
       seek msupp
       
       if mprntype = 'C'
-       sHeading = 'Report for Customer -' + mcust + ' Items with Primary Supplier ' + ;
-            LookItup( 'supplier' , msupp ) + if( moh, 'Onhand Items Only','' )
+       sHeading = 'Report for Customer - ' + mcust + ' Items with Primary Supplier ' + ;
+            LookItup( 'supplier' , msupp ) + if( moh, ' Onhand Items Only','' )
 
        Reporter( aCustomer,;                                                    // Field Array
             sHeading ,;                                                         // Report Heading
@@ -672,7 +670,7 @@ return
 
 *
 
-procedure descvalue
+procedure ItemValue
 local mdep,msupp,msell,mcost,msum,mavg,monhand,mrrp,choice,mscr, getlist:={}
 local deptchoice,oldscr:=Box_Save(), mapp, mdbf, mappcost, aArray, aReport
 memvar totcost    // used in reports
@@ -863,7 +861,7 @@ return
 
 *
 
-procedure descmarkdn
+procedure ItemMarkDown
 local mtotdep:=0,mdept:=space(3), mretail, mprice, sID, getlist:={}
 local page_no:=1, aArray := {}, farr
 Heading('Stock Markdown')

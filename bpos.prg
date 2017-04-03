@@ -29,8 +29,9 @@ local cSysPath
 
 #ifdef __GTWVW__
  //  local lMainCoord
- //altd()
  local lMainCoord := WVW_SetMainCoord( .t. )
+ // altd()
+ 
  // WVW_SetWindowTitle( "Hello World")
  WVW_SetCodePage(,255)
 
@@ -40,8 +41,7 @@ local cSysPath
  WVW_SBaddPart( 0, '20', 20, 0, .t. )
  WVW_SBSetText(,,'Hello' )
  //wvw_showwindow()
- //wait
-
+ 
 #else
  setmode(25,80)
 
@@ -57,7 +57,6 @@ else
  cSysPath = '\bpos\'
  
 endif
-
 Oddvars( SYSPATH, cSysPath )
 
 Oddvars( START_SCR, { Savescreen(), row(), col() } )
@@ -78,8 +77,8 @@ request DBFCDX
 
 set autopen on
 set( _SET_MFILEEXT, ".FPT" )
-// set( _SET_EVENTMASK, INKEY_ALL )  // Turn this on for mice etc
-set( _SET_EVENTMASK, INKEY_KEYBOARD )
+set( _SET_EVENTMASK, INKEY_ALL )  // Turn this on for mice etc
+// set( _SET_EVENTMASK, INKEY_KEYBOARD )
 set( _SET_DEBUG, .t. )
 set( _SET_AUTOPEN, TRUE )
 set( _SET_AUTORDER, TRUE )

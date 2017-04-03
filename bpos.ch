@@ -38,8 +38,8 @@ v1.25.3 - PrintHead doesn't work any more
 #define SMTP_STRING "smtp://user+developer_smtp.com:<password>mail." + DEVELOPER + ".com"
 // BPOS Customer Information
 
-#define LYTTLETON
-// #define THELOOK
+// #define LYTTLETON
+#define THE_LOOK
 // #define DUCKWORTHS
 
 #ifdef LYTTLETON
@@ -47,15 +47,17 @@ v1.25.3 - PrintHead doesn't work any more
  #define EPSON
  #define MUST_USE_QTY
  #define QTY_PICT "999.999"
- #define QTY_LEN 6
- #define QTY_DEC 2   
+ #define QTY_DISP_PICT "99999.999"
+ #define QTY_LEN 7
+ #define QTY_DEC 3   
  #define NONEGSTOCKWARN
  
 #endif
  
-#ifdef THELOOK
+#ifdef THE_LOOK
  #define EPSON
  #define BPOSCUST "The Look"
+ #define QTY_DISP_PICT "99"
 
 #endif
 
@@ -340,7 +342,7 @@ v1.25.3 - PrintHead doesn't work any more
 #endif
 
 #ifndef QTY_DEC
- #define QTY_LEN 2
+ #define QTY_DEC 2
 
 #endif
 
