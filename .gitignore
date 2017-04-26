@@ -45,3 +45,7 @@ bluepos-code/
 *.txt
 *.log
 bpos.tds
+makefile.bcc.old
+*.xxx
+makefile.xxx.old
+Docket.prn
