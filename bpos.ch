@@ -29,7 +29,7 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 // Harbour uses this
 // #define __GTWVG__
 
-#define BUILD_NO "1.25.3"
+#define BUILD_NO "1.25.4"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
 #define DEVELOPER_FAX "+61 2 4751 8479"
 #define SUPPORT_FAX "No Number - use email"
