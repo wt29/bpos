@@ -21,7 +21,7 @@ local inv_tot, item_tot, aHelpLines, aPo
 
 local oldinvno
 
-#ifndef THELOOK
+#ifndef THE_LOOK
 local ntemp, qtyavail, sid, qty_reqd, mComments
 local mNum, spec_dep, Spec_Date, page_number, page_width, page_len
 local top_mar, bot_mar, arr_ptr, mCustOrdNo, col_head1, col_head2
@@ -231,7 +231,7 @@ while mgo
    endif
 
   enddo
-#ifdef THELOOK
+#ifdef THE_LOOK
   Heading( 'Finish review' )
   if isReady(12, , "Finish Reviewing?")
 
@@ -539,7 +539,7 @@ while mgo
      recvhead->( dbskip() )
 
     enddo
-#ifndef THELOOK
+#ifndef THE_LOOK
     aPo := {}  // An array to hold po's
     recvline->( ordsetfocus( 'key' ) )
     if( msupp != '*', recvline->( dbseek( msupp ) ), recvline->( dbgotop() ) )

@@ -304,10 +304,10 @@ return
 procedure stprint
 local nMenuSelect,mstktype:=Sysinc("StkType","G"),mapp,mavg,mstocktake,aArray
 local getlist:={}, mscr, mdbf, aReport,sForCond
-local mcount,msum,mavr,msell,mrrp,moh,mcost,mappr,mapprval
+local mcount,msum,mavr,mrrp,moh,mappr,mapprval
 
-memvar totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin
-public totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin
+memvar totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin, mcost, msell
+public totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin, mcost, msell
 
 mdep:=Sysinc("Stkdept","G")
 while TRUE
@@ -746,21 +746,20 @@ while TRUE
    Center( 10,'Processing - Please Wait' )
    select master
    ordsetfocus( BY_DEPARTMENT )
-   go top
-   // Pitch17()
+   master->( dbgotop() )
 
    aReport := {}
    aadd(aReport,{'substr(desc, 1, 35)','Item Description', 30, 0, FALSE } )
-   aadd(aReport,{'substr(alt_desc, 1, 25)','Alternate Desc', 25, 0, TRUE } )
-   aadd(aReport,{'master->stocktake','Stocktake', 8, 0, TRUE } )
-   aadd(aReport,{'master->onhand','Onhand', 7, 0, TRUE } )
+   aadd(aReport,{'substr(alt_desc, 1, 25)','Alternate Desc', 25, 0, FALSE } )
+   aadd(aReport,{'master->stocktake','Stktake', 8, 0, TRUE } )
+   aadd(aReport,{'master->onhand','Onhand', 8, 0, TRUE } )
    aadd(aReport,{'master->sell_price','Sell;Price', 10, 2, FALSE } )
    aadd(aReport,{'master->sell_price*master->onhand','Valuation;Sell Price', 12, 2, TRUE } )
    aadd(aReport,{'master->cost_price','Cost;Price', 10, 2, FALSE } )
    aadd(aReport,{'master->cost_price*master->onhand','Valuation;Cost Price', 12, 2, TRUE } )
 //   aadd(aReport,{'100-Zero(master->cost_price,Zero(master->onhand->sell_price, 100))','Discount', 10, 2, FALSE } )
 
-   sForCond = "master->onhand > 0 .and." + ;
+    sForCond = "master->onhand > 0 .and." + ;
               "( master->onhand>monhand.or.master->cost_price<mcost.or.master->sell_price>msell .or." + ;
               "100-Zero(master->cost_price,(master->sell_price/100))<mmargin .or." + ;
               "( Lookitup( 'supplier', 'supp_code', 'price_meth' ) = 'R'" + ;

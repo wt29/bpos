@@ -14,6 +14,7 @@ v1.23 - Work around Invoices and GST
 v1.24 - Current Sales File print
 v1.25.0 - Edit the POS and voids require confirmation
 v1.25.3 - PrintHead doesn't work any more
+v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds in place
 
 */
 
@@ -22,7 +23,11 @@ v1.25.3 - PrintHead doesn't work any more
 
 // #include "wvtgui.ch"
 
+// Required for xHarbour
 #define __GTWVW__
+
+// Harbour uses this
+// #define __GTWVG__
 
 #define BUILD_NO "1.25.3"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
@@ -36,8 +41,8 @@ v1.25.3 - PrintHead doesn't work any more
 #define SMTP_SUPPORT_EMAIL 'support@bluegumsoftware.com'
 #define SMTP_FROM_SERVER "MyName@Mail.server.com"
 #define SMTP_STRING "smtp://user+developer_smtp.com:<password>mail." + DEVELOPER + ".com"
-// BPOS Customer Information
 
+// BPOS Customer Information
 // #define LYTTLETON
 #define THE_LOOK
 // #define DUCKWORTHS

@@ -1078,7 +1078,7 @@ if !empty( Bvars( B_GREET ) )
 
 endif
 
-#ifdef THELOOK
+#ifdef THE_LOOK
 Dock_line( "Thank you for shopping at The Look" )
 #endif
 

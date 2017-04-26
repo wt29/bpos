@@ -53,6 +53,9 @@ enddo
 *
 
 procedure xreport
+
+local aPrintLines := {}
+local aRptFields :={}
 local sTendType
 local nGrandQty := 0
 local nGrandTot := 0
@@ -60,13 +63,11 @@ local nTendQty := 0
 local nTendTotal := 0
 local nRegTotal := 0
 local nRegQty := 0
-#ifdef EPSON
-local sRName := "", lFirstPass := TRUE
-#else
+local sRName := ""
+local nTotal:=0, nQty:=0
+local lFirstPass := TRUE
 local oPrinter 
-local aPrintLines := {}
-local aRptFields :={}
-#endif
+
 if Netuse( "sales" )
  Print_find( "docket" )
  Heading('X Report')
@@ -76,7 +77,7 @@ if Netuse( "sales" )
   sales->( dbgotop() )
   sTendType := sales->tend_type
   // sRName := "" // sales->register
-#ifdef EPSON
+#ifdef EPSON    // This is required on xHarbour. Can't find the bug but it just won't select the docket when using Win32Print
   set console off
   set print on
   ? "X Report    " + dtoc( Bvars( B_DATE ) ) + "   " + time() 
@@ -169,7 +170,8 @@ if Netuse( "sales" )
   set printer to  // Should Flush the printer
 
 #else
-  oPrinter:= Win32Prn():New()
+  // Alert( trim( LVars( L_DOCKET_NAME ) ))
+  oPrinter:= Win32Prn( trim( LVars( L_DOCKET_NAME ) ) ):New()
   oPrinter:Landscape:= .F.
   oPrinter:FormType := FORM_A4
   oPrinter:Copies   := 1
@@ -256,7 +258,7 @@ if Netuse( "sales" )
 
    oPrinter:endDoc()
    oPrinter:Destroy()
-
+  endif
  #endif
 
   ordDestroy( "tend_type" )
@@ -265,6 +267,7 @@ if Netuse( "sales" )
  sales->( dbclosearea() )
 
 endif
+
 return
 
 *

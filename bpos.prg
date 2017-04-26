@@ -44,7 +44,10 @@ local cSysPath
  
 #else
  setmode(25,80)
-
+ #ifdef __GTWVG__
+  Wvt_SetGui( TRUE )
+  Wvt_SetTitle( SYSNAME )
+ #endif 
 #endif
 
 cSysPath := GetENV( "BPOSPATH" )

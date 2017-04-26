@@ -291,6 +291,7 @@ while lGo
   case p_sel = 2
    Heading('Print Departments by Code')
    select dept
+   go top
    if Isready(12)
     farr := {}
     aadd(farr,{'dept->code','Code',5,0,FALSE})

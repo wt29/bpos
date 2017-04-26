@@ -140,7 +140,7 @@ while supploop
      loop
 
     endif
-#ifdef THELOOK
+#ifdef THE_LOOK
     lBarCode := FALSE
 #else
     lbarcode := if( len( sID ) = 10 .or. len( sID ) < 9 , YES , NO )

@@ -166,7 +166,8 @@ return
 *
 
 procedure SysInfo ( sNodeName )
-local sScreen:=Box_Save( 04, 01, 13, 77 )
+local aPrinters := getPrinters( TRUE, TRUE )
+local sScreen:=Box_Save( 04, 01, 16 + len( aPrinters) , 77 ), x
 Highlight( 05, 03, '    Node Address', sNodeName )
 Highlight( 06, 03, '        Compiler', version() )
 Highlight( 07, 03, 'Operating System', os() )
@@ -175,6 +176,13 @@ Highlight( 09, 03, '             RDD', rddsetdefault() )
 Highlight( 10, 03, '       Index Ext', ordbagext() )
 Highlight( 11, 03, '       Free Pool', Ns( memory(0) ) )
 Highlight( 12, 03, '     System Path', Oddvars( SYSPATH ) )
+Highlight( 13, 03, ' Default Printer', GetDefaultPrinter() )
+@ 14, 03 say replicate( DBL_ULINE, 74 )
+for x :=1 to len(aPrinters)
+ @ 14 + x, 03 say padr( aPrinters[x, 1], 40 ) + ' ' + padr( aPrinters[ x,2 ], 15 ) + ' ' + padr( aPrinters[x,3], 15 ) 
+
+next
+// Highlight( 13, 03, '    Compiled for', Oddvars( SYSPATH ) )
 
 Error('')
 Box_Restore( sScreen )

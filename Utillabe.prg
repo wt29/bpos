@@ -94,17 +94,38 @@ sBarcode := trim( sBarcode )
 set console off
 set print on
 
-for x = 1 to mqty
+for x = 1 to mqty 
+
+#ifdef THE_LOOK
+ sString += '^XA' + CRLF
+ sString += '^PW250' + CRLF
+ sString += '^FO10, 18' + CRLF
+ sString += '^ABN,25,15' + CRLF
+ sString += '^FD' + trim( BVars( B_NAME ) ) + CRLF
+ sString += '^FS' + CRLF
+ sString += '^FO10,45' + CRLF
+ if len( trim( sBarcode ) ) >= 12
+  sString += '^BEN,50,Y,N' + CRLF
+  sString += '^FD' + left( sBarcode, 12 ) + CRLF
+
+ else
+  sString += '^B2N,40,Y,N,N' + CRLF
+  sString += '^FD' + trim( sBarcode ) + CRLF
+
+ endif
+ sString += '^FS' + CRLF
+ sString += '^FO10,115' + CRLF
+ sString += '^ADN,30,25' + CRLF
+ sString += '^FD$' + ltrim( ns( master->sell_price, 10, 2 ) ) + CRLF
+ sString += '^XZ' + CRLF
+
+#else
 
  sString += '^XA' + CRLF
  sString += '^PW250' + CRLF
  sString += '^FO10, 18' + CRLF
  sString += '^ABN,30,15' + CRLF
-#ifdef LYTTLETON
  sString += '^FDLyttleton' + CRLF
-#else 
- sString += '^FD' + trim( BVars( B_NAME ) ) + CRLF
-#endif
  sString += '^FS' + CRLF
  sString += '^FO10,55' + CRLF
  if len( trim( sBarcode ) ) >= 12
@@ -112,11 +133,7 @@ for x = 1 to mqty
   sString += '^FD' + left( sBarcode, 12 ) + CRLF
 
  else
-#ifdef THE_LOOK
-  sString += '^B2N,40,Y,N,N' + CRLF
-#else
   sString += '^B3N,N,60,Y,N' + CRLF
-#endif
   sString += '^FD' + trim( sBarcode ) + CRLF
 
  endif
@@ -130,9 +147,10 @@ for x = 1 to mqty
  sString += '^FO10,190' + CRLF
  sString += '^ADN,12,12' + CRLF
  sString += '^FD' + trim( master->desc ) + CRLF
- 
  sString += '^XZ' + CRLF
-
+ 
+#endif 
+ 
 next x
 
 ? sString
