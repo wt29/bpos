@@ -2041,8 +2041,8 @@ local type_arr := { { 'SUPP_CODE', SUPP_CODE_LEN },;
 fhandle := fcreate( 'dberrors.txt' )
 @ 22, 12 say 'File - dberrors.txt'
 for x := 1 to len( aArray )
+ @ 21, 12 say aArray[ x, 1 ]
  if Netuse( aArray[ x, 1 ] )
-  @ 21, 12 say aArray[ x, 1 ]
   for y := 1 to fcount()
    for z := 1 to len( type_arr )
     if fieldname( y ) = type_arr[ z, 1 ] .and. valtype( fieldget( y ) ) = 'C' .and. ;

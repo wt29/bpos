@@ -24,7 +24,7 @@ function print_find ( sPTRMain )
 local lReturn := FALSE
 local sWarning := " has not been configured on this machine"
 
-sPTRMain = lower( sPTRMAIN )
+sPTRMain := lower( sPTRMAIN )
 
 do case
 Case sPTRMain = "docket"
@@ -124,7 +124,7 @@ if Secure( X_CASHDRAWER )
  set console on
  Box_Restore( sScreen )
  if upper( newpass ) != 'CASH'
-  Error( 'Cash Drawer Passwords not accepted', 12 )
+  Error( 'Cash drawer password not accepted', 12 )
   SysAudit( 'CDPassFail' )
  else
   SysAudit( 'CDOpen' )
