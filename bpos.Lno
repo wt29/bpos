@@ -1,0 +1,34 @@
+OBJFILES   bpos.obj proclib.obj acme.obj Apcheque.obj Apeom.obj Apremit.obj Aprep.obj Aptran.obj Areom.obj Arrep.obj \
+Arstat.obj Artran.obj Dpurord.obj Errorsys.obj Fpurord.obj Invforms.obj Mainacad.obj Maincate.obj Maincust.obj Maindept.obj \
+Mainsupp.obj Maintitl.obj Prepack1.obj Prepack2.obj Proclib.obj Purckit.obj Putrans.obj Recitem.obj Reclist.obj Recpost.obj Recvbuyb.obj Returns.obj \
+Setupdbf.obj Utilarch.obj Utilback.obj Utilcoms.obj Utilcond.obj Utilimpo.obj Utillabe.obj Utilpack.obj \
+Utilrepr.obj Utilsppa.obj Utilstoc.obj Utilupdt.obj s_appr.obj s_arch.obj s_cash.obj s_daily.obj \
+s_inq1.obj s_inq2.obj s_inv1.obj s_inv2.obj s_layb.obj s_repo.obj s_spec.obj mainbran.obj
+PRGFILES   bpos.prg acme.prg Apcheque.prg Apeom.prg Apremit.prg Aprep.prg Aptran.prg Areom.prg Arrep.prg \
+Arstat.prg Artran.prg Dpurord.prg Errorsys.prg Fpurord.prg Invforms.prg Mainacad.prg Maincate.prg Maincust.prg Maindept.prg \
+Mainsupp.prg Maintitl.prg Prepack1.prg Prepack2.prg proclib.prg Purckit.prg Putrans.prg Recitem.prg \
+Reclist.prg Recpost.prg Recvbuyb.prg Returns.prg Setupdbf.prg Utilarch.prg Utilback.prg \
+Utilcoms.prg Utilcond.prg Utilimpo.prg Utillabe.prg Utilpack.prg Utilrepr.prg Utilsppa.prg Utilstoc.prg Utilupdt.prg \
+s_appr.prg s_arch.prg s_cash.prg s_daily.prg s_inq1.prg s_inq2.prg s_inv1.prg s_inv2.prg s_layb.prg \
+s_repo.prg s_spec.prg mainbran.prg
+CFILES   bpos.c acme.c Apcheque.c Apeom.c Apremit.c Aprep.c Aptran.c Areom.c Arrep.c \
+Arstat.c Artran.c Dpurord.c Errorsys.c Fpurord.c Invforms.c Mainacad.c Maincate.c Maincust.c Maindept.c \
+Mainsupp.c Maintitl.c Prepack1.c Prepack2.c proclib.c Purckit.c Putrans.c Recitem.c \
+Reclist.c Recpost.c Recvbuyb.c Returns.c Setupdbf.c Utilarch.c Utilback.c \
+Utilcoms.c Utilcond.c Utilimpo.c Utillabe.c Utilpack.c Utilrepr.c Utilsppa.c Utilstoc.c Utilupdt.c \
+s_appr.c s_arch.c s_cash.c s_daily.c s_inq1.c s_inq2.c s_inv1.c s_inv2.c s_layb.c \
+s_repo.c s_spec.c mainbran.c
+BCB   c:\develop\bcc55
+BHC   c:\develop\xhb
+TOPMODULE   bpos.prg
+LIBFILES   debug.lib optcon.lib bcc640.lib lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib \
+dbfntx.lib dbfcdx.lib dbffpt.lib dbfdbt.lib common.lib gtwin.lib codepage.lib
+DEFFILE  
+HARBOURFLAGS  
+LFLAGS   -L$(BCB)\lib\obj;$(BCB)\lib;$(BHC)\lib -Gn -M -m -s -Tpe -ap
+LINKER   ilink32
+ALLOBJ   c0x32.obj $(OBJFILES)
+ALLLIB   $(LIBFILES) import32.lib cw32.lib
+bpos.exe : $(OBJFILES) $(CFILES)
+.prg.obj:
+$(BHC)\bin\harbour -D -n -go -I$(BHC)\include /b -o $* $**

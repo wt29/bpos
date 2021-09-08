@@ -43,3 +43,7 @@ bluepos-code/
 *.exe
 *.lib
 *.txt
+*.bak
+
+#Zip Files
+*.zip
