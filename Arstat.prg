@@ -179,9 +179,9 @@ mdate := dtoc( mdate )
 if stpage > 1
  @ 1,0 say 'Page No ' + Ns(stpage,3)
 endif
-@ 03,0 say chr(14) + trim(BPOSCUST) + chr(20) + chr(13)
+@ 03,0 say chr(14) + trim(trim( BVars( B_NAME ) )) + chr(20) + chr(13)
 setprc( 3, 0 )
-@ prow(),54 say BPOSCUST
+@ prow(),54 say trim( BVars( B_NAME ) )
 @ 04,00 say Bvars( B_ADDRESS1 )
 @ 04,54 say substr(Bvars( B_ADDRESS1 ), 1, 24 )
 if !empty(Bvars( B_ADDRESS2 ) )

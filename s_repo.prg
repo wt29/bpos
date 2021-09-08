@@ -28,6 +28,7 @@ if Secure( X_SALESREPORTS )
   aadd( aArray, { 'Supplier', 'Print Sales by Supplier by Period', { || SuppSalesRpt() }, nil } )
   aadd( aArray, { 'Brand', 'Print Sales by Brand by Period', { || ImprSalesRpt() }, nil } )
   aadd( aArray, { 'Best Sellers', 'Print 20 Best Sellers in Each Department', { || ListBest() }, nil } )
+  aadd( aArray, { TAX_DESC, 'Print ' + TAX_DESC + ' for selected period', { || TaxReport() }, nil } )
   choice := MenuGen( aArray, 09, 35, 'Reports')
   if choice < 2
    return
@@ -176,7 +177,7 @@ if IsReady(14)
      aadd( aReport,{ 'qty', 'Quantity;Sold', 8, 0, TRUE})
      aadd( aReport,{ 'cost_price', 'Cost Of Sales', 12, 2, TRUE})
      aadd( aReport,{ 'nett_price', 'Nett Sales',12, 2, TRUE})
-     aadd( aReport,{ 'qty*master->retail', 'Recomended;Retail', 12, 2, TRUE})
+     aadd( aReport,{ 'qty*master->retail', 'Recommended;Retail', 12, 2, TRUE})
      aadd( aReport,{ 'master->onhand', 'Onhand', 7, 0, FALSE})
      aadd( aReport,{ 'ytdtot()', 'Ytd;Sales', 6, 0, FALSE})
     
@@ -785,14 +786,14 @@ if Netuse( 'brand' )
         endif
         Reporter( aReport,;
                   '"Items not sold by Supplier for Period " + Ns( nPeriod )',;
-                  'supplier->name',;                        // group by
-                  "'Supplier:'+Lookitup( 'supplier',master->supp_code) ",;                             // group header
-                  'imprint->name',;                         // sub grp by
-                  "'Imprint:'+Lookitup( 'brand',master->brand) ",;                             // sub grp header
-                  TRUE,;                                    // Summary report
-                  'temp->period = nPeriod',;                // For cond
-                  "if( sSupp = '*', TRUE, master->supp_code = sSupp )",;   // While cond
-                  132 )                                     // Page width
+                  'supplier->name',;                                             // group by
+                  "'Supplier:'+Lookitup( 'supplier',master->supp_code) ",;       // group header
+                  'imprint->name',;                                              // sub grp by
+                  "'Imprint:'+Lookitup( 'brand',master->brand) ",;               // sub grp header
+                  TRUE,;                                    					 // Summary report
+                  'temp->period = nPeriod',;                					 // For cond
+                  "if( sSupp = '*', TRUE, master->supp_code = sSupp )",;         // While cond
+                  132 )                                                          // Page width
 
         SysAudit( 'MthSuppNoSaRe' )
         master->( orddestroy( 'supplier' ) )
@@ -873,11 +874,11 @@ local count, dept, aReport := {}
 local bind := '* ', dpart := '*  '
 local mscr := Box_Save(10,26,15,56)
 
-memvar stdate,enddate
-private stdate := Bvars( B_DATE ) - 13, enddate := Bvars( B_DATE )
+memvar dStartDate,dEndDate
+private dStartDate := Bvars( B_DATE ) - 13, dEndDate := Bvars( B_DATE )
 
-@ 11,29 say "Enter start date:" get stdate picture 'D' valid stdate >= ctod('01/01/80')
-@ 12,28 say "Enter finish date:" get enddate picture 'D' valid enddate >= ctod('01/01/80')
+@ 11,29 say "Enter start date:" get dStartDate picture 'D' valid dStartDate >= ctod('01/01/80')
+@ 12,28 say "Enter finish date:" get dEndDate picture 'D' valid dEndDate >= ctod('01/01/80')
 @ 13,37 say "Binding: " get bind picture '@!K' valid ( bind = '* ' .or. dup_chk( bind, 'binding') )
 @ 14,34 say "Department: " get dpart picture '@K!' valid ( dpart = '*  ' .or. dup_chk( dpart, 'dept'))
 read
@@ -905,9 +906,9 @@ if IsReady(16)
    select 0
    if Netuse( Oddvars( TEMPFILE ), EXCLUSIVE, 10, "saletmp" )
     salehist->( dbgobottom() )
-    while ((( salehist->date ) >= stdate) .and. salehist->(!bof())) .or. salehist->date = ctod("  /  /  ")
+    while ((( salehist->date ) >= dStartDate) .and. salehist->(!bof())) .or. salehist->date = ctod("  /  /  ")
      Pinwheel()      
-     if ( salehist->date) <= enddate .and. salehist->date <> ctod("  /  /  ") 
+     if ( salehist->date) <= dEndDate .and. salehist->date <> ctod("  /  /  ") 
       if ( master->binding == bind .or. bind == '* ')
        if ( master->department == dpart .or. dpart == '*  ')
         add_rec( 'saletmp' )
@@ -971,7 +972,7 @@ if IsReady(16)
     aadd(aReport,{'brand->name','Brand',20,0,FALSE})
     aadd(aReport,{'qty','Quantity',8,0,TRUE})
 
-    Reporter(aReport,'"Best Sellers Listing ('+dtoc(stdate)+' to '+dtoc(enddate)+')',;
+    Reporter(aReport,'"Best Sellers Listing ('+dtoc(dStartDate)+' to '+dtoc(dEndDate)+')',;
     'department',"'Department : '+department+' ('+lookitup('dept',department)+')'",'','',FALSE)
 
     stmp->( orddestroy( 'dept' ) )
@@ -992,4 +993,55 @@ if IsReady(16)
 endif
 Box_Restore( mscr )
 return
+
+*
+
+procedure TaxReport()
+local getlist:={}
+local aReport:={}
+local mscr:=Box_Save(10,26,14,56)
+local lSummary:=FALSE
+
+memvar dStartDate,dEndDate
+private dStartDate := Bvars( B_DATE ) - 13, dEndDate := Bvars( B_DATE )
+
+@ 11,29 say "Enter start date:" get dStartDate picture 'D' valid dStartDate >= ctod('01/01/80')
+@ 12,28 say "Enter finish date:" get dEndDate picture 'D' valid dEndDate >= ctod('01/01/80')
+@ 13,28 say "Summary repoort:" get lSummary picture 'L'
+read
+ 
+if IsReady(16)
+ if Master_use()
+  if Netuse( "salehist" )
+   set relation to salehist->id into master
+   
+   salehist->( dbgotop() )
+   aadd(aReport,{'substr( master->desc,1,30)',DESC_DESC,30,0,FALSE})
+   aadd(aReport,{'salehist->unit_price','Sale;Price',7,2,FALSE})
+   aadd(aReport,{'salehist->qty','Qty',QTY_LEN, QTY_DEC,FALSE})
+   aadd(aReport,{'salehist->qty * salehist->unit_price','Extend', 10, 2, TRUE } )
+   aadd(aReport,{'salehist->sales_tax * salehist->qty',TAX_DESC+';Extended',10,2,FALSE})
+   
+   Reporter( aReport,;
+             TAX_DESC + ' report for ' + dtoc(dStartDate)+' to '+dtoc(dEndDate) ,;
+             "salehist->date",;                                             // group by
+             "'Date:'+dtoc(salehist->date)",;  					            // group header
+             ,;                                              			    // sub grp by
+             ,;  											                // sub grp header
+             lSummary,;                                    					// Summary report
+             'salehist->date >= dStartDate .and. salehist->date <= dEndDate',;   // For cond
+             '',; 														    // While cond
+             80,;															// Page width
+			TRUE )                                                          // permit to screen output
+
+   SysAudit( 'SalesTaxReport' )
+   salehist->( dbcloseArea() )
+ 
+  endif
+  master->( dbclosearea() )
+ endif
+endif
+Box_Restore( mscr )
+return
+
 

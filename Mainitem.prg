@@ -26,9 +26,9 @@ while mgo
  aArray := {}
  aadd( aArray, { 'File', 'Return to file maintenance menu', nil, nil } )
  aadd( aArray, { 'Add', 'Add New Items', { || add_item() }, nil } )
- aadd( aArray, { 'Print', 'Print Item Details', { || Descprint() }, nil } )
- aadd( aArray, { 'Value', 'Stock Valuation', { || Descvalue() }, nil } )
- aadd( aArray, { 'Markdown', 'Markdown Stock', { || Descmarkdn() }, nil } )
+ aadd( aArray, { 'Print', 'Print Item Details', { || ItemPrint() }, nil } )
+ aadd( aArray, { 'Value', 'Stock Valuation', { || ItemValue() }, nil } )
+ aadd( aArray, { 'Markdown', 'Markdown Stock', { || ItemMarkDown() }, nil } )
  aadd( aArray, { 'Catalogue', 'Catalogue Production System', { || Catalog() }, nil } )
  choice := MenuGen( aArray, 03, 02, 'Desc' )
  if choice < 2
@@ -45,22 +45,20 @@ return
 
 *
 
-procedure descprint
+procedure ItemPrint
 local mprntype,choice,mscr,sAltDesc1,sAltDesc2,mchoice
-local mtitl1, mtitl2, mcat, mcust, mimpr
+local mcat, mcust, mimpr
 local oldscr:=Box_Save(), sID, deptloop
 local getlist:={}, supploop, sHeading
-local cutoff, firstpass, aArray
-local aCustomer, aDetail
-local sHead, sFor, sWhile
+local firstpass, aArray, aCustomer, aDetail, sHead, sFor, sWhile
 
-memvar mDept, mOh, mlen1, mlen2, msupp
-public mDept, mOh, mlen1, mlen2, msupp
+memvar mDept, mOh, mlen1, mlen2, msupp, mtitl, mtitl1, mtitl2, cutoff
+public mDept, mOh, mlen1, mlen2, msupp, mtitl, mtitl1, mtitl2, cutoff
 
 while TRUE
  Box_Restore( oldscr )
 
- Heading( 'Desc File Print Menu' )
+ Heading( ITEM_DESC + ' File Print Menu' )
  Print_find( 'report' )
 
  aArray := {}
@@ -161,8 +159,8 @@ while TRUE
       seek msupp
       
       if mprntype = 'C'
-       sHeading = 'Report for Customer -' + mcust + ' Items with Primary Supplier ' + ;
-            LookItup( 'supplier' , msupp ) + if( moh, 'Onhand Items Only','' )
+       sHeading = 'Report for Customer - ' + mcust + ' Items with Primary Supplier ' + ;
+            LookItup( 'supplier' , msupp ) + if( moh, ' Onhand Items Only','' )
 
        Reporter( aCustomer,;                                                    // Field Array
             sHeading ,;                                                         // Report Heading
@@ -315,7 +313,7 @@ while TRUE
     mlen2 := len( mtitl2 )
     dbseek( mtitl1, TRUE )
     if mprntype = 'C'
-     sHeading = 'Report for ' + mcust + ' List of Items from ' + mtitl1 + ' to ' + mtitl2
+     sHeading = 'Report for ' + mcust + ' List of ' + ITEM_DESC + ' ' + mtitl1 + ' to ' + mtitl2
      Reporter( aCustomer,;                                                          //Field Array
             sHeading ,;   // Report Heading
             ,;                                                                  // Group By
@@ -328,7 +326,7 @@ while TRUE
             132 )                                                               // approx Page width
 
     else
-      sHeading = "Report for " + mcust + " List of Items from " + mtitl1 + " to " + mtitl2
+      sHeading = "Report for " + mcust + ' List of ' + ITEM_DESC + ' ' + mtitl1 + " to " + mtitl2
       Reporter( aCustomer,;                                                     //Field Array
             sHeading,;                                                          // Report Heading
             ,;                                                                  // Group By
@@ -622,8 +620,6 @@ if Isready(11)
  select Master
  master->( dbgotop() )
  
-// // Pitch17()
-
  farr := {}
  aadd( farr,{'idcheck(master->id)','id',13,0,FALSE})
  aadd( farr,{'substr(master->desc,1,30)','Desc',30,0,FALSE})
@@ -674,7 +670,7 @@ return
 
 *
 
-procedure descvalue
+procedure ItemValue
 local mdep,msupp,msell,mcost,msum,mavg,monhand,mrrp,choice,mscr, getlist:={}
 local deptchoice,oldscr:=Box_Save(), mapp, mdbf, mappcost, aArray, aReport
 memvar totcost    // used in reports
@@ -865,7 +861,7 @@ return
 
 *
 
-procedure descmarkdn
+procedure ItemMarkDown
 local mtotdep:=0,mdept:=space(3), mretail, mprice, sID, getlist:={}
 local page_no:=1, aArray := {}, farr
 Heading('Stock Markdown')
@@ -1386,7 +1382,7 @@ return ( price > 0 )
 
 proc sphead
 set device to print
-@ prow(),00 say padc( trim( BPOSCUST ) + ' Special Desc List', 80 )
+@ prow(),00 say padc( trim( trim( BVars( B_NAME ) ) ) + ' Special Desc List', 80 )
 @ prow()+2,02 say 'Desc'
 @ prow(),  43 say 'Author'
 @ prow(),  74 say 'Price'

@@ -12,7 +12,9 @@ v1.21 - Last of the converted Forms. Errorsys now writes files into errors
 v1.22 - Fixed the stocktake forms - did some work around the GST printing problems
 v1.23 - Work around Invoices and GST
 v1.24 - Current Sales File print
-
+v1.25.0 - Edit the POS and voids require confirmation
+v1.25.3 - PrintHead doesn't work any more
+v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds in place
 
 */
 
@@ -21,9 +23,13 @@ v1.24 - Current Sales File print
 
 // #include "wvtgui.ch"
 
+// Required for xHarbour
 #define __GTWVW__
 
-#define BUILD_NO "1.24"
+// Harbour uses this
+// #define __GTWVG__
+
+#define BUILD_NO "1.25.4"
 #define DEVELOPER_PHONE "+61 2 4751 8497"
 #define DEVELOPER_FAX "+61 2 4751 8479"
 #define SUPPORT_FAX "No Number - use email"
@@ -32,15 +38,31 @@ v1.24 - Current Sales File print
 #define EXECUTABLE "bpos.exe"
 #define SYSNAME 'BPOS'
 #define DEVELOPER 'Bluegum Software'
+#define SMTP_SUPPORT_EMAIL 'support@bluegumsoftware.com'
+#define SMTP_FROM_SERVER "MyName@Mail.server.com"
+#define SMTP_STRING "smtp://user+developer_smtp.com:<password>mail." + DEVELOPER + ".com"
 
 // BPOS Customer Information
-
-#define THELOOK
+// #define LYTTLETON
+#define THE_LOOK
 // #define DUCKWORTHS
 
-#ifdef THELOOK
+#ifdef LYTTLETON
+ #define BPOSCUST "Lyttleton Stores"
+ #define EPSON
+ #define MUST_USE_QTY
+ #define QTY_PICT "999.999"
+ #define QTY_DISP_PICT "99999.999"
+ #define QTY_LEN 7
+ #define QTY_DEC 3   
+ #define NONEGSTOCKWARN
+ 
+#endif
+ 
+#ifdef THE_LOOK
  #define EPSON
  #define BPOSCUST "The Look"
+ #define QTY_DISP_PICT "99"
 
 #endif
 
@@ -62,35 +84,35 @@ v1.24 - Current Sales File print
 
 #endif
 
-
 #ifdef IS_BOOKSHOP
  #define STORETYPE 'Bookshop'
  #define STORENAMEDESC 'Bookshop'
- #define ITEM_DESC 'Title'
+ #define PLU_DESC 'ISBN'
  #define ID_DESC 'ISBN'
+ #define ITEM_DESC 'Title'
  #define DESC_DESC 'Title'                    // Odd name - the "description" of the description field
  #define ALT_DESC 'Author'
  #define BRAND_DESC 'Imprint'
  #define PACKAGE_DESC 'Binding'
  #define ILLUSTRATOR_DESC 'Illustrator'
- #define PLU_DESC 'ISBN'
 
 #else
  #define STORETYPE 'Store'
  #define STORENAMEDESC 'Store Name'
- #define ITEM_DESC 'Items'
- #define ID_DESC 'Code'
+ #define ITEM_DESC 'Item'
+ #define PLU_DESC 'Item ID'
+ #define ID_DESC 'Item ID'
  #define DESC_DESC 'Description'
- #define ALT_DESC 'Alt. Descrpt'
+ #define ALT_DESC '2nd Descr.'
  #define BRAND_DESC 'Brand'
  #define PACKAGE_DESC 'Package'
- #define ILLUSTRATOR_DESC '2nd Description'
- #define PLU_DESC 'PLU'
+ #define ILLUSTRATOR_DESC '3rd Descr.'
  
 #endif
 
 #define MEMO_EXT 'fpt'
 #define NEW_DBF_EXT '.bps'
+#define INDEX_EXT '.cdx' 
 
 #define FORM_A4 9
 
@@ -149,7 +171,7 @@ v1.24 - Current Sales File print
 #define C_CYAN    8
 #define C_BLACK   9
 
-#define C_BACKGROUND 'BG'
+#define C_BACKGROUND 'B+'
 
 // Colour defines for Tbrowse objs
 //#define TB_COLOR  'GR+/' + C_BACKGROUND + ', N/W'
@@ -159,7 +181,8 @@ v1.24 - Current Sales File print
 #define HEADSEP 'Í'
 #define COLSEP '³'
 
-#define ULINE  chr(95)
+#define ULINE chr(95)
+#define DBL_ULINE "="
 
 #define CRYPTKEY 'charlotte89'   // Should work if ever this is needed now uses HB_CRYPT
 
@@ -170,14 +193,20 @@ v1.24 - Current Sales File print
 #endif
 
 #define SYSTEM_MAX_RECS 100000   //How many records to keep in the audit trail
+#define ESC 27
+#define GS 29
 
 // Printing Bits
-#define BIGCHARS chr(27) + chr(33) + chr(48)
-#define VERYBIGCHARS chr(27) + chr(33) + chr(49)
-#define NOBIGCHARS chr(27) + chr(33) + chr(0)
-#define SCRIPTCHARS chr(27) + chr(33) + chr(50)
+#define BIGCHARS chr( ESC ) + chr(33) + chr(48)
+// #define BIGCHARS chr( GS ) + "!" + chr(3)
+// #define NOBIGCHARS chr( GS ) + "!" + chr(0)
+// #define BIGCHARS chr( ESC ) + "E" + chr(3)
 
-#define PAPERCUT chr(29) + "V" + chr(66) + chr(0)                            // Used in S_CASH
+#define VERYBIGCHARS chr( ESC ) + chr(33) + chr(49)
+#define NOBIGCHARS chr( ESC ) + chr(33) + chr(0)
+#define SCRIPTCHARS chr( ESC ) + chr(33) + chr(50)
+
+#define PAPERCUT chr( GS ) + "V" + chr(66) + chr(0)                            // Used in S_CASH
 
 #define ITALICS chr(27)+chr(37)+'G'
 #define NOITALICS chr(27)+chr(37)+'H'
@@ -317,6 +346,16 @@ v1.24 - Current Sales File print
 
 #endif
 
+#ifndef QTY_DEC
+ #define QTY_DEC 2
+
+#endif
+
+#ifndef CATEGORY_CODE_LEN
+ #define CATEGORY_CODE_LEN 6
+
+#endif
+
 #ifndef SALES_CODE_LEN
  #define SALES_CODE_LEN 2
 
@@ -337,8 +376,8 @@ v1.24 - Current Sales File print
 #endif
 
 #ifndef MAXNEGSTOCK    // This is how far we will let negative stock go - used in invoicing
- #define MAXNEGSTOCK -999
-
+ #define MAXNEGSTOCK -99
+ 
 #endif
  
 #ifndef CREDPICT
@@ -363,13 +402,19 @@ v1.24 - Current Sales File print
  #define GST_RATE 10
 
 #endif
+
+#ifndef TAX_DESC
+ // GST relies on the "taxExempt" field and the nominated GST rate
+ #define TAX_DESC "GST Exempt"
+
+#endif
  
 #ifndef CURRENCY
  #define CURRENCY 'AUS$'
 
 #endif
  
-// Some defines for easy handling of index relations
+// Some defines for easy handling of index relation
 #define NATURAL         ''
 #define BY_ID           'ID'
 #define BY_DESC         'desc'
@@ -537,7 +582,7 @@ v1.24 - Current Sales File print
 #define L_F10MARGIN     37
 #define L_DATE          38
 #define L_CUST_NO       39
-#define L_CDTYPE        40
+#define L_CDTYPE        40 
 #define L_AUTO_OPEN     41
 #define L_CDPORT        42
 #define L_DOCKET        43
@@ -562,8 +607,11 @@ v1.24 - Current Sales File print
 #define L_C8            62
 #define L_C9            63
 #define L_COLOR         64
-#define L_POZ           65
+#define L_POSDISPLAY    65   // do we have a POS Display?
 #define L_ONP           66
+#define L_POSDISPPORT   67   // what port
+#define L_SCALE			68   // Do we have a scale?
+#define L_SCALEPORT     69   // What port is it on
 
 // X - Security defines 
 #define X_SUPERVISOR    1
@@ -645,4 +693,16 @@ v1.24 - Current Sales File print
 #define MB_RET_OK                   1
 #define MB_RET_YES                  6
 #define MB_RET_NO                   7
+
+#ifdef NDL
+
+#else
+
+ #define HDG_CASHSALES  	'Cash Sales'
+ #define LBL_PLU_LOOKUP 	'Scan Barcode / Enter ' + ID_DESC
+ #define LBL_CS_SCR_HEAD_Q 	'Item Desc                                Price     Qty   Extend'
+ #define LBL_CS_SCR_HEAD	'Item Desc                                Price'
+ 
+#endif 
+
 // Eof - bpos.ch

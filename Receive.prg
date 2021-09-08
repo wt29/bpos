@@ -40,7 +40,7 @@ if Master_use()
  endif
 endif
 
-line_clear(24)
+line_clear( 24 )
 
 while supploop
 
@@ -140,7 +140,7 @@ while supploop
      loop
 
     endif
-#ifdef THELOOK
+#ifdef THE_LOOK
     lBarCode := FALSE
 #else
     lbarcode := if( len( sID ) = 10 .or. len( sID ) < 9 , YES , NO )

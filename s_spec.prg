@@ -110,15 +110,17 @@ while TRUE
  cls
  @ 01,67 say 'Docket is ' + if( lvars( L_DOCKET ), 'On', 'Off' )
  Heading('Create Special Order')
- @ 03,00 say ' Supp  Desc                          Author        Qty  Order No     Av Spec'
+ SysColor( C_BRIGHT )
+ @ 03,00 say ' Supp  ' + padr( DESC_DESC, 25) + padr( ALT_DESC, 20 ) + ' Qty  Order No     Av Spec'
  @ 04,00 say replicate( chr( 196 ), 79 )
+ SysColor( C_NORMAL )
  mcomm := space(40)
  while TRUE
   msupp := space( SUPP_CODE_LEN )
   Highlight( 1, 1, 'Customer NameÍÍÍ> ', custname )
   Highlight( 1, 40, 'CommentsÍÍÍ>', customer->comments )
   Highlight( 02, 60, 'Deposit(s) $', Ns( mtotdep ) )
-  @ 02,25 say 'Enter id/Code' get sID pict '@!'
+  @ 02,25 say ID_DESC get sID pict '@!'
 
   if !specvars[ APPENDING ]
    okf5 := setkey( K_F5, { || SpecPDTAppe() } )
@@ -241,7 +243,7 @@ while TRUE
    else
     if !Codefind(sID)
      clear typeahead
-     Error( 'id/Code not on File', 12 )
+     Error( ID_DESC + ' not on File', 12 )
 
     else
      line_clear(row)
@@ -261,25 +263,25 @@ while TRUE
      msupp := master->supp_code
      macq := space(10)
      mavail := MASTAVAIL
-     @ 05,00 get msupp pict '@!' valid( dup_chk( msupp,"supplier" ) .and. !empty(msupp) )
+     @ 05,00 get msupp pict '@!' valid( dup_chk( msupp, "supplier" ) .and. !empty(msupp) )
      @ 05,06 say substr( master->desc, 1, 25 ) + ' ' + master->status
      @ 05,37 say substr( master->alt_desc, 1, 14 )
      @ 05,52 get mqty pict QTY_PICT
      @ 05,58 get mordno pict '@S10!'
      @ 05,70 say mavail pict '999'
      @ 05,75 say master->special pict '999'
-     linesave := Box_Save(6,0,7,79)
-     Line_clear( 6 )
-     @ 06,01 say 'Sp Ord Comment' get mcomm pict '@KS19'
-     @ 06,37 say 'Deposit' get mdep pict '9999.99'
-     @ 06,53 say 'StandOr' get mstand pict 'Y'
-     @ 06,63 say 'Acq #' get macq
+     linesave := Box_Save(6, 0, 9, 79 )
+//     Line_clear( 6 )
+     @ 07,01 say 'Sp Ord Comment' get mcomm pict '@KS19'
+     @ 07,37 say 'Deposit' get mdep pict '9999.99'
+     @ 07,53 say 'StandOr' get mstand pict 'Y'
+     @ 07,63 say 'Acq #' get macq
      read
      mreceived := 0
      morder := mqty - mreceived
      if master->onorder > 0 .and. mqty - mreceived > 0
-      line_clear( 7 )
-      @ 07,01 say 'You have '+Ns(master->onorder)+' on order already.';
+//      line_clear( 7 )
+      @ 08, 01 say 'You have '+Ns( master->onorder )+' on order already.';
             +' How many extra to place onto draft order' get morder pict '99'
       read
      endif
@@ -397,7 +399,7 @@ while TRUE
    spectemp->( dbgotop() )
    Dock_head()
    Dock_line(  chr(17) + chr(14) + 'Special No: ' + Ns(mspecno,6) )
-   Dock_line(  'Please order the following books for :' )
+   Dock_line(  'Please order the following ' + ITEM_DESC + ' for :' )
    Dock_line(  customer->name )
    Dock_line(  '(Hm) ' + customer->phone1 + '   (Wk)' + customer->phone2 )
    Dock_line(  'Desc               '+ ALT_DESC + '          Qty' )
@@ -499,13 +501,13 @@ while TRUE
     if !navigate(specbrow,keypress)
      do case
      case keypress == K_F1
-      aHelpLines := { { 'Del', 'Delete line from Order' },;
-                   { 'Enter', 'Modify line Details' },;
-                   { 'F4', 'Add a deposit to this Order' },;
-                   { 'F9', 'Delete all of Special Order' },;
-                   { 'F10', 'Examine Desc Details' },;
-                   { 'F12', 'Finalise all of this Special Order' }, ;
-                   { 'Ctrl-Enter', 'Change Customer order number' } }
+      aHelpLines := { 	{ 'Del', 'Delete line from Order' },;
+						{ 'Enter', 'Modify line Details' },;
+						{ 'F4', 'Add a deposit to this Order' },;
+						{ 'F9', 'Delete all of Special Order' },;
+						{ 'F10', 'Examine Desc Details' },;
+						{ 'F12', 'Finalise all of this Special Order' }, ;
+						{ 'Ctrl-Enter', 'Change Customer order number' } }
       Build_help( aHelpLines )
 
      case keypress == K_CTRL_RET
@@ -609,7 +611,7 @@ while TRUE
      case keypress == K_F10
       if Secure( X_SALEVOID )
        mtotdep := 0
-       if Isready( 03, 21, 'Ok to delete all of Special Order' )
+       if Isready( 03, 21, 'Ok to delete all of Special Order '  + ns( special->number ) + '?' )
         SysAudit( "SpDelAll" + Ns( special->number ) )
         special->( dbseek( mspecno ) )
         while special->number = mspecno .and. !special->( eof() )
@@ -1450,7 +1452,7 @@ while !special->( eof() ) ;
 
 enddo
 @ prow()+1, 0 say replicate( chr(196) ,80 )
-@ prow()+3, 0 say 'For and on Behalf of ' + BPOSCUST + ' _____________________'
+@ prow()+3, 0 say 'For and on Behalf of ' + trim( BVars( B_NAME ) ) + ' _____________________'
 eject
 set device to screen
 return
@@ -1462,7 +1464,7 @@ setprc(0,0)
 
 @ 0,0 say BIGCHARS + 'Special Order Status Report'
 @ prow()+1,60 say BIGCHARS + dtoc(Bvars( B_DATE ) ) + NOBIGCHARS
-@ prow()+1,0 say chr(27)+chr(31)+chr(1)+chr(14)+BPOSCUST;
+@ prow()+1,0 say chr(27)+chr(31)+chr(1)+chr(14)+trim( BVars( B_NAME ) );
             +chr(27)+chr(31)+chr(0)
 @ prow()+1,0 say Bvars( B_ADDRESS1 )
 if !empty( Bvars( B_ADDRESS2 ) )

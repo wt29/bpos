@@ -7,10 +7,10 @@ LOCAL cSmtpUrl, oEmail, oSMTP
       LOCAL cSubject, cFrom, cTo, cBody, cFile
 
       // preparing data for eMail
-      cSmtpUrl := "smtp://tony+bluegumsoftware.com:Kwaka900@mail.bluegumsoftware.com"
+      cSmtpUrl := SMTP_STRING
       cSubject := "Testing eMail"
-      cFrom    := "MyName@Mail.server.com"
-      cTo      := "tony@bluegumsoftware.com"
+      cFrom    := SMTP_FROM_SERVER 
+      cTo      := SMTP_SUPPORT_EMAIL
       cFile    := "ErrorSys.prg"
       cBody    := "This is a test mail sent at: " + DtoC(date()) + " " + Time()
 
@@ -72,17 +72,17 @@ FUNCTION bposSendMail( cServer, nPort, cFrom, aTo, aCC, aBCC, cBody, cSubject, a
    LOCAL lConnect      := .T.
    local oPop
 
-   DEFAULT cUser TO "tony@bluegumsoftware.com"
-   DEFAULT cPass TO "Kwaka900"
+   DEFAULT cUser TO ""
+   DEFAULT cPass TO ""
    DEFAULT nPort TO 25
    DEFAULT aFiles TO {}
    DEFAULT nPriority TO 3
    DEFAULT lRead TO .F.
    DEFAULT lTrace to .T.
    DEFAULT lPopAuth to .F.
-   DEFAULT cPopServer to "mail.bluegumsoftware.com"
-   DEFAULT cServer to "mail.tpg.com.au"
-   DEFAULT ato to "tony@bluegumsoftware.com"
+   DEFAULT cPopServer to SMTP_FROM_SERVER
+   DEFAULT cServer to SMTP_FROM_SERVER
+   DEFAULT ato to SMTP_SUPPORT_EMAIL
    DEFAULT cBody to "hi"
 
    cUser := StrTran( cUser, "@", "&at;" )
@@ -159,7 +159,6 @@ FUNCTION bposSendMail( cServer, nPort, cFrom, aTo, aCC, aBCC, cBody, cSubject, a
    ENDIF
    
    TRY
-    //  cURL := "smtp://tony@bluegumsoftware.com:Kwaka900@mail.bluegumsoftware.com"
     cUrl := "smtp://" + cUser + "@" + cServer + '/' + cTo
     oUrl := tUrl():New( cUrl )
 

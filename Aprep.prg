@@ -72,9 +72,9 @@ while TRUE
      endif
      term := inkey()
      if row=1
-      apos:=((136-len(BPOSCUST))/2)-8
+      apos:=((136-len(trim( BVars( B_NAME ) )))/2)-8
       bpos:=((136-len(reptit))/2)-7
-      @ 1,1 say  dtoc(Bvars( B_DATE ))+space(apos)+BPOSCUST
+      @ 1,1 say  dtoc(Bvars( B_DATE ))+space(apos)+trim( BVars( B_NAME ) )
       @ 3,0 say 'PAGE '+ltrim(str(mpage,2))+space(bpos)+reptit
       @ 5,0 say "Credit Id   Creditor Name                     Phone" ;
           + "          Current $    30 Days $    60 Days $" ;
@@ -120,7 +120,7 @@ while TRUE
       if row>52
        eject
        mpage++
-       @ 1,0 say dtoc( Bvars( B_DATE ) ) + space( apos ) + BPOSCUST
+       @ 1,0 say dtoc( Bvars( B_DATE ) ) + space( apos ) + trim( BVars( B_NAME ) )
        @ 3,0 say 'Page '+Ns(mpage,2)+space(bpos)+reptit
        @ 5,0 say "   Id          Creditor                   Phone " ;
           + "            Current $    30 Days $    60 Days $" ;
@@ -159,7 +159,7 @@ while TRUE
       skip
      enddo
      // Pitch10()
-     @ 0,0 say dtoc( Bvars( B_DATE ) ) + padc( BPOSCUST, 60 ) + 'Page ' + Ns( mpage, 2 )
+     @ 0,0 say dtoc( Bvars( B_DATE ) ) + padc( trim( BVars( B_NAME ) ), 60 ) + 'Page ' + Ns( mpage, 2 )
      @ 1,0 say padc( 'Creditors Trial Balance SysAudit Report', 80 )
      @ 06,10 say '     Opening Balance.... '+str( Oddvars( CRE_OP_BAL ),10,2)
      @ 07,10 say '     + Purchases........ '+str(totinv,10,2)

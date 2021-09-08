@@ -130,7 +130,7 @@ while TRUE
     exit
    endcase
   enddo
-
+/*
  case choice = 3 .and. Secure( X_GENERAL )
   if !file( Oddvars( SYSPATH )+'Exogen.bat' )
    Error("General Ledger Option not Installed",12)
@@ -139,8 +139,8 @@ while TRUE
   endif
 
  case choice = 4 .and. Secure( X_REPORTER )
-
- case choice < 2 .or. choice = 5
+*/
+ case choice = 3 .or. choice = 0
   return
 
  endcase

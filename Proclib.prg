@@ -89,31 +89,31 @@ function add_rec ( cFileName ) // Bugger it add the record or else !!
 default cFileName to alias()
 (cFileName)->( dbappend() )
 while neterr()             // Error from last attempt
- Error('Attempting to append new record to ' + cFileName , 12, 5 ) // Warn 'em
+ Error('Attempting to append new record to ' + cFileName , 12, 5 ) // Warn em
  (cFileName)->( dbappend() )   // Attempt to add again
 enddo                      // Test and loop ?
 return TRUE                // OK so back we go
 
 *
 
-function Netuse ( p_file, ex_use, wait, p_alias, lnewarea, aindex ,mtag )
-local forever, mcount := 1, ocur := setcursor( 0 )
+function Netuse (  sDbfFile, ex_use, wait, sDBFAlias, lnewArea, aindex ,mtag )
+local lForever, nCount := 1, ocur := setcursor( 0 )
 
 default ex_use to SHARED
 default wait to 10
-default p_alias to NOALIAS
-default lnewarea to NEW
+default sDBFAlias to NOALIAS
+default lnewArea to NEW
 default mtag to 1
 
-forever := ( wait = 0 )
-lnewarea := ( lnewarea != nil ) .and. lnewarea
-if !file( p_file + if(  '.' $ p_file, '', '.dbf' ) )
- Error( 'File ' + p_file + ' could not be found in default drive or in path "' + Oddvars( SYSPATH ) + '"', 12 )
+lForever := ( wait = 0 )
+lnewArea := ( lnewArea != nil ) .and. lnewArea
+if !file( sDbfFile + if(  '.' $ sDbfFile, '', '.dbf' ) )
+ Error( 'File ' + sDbfFile + ' could not be found in default drive or in path "' + Oddvars( SYSPATH ) + '"', 12 )
  return FALSE
 
 endif
-while ( forever .or. wait > 0 )
- dbusearea( lnewarea, 'DBFCDX', p_file, p_alias, !ex_use )
+while ( lForever .or. wait > 0 )
+ dbusearea( lnewArea, "DBFCDX", sDbfFile, sDBFAlias, !ex_use )
 
  if !neterr()
 
@@ -129,12 +129,12 @@ while ( forever .or. wait > 0 )
  endif
  inkey(1)
  --wait
- mcount++
- if int(mcount/5) = mcount/5
-  Error( 'Waiting for file ' + p_file + ' to become Available', 12, 4 )
+ nCount++
+ if int(nCount/5) = nCount/5
+  Error( 'Waiting for file ' + sDbfFile + ' to become Available', 12, 4 )
  endif
 enddo
-Error( 'File ' + p_file + ' unavailable', 12, 3 )
+Error( 'File ' + sDbfFile + ' unavailable', 12, 3 )
 setcursor( ocur )
 return FALSE
 
@@ -216,12 +216,12 @@ return nil
 
 function pinwheel ( nointerupt )
 local olddev := set( _SET_DEVICE, 'screen' ), mret
-static mchr := {'|','/','-','\'}, mcount := 0
-mcount++
-if mcount = 5
- mcount := 1
+static mchr := {'|','/','-','\'}, nCount := 0
+nCount++
+if nCount = 5
+ nCount := 1
 endif
-@ 24, 79 say mchr[ mcount ]
+@ 24, 79 say mchr[ nCount ]
 set( _SET_DEVICE, olddev )
 if nointerupt = nil
  mret := ( inkey() != K_ESC )
@@ -237,8 +237,9 @@ local nOrigSelect := select()
 
 if mqty != nil
  if master->onhand + mqty < MAXNEGSTOCK
-  Error( 'Negative Stock limit Exceeded on desc', 12, ,trim( left( master->desc, 40 ) ) )
-
+#ifndef NONEGSTOCKWARN
+  Error( 'Negative Stock limit Exceeded on ' + DESC_DESC, 12, ,trim( left( master->desc, 40 ) ) )
+#endif
  else
   master->onhand += mqty
 
@@ -333,7 +334,6 @@ if len( mlvars ) = 0
    nodes->good := 530
    nodes->bad := 250
    nodes->colattr := if(iscolor(),1,16)
-   nodes->docket := TRUE
    nodes->memory := 640
    nodes->color := TRUE
    nodes->backgr := TRUE
@@ -373,7 +373,7 @@ if Netuse( "nodes", EXCLUSIVE )                         // All of our 'L_' Varia
    fieldput( x, mlvars[ x ] ) 
   next                                                  // And Again for more fields
  else
-  Error( 'Trouble locating Node Address in Nodes file - Notify Bluegum Software', 12 )
+  Error( 'Trouble locating Node Address in Nodes file - Notify ' + DEVELOPER , 12 )
  endif
  nodes->( dbclosearea() )
 endif
@@ -527,10 +527,11 @@ return
 
 *
 
-function error ( ertext,errow,erwait,extrainfo )
+function error ( ertext, errow, erwait, extrainfo )
 local sScreen, ercol, er_bott, er_right, ocursor:=setcursor(0)
 default erText to ""
 default extraInfo to ""
+default erWait to 0
 if bvars( B_BELLS )
  tone( lvars( L_BAD ), 5 )
 endif
@@ -544,26 +545,22 @@ if errow = nil
 
 else
  er_right := ercol + max( 27, max( len( ertext ), if( extrainfo != "", len( extrainfo ), 0 ) ) ) + 4
- er_bott := errow + if( erwait = nil, 2, 1 ) + if( empty( ertext ), 0, 1 )+ if( extrainfo = "", 0, 1 )
+ er_bott := errow + if( erwait = 0, 2, 1 ) + if( empty( ertext ), 0, 1 )+ if( extrainfo = "", 0, 1 )
  sScreen:=Box_Save( errow, ercol, er_bott, er_right, C_YELLOW )
  Center( errow + 1, ertext )
  if extrainfo != ""
   Center( errow + 2, extrainfo )
 
  endif
- if erwait = nil
+ if erwait = 0
   Center( er_bott - 1, '- Hit any key to continue -' )
 
  endif  
 
 endif
-if erwait != nil
- inkey( erwait )
 
-else
- inkey( 0 )
+inkey( erwait, INKEY_ALL )
 
-endif
 Syscolor( 1 )           
 Box_Restore( sScreen )
 setcursor( ocursor )
@@ -1441,7 +1438,7 @@ return nil
 
 function line_clear ( line_no )
 @ line_no,0 say space(79+1)
-return ""
+return "" 
 
 *
 
@@ -1469,7 +1466,7 @@ case p_colour = C_BRIGHT
  setcolor( 'w+/' + C_BACKGROUND + ', w+' )
 
 case p_colour = C_MAUVE    // 4
- setcolor( 'w/rb,w+/r,,,w/r', 'w+' )
+ setcolor( 'w/rb,w+/r,w/rb,w/rb,w/rb' )
 
 case p_colour = C_GREY     // 5
  setcolor( 'w+/w', 'w+' )
@@ -1481,7 +1478,7 @@ case p_colour = C_GREEN    // 7
  setcolor( 'w+/g', 'w+' )
 
 case p_colour = C_CYAN     // 8
- setcolor( 'w/bg+,w+/gr,,,bg+/bg', 'w+' )
+ setcolor( 'w/bg+,w+/gr,,,bg+/bg' )
 
 endcase
 
@@ -1563,9 +1560,8 @@ return nil
 *
 
 function kill ( file_name )
-local mcol := col(), mrow := row()
 if file( file_name )
- ferase( file_name )
+ erase ( file_name )
 
 endif
 return nil
@@ -1619,7 +1615,7 @@ return ( retval )
 *
 
 function fil_lock ( wait, malias )
-local forever,mcount
+local forever,nCount
 if malias = nil
  malias := alias()
 endif
@@ -1627,12 +1623,12 @@ if (malias)->( flock() )
  return TRUE  // locked
 endif
 forever := (wait = 0)
-mcount := 1
+nCount := 1
 while (forever .or. wait > 0)
  inkey(.5)
  wait -= .5
- mcount++
- if int(mcount/5) = mcount/5
+ nCount++
+ if int(nCount/5) = nCount/5
   Error('Waiting for file '+malias+' to be unlocked by other users',12,.5)
  endif
  if ( malias)->( flock() )
@@ -1778,8 +1774,8 @@ return ( sString )
 *
 
 function add_item ( sid, msupp )
-local currec:=master->( recno() ), sScreen, lfoundkey := FALSE, msub, getlist:={}
-local maccept, okins := setkey( K_INS , nil ), okf8 := setkey( K_F8 , nil ), hasarchive
+local currec:=master->( recno() ), sScreen, lfoundkey := FALSE, sSubString, getlist:={}
+local lAccept, okins := setkey( K_INS , nil ), okf8 := setkey( K_F8 , nil ), hasarchive
 
 local idnum := space( ID_ENQ_LEN ), catnum:=space(15)
 local there := FALSE, mfpos, y
@@ -1809,20 +1805,21 @@ if !empty( sid )
    Error( "Illegal first character '"+substr( sid,1,1 )+"' in PLU/id",12 )
 
   else
-   maccept := TRUE
+   lAccept := TRUE
    sid := trim( sid )
-   msub := substr( sid, 1, 2 )
+#ifdef BOOKSHOP   
+   sSubString := substr( sid, 1, 2 )
    do case
-   case len( sid ) = 13 .and. ( msub = '97' .or. msub = '93' .or. msub = '94' )
+   case len( sid ) = 13 .and. ( sSubString = '97' .or. sSubString = '93' .or. sSubString = '94' )
     sid := CalcAPN( sid )   // Dud (no check digit) Keyboard/CalcAPN readers
 
    case SYSNAME = 'BPOS' .and. len( sid ) = 10 .and. !isalpha( sid )
     if sid != idcheck( sid )
-     Error( 'id Code not verified', 8 )
+     Error( PLU_DESC + ' Code not verified', 8 )
      sScreen := Box_Save( 08, 10, 11, 70 )
      Highlight( 09, 12, 'Old id', sid )
      Highlight( 09, 35, 'New Calculated Value', idcheck( sid ) )
-     @ 10,25 say 'Accept Calculated Value' get maccept pict 'Y'
+     @ 10,25 say 'Accept Calculated Value' get lAccept pict 'Y'
      read
      Box_Restore( sScreen )
     endif
@@ -1830,7 +1827,9 @@ if !empty( sid )
 
    endcase
 
-   if maccept
+#endif
+
+   if lAccept
     hasarchive := !( select( 'archive' ) = 0 )
     if !hasarchive
      if file( Oddvars( SYSPATH ) + "archive\archive.dbf" )
@@ -1879,6 +1878,7 @@ if !empty( sid )
      master->minstock := Bvars( B_REORDQTY )
      master->entered := Bvars( B_DATE )
      master->supp_code := msupp
+	 master->taxExempt := FALSE  			// Death and taxes
      keyboard chr( K_ENTER )                // Stuff kbrd to get over id ?
 
     endif
@@ -1890,7 +1890,7 @@ if !empty( sid )
      master->( dbdelete() )
      master->( dbrunlock() )
      Error(if(lastkey()=K_ESC,'<Esc> pressed',if(empty(master->desc),'No desc';
-             ,'No 1st Supplier'))+' - Record Deleted',12)
+             ,'No 1st Supplier - the Item record must have a supplier'))+' - Record Deleted',12)
     else
      lfoundkey := TRUE
      Repeat( master->( recno() ) )   // Save last record number for repeat func
@@ -2041,8 +2041,8 @@ local type_arr := { { 'SUPP_CODE', SUPP_CODE_LEN },;
 fhandle := fcreate( 'dberrors.txt' )
 @ 22, 12 say 'File - dberrors.txt'
 for x := 1 to len( aArray )
+ @ 21, 12 say aArray[ x, 1 ]
  if Netuse( aArray[ x, 1 ] )
-  @ 21, 12 say aArray[ x, 1 ]
   for y := 1 to fcount()
    for z := 1 to len( type_arr )
     if fieldname( y ) = type_arr[ z, 1 ] .and. valtype( fieldget( y ) ) = 'C' .and. ;
@@ -2062,207 +2062,6 @@ memoedit( memoread( 'dberrors.txt' ), 08, 3, 22, 75 )
 Box_Restore( sScreen )
 return nil
 
-*
-
-function Check_new_dbf
-// A Utility to check one set of DBFs against another
-// First of all get an array of our existing Dbf's
-
-local oarr:= asort( directory( Oddvars( SYSPATH ) + '*.dbf' ), , ,{ |p1,p2| p1[1] < p2[1] } )
-
-local x, y, ddstruct, mstruct, fname
-local narr, sFname
-local sScreen := Box_Save( 3, 10, 5, 30 )
-local fhandle := fcreate( 'dbdifs.txt' )  // Differences written out here
-local oldsyspath := Oddvars( SYSPATH )
-
-@ 04, 12 say 'File - dbdifs.txt'
-
-if len( directory( Oddvars( SYSPATH ) + 'dbfstru', 'D' ) ) = 0   // Create a directory to hold system errors for review
- DirMake( Oddvars( SYSPATH ) + 'dbfstru' )
-
-endif
-
-narr := directory( OddVars( SYSPATH ) + 'dbfstru\*.' + NEW_DBF_EXT )   // Kill old structures in Dir if exist
-
-for x := 1 to len( narr )
- Kill( Oddvars( SYSPATH ) + 'dbfstru\' + narr[ x, 1 ] )
-
-next
- 
-Oddvars( SYSPATH, Oddvars( SYSPATH ) + 'dbfstru\' )       // Fool system in thinking default dir is dbcheck
-
-Createdbfs()                         // Create dbf's ( with NEW_DBF_EXT ) extensions
-
-Oddvars( SYSPATH, oldsyspath )       // Set system path back on rails
-
-Kill( Oddvars( SYSPATH ) + 'datadict.std' )
-
-narr := asort( directory( OddVars( SYSPATH) + 'dbfstru\*' + NEW_DBF_EXT ), , ,{ |p1,p2| p1[1] < p2[1] } )  // Sorted Array of DD files
-
-ddstruct := {}                       // Ok our Data Dict ( DD ) is to be built from files in dbcheck
-aadd( ddstruct, { "file_name", "C", 10 , 0 } )
-aadd( ddstruct, { "field_name", "C", 10 , 0 } )
-aadd( ddstruct, { "field_type", "C", 1 , 0 } )
-aadd( ddstruct, { "field_len", "N", 3, 0 } )
-aadd( ddstruct, { "field_dec", "N", 2, 0 } )
-dbcreate( Oddvars( SYSPATH) + 'datadict.std', ddstruct )
-
-Netuse( 'datadict.std', EXCLUSIVE, , 'std' )
-
-for x := 1 to len( narr )
-
- sFname  := OddVars( SYSPATH ) + 'dbfstru\' + narr[ x, 1 ]
- Netuse( sFname, EXCLUSIVE, ,'dbcheck' )
- mstruct := dbcheck->( dbstruct() )
- dbcheck->( dbclosearea() )
-
- for y := 1 to len( mstruct )
-
-  fname := narr[ x, 1 ]
-
-  if !( left( fname, 1 ) $ 'Z~_' )
-
-   Add_rec( 'std' )
-   std->file_name := substr( narr[ x,1 ], 1, at( '.', narr[ x,1] ) -1 )
-   std->field_name := mstruct[ y, 1 ]
-   std->field_type := mstruct[ y, 2 ]
-   std->field_len := mstruct[ y, 3 ]
-   std->field_dec := mstruct[ y, 4 ]
-   std->( dbrunlock() )
-
-  endif
-
- next
-
-next
-
-// altD()
-
-Box_Save( 7, 10, 12, 70 )
-
-@ 8, 12 say 'Data Dictionary built ' + Ns( std->( reccount() ) )+ ' records created'
-
-Kill( OddVars( SYSPATH ) + "datadict.old" )
-
-ddstruct := {}
-aadd( ddstruct, { "file_name", "C", 10 , 0 } )
-aadd( ddstruct, { "field_name", "C", 10 , 0 } )
-aadd( ddstruct, { "field_type", "C", 1 , 0 } )
-aadd( ddstruct, { "field_len", "N", 3, 0 } )
-aadd( ddstruct, { "field_dec", "N", 2, 0 } )
-dbcreate( OddVars( SYSPATH ) + "datadict.old", ddstruct )
-
-Netuse( 'datadict.old', EXCLUSIVE, ,'ddold' )
-
-for x := 1 to len( oarr )
-  fwrite( fhandle,'File in use ' + oarr[ x, 1 ] + CRLF )
-  if !file( Oddvars( SYSPATH ) + oarr[x, 1] )
-   Error( 'File ' + oarr[ x, 1 ] + ' not found' )
-
-  else
-   Netuse( oarr[ x, 1 ], EXCLUSIVE )
-   mstruct := dbstruct()
-   dbclosearea()
-
-   for y := 1 to len( mstruct )
-    fname := oarr[ x, 1 ]
-
-    if !( left( fname, 1 ) $ 'Z~_' )  // Don't check temp etc files
-     Add_rec( 'ddold' )
-     ddold->file_name := substr( oarr[ x, 1 ], 1, at( '.', oarr[ x, 1 ] ) -1 )
-     ddold->field_name := mstruct[ y, 1 ]
-     ddold->field_type := mstruct[ y, 2 ]
-     ddold->field_len := mstruct[ y, 3 ]
-     ddold->field_dec := mstruct[ y, 4 ]
-     ddold->( dbrunlock() )
-
-    endif
-    Pinwheel( NOINTERUPT )
-
-   next
-   Pinwheel( NOINTERUPT )
-
-  endif
-
-next
-
-select ddold
-
-@ 09, 12 say 'New Data Dictionary built ' + Ns( ddold->( reccount() ) ) + ' records created'
-@ 10, 12 say 'Forward Searching - Wait about'
-
-select std
-indx( 'file_name+field_name', 'filename' )
-
-select ddold
-set relation to ddold->file_name+ddold->field_name into std
-
-dbgotop()
-while !eof() .and. Pinwheel( NOINTERUPT )
- do case
- case std->( eof() )  // Field not found in std
-  fdisp( fhandle,  'Field not found in standard ' )
- case std->field_type != ddold->field_type
-  fdisp( fhandle,  'Field type mismatch  - Standard = ' + std->field_type )
- case std->field_len != ddold->field_len
-  fdisp( fhandle,  'Field length mismatch  - Standard = ' + Ns( std->field_len ) )
- case std->field_dec != ddold->field_dec
-  fdisp( fhandle,  'Field Decimals mismatch  - Standard = ' + Ns( std->field_dec ) )
- otherwise
-  fdisp( fhandle,  '' )
- endcase
- dbskip()
-enddo
-select std
-orddestroy( 'filename' )
-
-@ 11, 12 say 'Backward Searching - Wait about'
-
-select ddold
-set relation to
-indx( 'file_name+field_name', 'ddold' )
-select std
-set relation to std->file_name + std->field_name into ddold
-std->( dbgotop() )
-while !std->( eof() ) .and. Pinwheel( NOINTERUPT )
- if ddold->( eof() )
-  fwrite( fhandle,'File ' + std->file_name + '  Standard field ' + std->field_name + ' not on local dbfs' + CRLF )
- endif
- std->( dbskip() )
-enddo
-ddold->( orddestroy( 'ddold' ) )
-dbcloseall()
-fclose( fhandle )
-
-Kill( Oddvars( SYSPATH ) + 'datadict.old' )
-Kill( Oddvars( SYSPATH ) + 'datadict.new' )
-//ferase( "datadict.new" )
-
-Box_Restore( sScreen )
-sScreen := Box_Save( 01, 02, 23, 78 )
-memoedit( memoread( 'dbdifs.txt' ), 02, 3, 22, 77 )
-Box_Restore( sScreen )
-return nil
-
-*
-
-function fdisp ( mhandle, mstr )
-local sScreen:=Box_Save( 2,40,8,75 )
-@ 3,42 say 'File Name ' + ddold->file_name
-@ 4,42 say 'Field Name ' + ddold->field_name
-@ 5,42 say 'Field Type ' + ddold->field_type
-@ 6,42 say 'Field Len  ' + Ns( ddold->field_len ) 
-@ 7,42 say 'Field Dec  ' + Ns( ddold->field_dec )
-if !empty( mstr )
- fwrite( mhandle,'File Name ' + ddold->file_name + CRLF )
- fwrite( mhandle,'Field Name ' + ddold->field_name + CRLF )
- fwrite( mhandle,'Field Type ' + ddold->field_type + CRLF )
- fwrite( mhandle,'Field Len  ' + Ns( ddold->field_len ) + CRLF ) 
- fwrite( mhandle,'Field Dec  ' + Ns( ddold->field_dec ) + CRLF )
- fwrite( mhandle, mstr  + CRLF + replicate( chr( 196 ), 40 ) + CRLF )
-endif
-return nil
 
 *
 
@@ -2378,7 +2177,7 @@ return nil
 
 #ifdef TERMINALCOUNT
 function TermCnt()
-local mterms, TermName, FileName, termcount
+local mterms, TermName, FileName, ternCount
 
 TermName := trim( lvars( L_NODE ) )
 if sysinc( "FlagStk","G")              // If stocktake in progress, all unlimited terminals
@@ -2392,7 +2191,7 @@ else
 endif
 
 if ( FileName := Fcreate( TermName, FC_HIDDEN ) ) !=-1
- Fwrite( FileName,"Bluegum Software Terminal Control File" )
+ Fwrite( FileName, DEVELOPER + " Terminal Control File" )
  Fwrite( FileName, CRLF )
  TermName := "This site is licensed for " + Ns( TERMINALCOUNT ) + " terminals"
  Fwrite( FileName, TermName )
@@ -2401,9 +2200,9 @@ endif
 TermName := FileName := {}
 TermName := directory( Oddvars( SYSPATH ) + "archive\*.bt","H" )
 
-for termcount := 1 to len( TermName )
- if at( "H", TermName[ termcount, 5 ] ) != 0
-  aadd( FileName, TermName[ termcount ] )
+for ternCount := 1 to len( TermName )
+ if at( "H", TermName[ ternCount, 5 ] ) != 0
+  aadd( FileName, TermName[ ternCount ] )
  endif
 next
 

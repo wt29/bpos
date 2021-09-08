@@ -14,23 +14,19 @@ local mfilepath := Oddvars( SYSPATH )
 cls
 
 @ 2, 2 to  12, 78
-@ 3, 04 say SYSNAME + ' has detected no Database files on this system.'
-@ 5, 04 say 'This section will set up the Database files required to run ' + SYSNAME
-@ 6, 04 say SYSNAME + ' will exit after creation - you will need to restart!'
-@ 7, 04 say 'Ok to create Database files' get lAnswer pict 'Y'
+@ 3, 04 say SYSNAME + ' has detected no Database files on this system on Path ' + OddVars( SYSPATH )
+@ 5, 04 say 'This section will set up the Database file skeletons required to run ' + SYSNAME
+@ 7, 04 say "1. Copy the skeletons (*" + NEW_DBF_EXT + " )from " + mFilePath + 'DBFSTRU to ' +mfilePath
+@ 8, 04 say "2. Rename them from *" + NEW_DBF_EXT + ' to *.dbf'
+@ 9, 04 say "3. Restart " + SYSNAME
+@ 11, 04 say 'Ok to create Database skeleton files - Path will be ' + OddVars( SYSPATH ) + "dbfstru\" get lAnswer pict 'Y'
 read
 
 if lAnswer
- lAnswer := FALSE
- @ 8, 04 say 'Again - Ok to create Database Files' get lAnswer pict 'Y'
- read
-
- if lAnswer
   SetupDirs()
-  CreateDbfs()
+  CreateDbfs( Oddvars( SYSPATH ) + "dbfstru\" )
   @ 10, 04 say 'You will need to rename the *' + NEW_DBF_EXT + ' files to *.dbf to run '+ SYSNAME + ' - Bye for now!'
 
- endif
 
 endif
 @ 13, 00 say ''
@@ -43,18 +39,37 @@ return nil
 function SetupDirs
 local getlist:={}, mbranch:=space( BRANCH_CODE_LEN ), aArray
 
+// DBD STRUcture folder
+if len( directory( Oddvars( SYSPATH ) + 'dbfstru', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'dbfstru' )
+
+endif
+
+// Archive Files
 if len( directory( Oddvars( SYSPATH ) + 'archive', 'D' ) ) = 0
  DirMake( Oddvars( SYSPATH ) + 'archive' )
 
 endif
 
-if len( directory( Oddvars( SYSPATH ) + 'comments', 'D' ) ) = 0
- DirMake( Oddvars( SYSPATH ) + 'comments' )
+// Master File Comments
+if len( directory( Oddvars( SYSPATH ) + 'mcomments', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'mcomments' )
 
 endif
 
+//Customer Comments
+if len( directory( Oddvars( SYSPATH ) + 'ccomments', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'ccomments' )
 
-/*
+endif
+
+// Supplier Comments
+if len( directory( Oddvars( SYSPATH ) + 'scomments', 'D' ) ) = 0
+ DirMake( Oddvars( SYSPATH ) + 'scomments' )
+
+endif
+
+#ifdef BRANCHES
 mscr := Box_Save( 2, 46, 4, 70 )
 @ 03,49 say 'Branch Code' get mbranch pict '@!'
 read
@@ -63,7 +78,7 @@ Bvars( B_BRANCH, mbranch )
 SysAudit( 'SetBranchCode' )
 
 Bvarsave()
-*/
+#endif
 
 if !file( Oddvars( SYSPATH ) + 'archive\archive.dbf' )
  aArray := {}
@@ -143,6 +158,209 @@ endif
 return lUpdated
 
 *
+*
+
+function Check_new_dbf
+// A Utility to check one set of DBFs against another
+// First of all get an array of our existing Dbf's
+
+local aCurrentDbf:= asort( directory( Oddvars( SYSPATH ) + '*.dbf' ), , ,{ |p1,p2| p1[1] < p2[1] } )
+
+local x, y, ddstruct, mstruct, fname
+local aNewStructure, sFname
+local sScreen := Box_Save( 3, 10, 5, 30 )
+local fhandle := fcreate( 'dbdifs.txt' )  // Differences written out here
+local cOldSysPath := Oddvars( SYSPATH )
+
+@ 04, 12 say 'File - dbdifs.txt'
+
+if len( directory( Oddvars( SYSPATH ) + 'dbfstru', 'D' ) ) = 0   // Create a directory to hold system errors for review
+ DirMake( Oddvars( SYSPATH ) + 'dbfstru' )
+
+endif
+
+aNewStructure := directory( OddVars( SYSPATH ) + 'dbfstru\*.' + NEW_DBF_EXT )   // Kill old structures in Dir if exist
+
+for x := 1 to len( aNewStructure )
+ Kill( Oddvars( SYSPATH ) + 'dbfstru\' + aNewStructure[ x, 1 ] )
+
+next
+ 
+Oddvars( SYSPATH, Oddvars( SYSPATH ) + 'dbfstru\' )       // Fool system in thinking default dir is dbcheck
+
+Createdbfs()                         // Create dbf's ( with NEW_DBF_EXT ) extensions
+
+Oddvars( SYSPATH, cOldSysPath )       // Set system path back on rails
+
+Kill( Oddvars( SYSPATH ) + 'datadict.std' )
+
+aNewStructure := asort( directory( OddVars( SYSPATH) + 'dbfstru\*' + NEW_DBF_EXT ), , ,{ |p1,p2| p1[1] < p2[1] } )  // Sorted Array of DD files
+
+// Our new Data Dict ( DD ) is to be built from files in dbfstru
+ddstruct := {}                       
+aadd( ddstruct, { "file_name", "C", 10 , 0 } )
+aadd( ddstruct, { "field_name", "C", 10 , 0 } )
+aadd( ddstruct, { "field_type", "C", 1 , 0 } )
+aadd( ddstruct, { "field_len", "N", 3, 0 } )
+aadd( ddstruct, { "field_dec", "N", 2, 0 } )
+dbcreate( Oddvars( SYSPATH) + 'datadict.std', ddstruct )
+
+Netuse( 'datadict.std', EXCLUSIVE, , 'std' )
+
+for x := 1 to len( aNewStructure )
+
+ sFname  := OddVars( SYSPATH ) + 'dbfstru\' + aNewStructure[ x, 1 ]
+ Netuse( sFname, EXCLUSIVE, ,'dbcheck' )
+ mstruct := dbcheck->( dbstruct() )
+ dbcheck->( dbclosearea() )
+
+ for y := 1 to len( mstruct )
+
+  fname := aNewStructure[ x, 1 ]
+
+  if !( left( fname, 1 ) $ 'Z~_' )
+
+   Add_rec( 'std' )
+   std->file_name := substr( aNewStructure[ x,1 ], 1, at( '.', aNewStructure[ x,1] ) -1 )
+   std->field_name := mstruct[ y, 1 ]
+   std->field_type := mstruct[ y, 2 ]
+   std->field_len := mstruct[ y, 3 ]
+   std->field_dec := mstruct[ y, 4 ]
+   std->( dbrunlock() )
+
+  endif
+
+ next
+
+next
+
+// altD()
+
+Box_Save( 7, 10, 12, 70 )
+
+@ 8, 12 say 'Data Dictionary built ' + Ns( std->( reccount() ) )+ ' records created'
+
+Kill( OddVars( SYSPATH ) + "datadict.old" )
+
+ddstruct := {}
+aadd( ddstruct, { "file_name", "C", 10 , 0 } )
+aadd( ddstruct, { "field_name", "C", 10 , 0 } )
+aadd( ddstruct, { "field_type", "C", 1 , 0 } )
+aadd( ddstruct, { "field_len", "N", 3, 0 } )
+aadd( ddstruct, { "field_dec", "N", 2, 0 } )
+dbcreate( OddVars( SYSPATH ) + "datadict.old", ddstruct )
+
+Netuse( 'datadict.old', EXCLUSIVE, ,'ddold' )
+
+for x := 1 to len( aCurrentDbf )
+  // fwrite( fhandle,'File in use ' + aCurrentDbf[ x, 1 ] + CRLF )
+  if !file( Oddvars( SYSPATH ) + aCurrentDbf[x, 1] )
+   Error( 'File ' + aCurrentDbf[ x, 1 ] + ' not found' )
+
+  else
+   Netuse( aCurrentDbf[ x, 1 ], EXCLUSIVE )
+   mstruct := dbstruct()
+   dbclosearea()
+
+   for y := 1 to len( mstruct )
+    fname := aCurrentDbf[ x, 1 ]
+
+    if !( left( fname, 1 ) $ 'Z~_' )  // Don't check temp etc files
+     Add_rec( 'ddold' )
+     ddold->file_name := substr( aCurrentDbf[ x, 1 ], 1, at( '.', aCurrentDbf[ x, 1 ] ) -1 )
+     ddold->field_name := mstruct[ y, 1 ]
+     ddold->field_type := mstruct[ y, 2 ]
+     ddold->field_len := mstruct[ y, 3 ]
+     ddold->field_dec := mstruct[ y, 4 ]
+     ddold->( dbrunlock() )
+
+    endif
+    Pinwheel( NOINTERUPT )
+
+   next
+   Pinwheel( NOINTERUPT )
+
+  endif
+
+next
+
+select ddold
+
+@ 09, 12 say 'New Data Dictionary built ' + Ns( ddold->( reccount() ) ) + ' records created'
+@ 10, 12 say 'Forward Searching - Wait about'
+
+select std
+indx( 'file_name+field_name', 'filename' )
+
+select ddold
+set relation to ddold->file_name+ddold->field_name into std
+
+dbgotop()
+while !eof() .and. Pinwheel( NOINTERUPT )
+ do case
+ case std->( eof() )  // Field not found in std
+  fdisp( fhandle,  'Field not found in standard ' )
+ case std->field_type != ddold->field_type
+  fdisp( fhandle,  'Field type mismatch  - Standard = ' + std->field_type )
+ case std->field_len != ddold->field_len
+  fdisp( fhandle,  'Field length mismatch  - Standard = ' + Ns( std->field_len ) )
+ case std->field_dec != ddold->field_dec
+  fdisp( fhandle,  'Field Decimals mismatch  - Standard = ' + Ns( std->field_dec ) )
+ otherwise
+  fdisp( fhandle,  '' )
+ endcase
+ dbskip()
+enddo
+select std
+orddestroy( 'filename' )
+
+@ 11, 12 say 'Backward Searching - Wait about'
+
+select ddold
+set relation to
+indx( 'file_name+field_name', 'ddold' )
+select std
+set relation to std->file_name + std->field_name into ddold
+std->( dbgotop() )
+while !std->( eof() ) .and. Pinwheel( NOINTERUPT )
+ if ddold->( eof() )
+  fwrite( fhandle,'File ' + std->file_name + '  Standard field ' + std->field_name + ' not on local dbfs' + CRLF )
+ endif
+ std->( dbskip() )
+enddo
+ddold->( orddestroy( 'ddold' ) )
+dbcloseall()
+fclose( fhandle )
+
+Kill( Oddvars( SYSPATH ) + 'datadict.old' )
+Kill( Oddvars( SYSPATH ) + 'datadict.new' )
+
+Box_Restore( sScreen )
+sScreen := Box_Save( 01, 02, 23, 78 )
+memoedit( memoread( 'dbdifs.txt' ), 02, 3, 22, 77 )
+Box_Restore( sScreen )
+return nil
+
+*
+
+function fdisp ( mhandle, mstr )
+local sScreen:=Box_Save( 2,40,8,75 )
+@ 3,42 say 'File Name ' + ddold->file_name
+@ 4,42 say 'Field Name ' + ddold->field_name
+@ 5,42 say 'Field Type ' + ddold->field_type
+@ 6,42 say 'Field Len  ' + Ns( ddold->field_len ) 
+@ 7,42 say 'Field Dec  ' + Ns( ddold->field_dec )
+if !empty( mstr )
+ fwrite( mhandle,'File Name ' + ddold->file_name + CRLF )
+ fwrite( mhandle,'Field Name ' + ddold->field_name + CRLF )
+ fwrite( mhandle,'Field Type ' + ddold->field_type + CRLF )
+ fwrite( mhandle,'Field Len  ' + Ns( ddold->field_len ) + CRLF ) 
+ fwrite( mhandle,'Field Dec  ' + Ns( ddold->field_dec ) + CRLF )
+ fwrite( mhandle, mstr  + CRLF + replicate( chr( 196 ), 40 ) + CRLF )
+endif
+return nil
+
+*
 
 function Createdbfs ( sSysPath )
 local aArray
@@ -189,7 +407,7 @@ aArray := {}
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
 aadd( aArray, { "supp_code", "c", SUPP_CODE_LEN, 0 } )
 aadd( aArray, { "department", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "date_ord", "d", 8, 0 } )
 aadd( aArray, { "special", "l", 1, 0 } )
 aadd( aArray, { "skey", "c", 10, 0 } )
@@ -203,7 +421,7 @@ dbcreate( sSysPath + "draft_po" + NEW_DBF_EXT, aArray )
 // DraftRet
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "supp_code", "c", SUPP_CODE_LEN, 0 } )
 aadd( aArray, { "brand", "c", BRAND_CODE_LEN, 0 } )
 aadd( aArray, { "date", "d", 8, 0 } )
@@ -228,7 +446,7 @@ dbcreate( sSysPath + "DraftRet" + NEW_DBF_EXT, aArray )
 // psales
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "tran_type", "c", 3, 0 } )
 aadd( aArray, { "tend_type", "c", 3, 0 } )
 aadd( aArray, { "mktg_type", "c", 3, 0 } )
@@ -274,21 +492,21 @@ aadd( aArray, { "nett_price", "n", 10, 2 } )
 aadd( aArray, { "sell_price", "n", 10, 2 } )
 aadd( aArray, { "retail", "n", 10, 2 } )
 aadd( aArray, { "st_amt", "n", 10, 2 } )
-aadd( aArray, { "onhand", "n", QTY_LEN, 0 } )
-aadd( aArray, { "special", "n", QTY_LEN, 0 } )
-aadd( aArray, { "minstock", "n", QTY_LEN, 0 } )
-aadd( aArray, { "approval", "n", QTY_LEN, 0 } )
-aadd( aArray, { "stocktake", "n", QTY_LEN, 0 } )
-aadd( aArray, { "onorder", "n", QTY_LEN, 0 } )
-aadd( aArray, { "held", "n", QTY_LEN, 0 } )
-aadd( aArray, { "pp_onhand", "n", QTY_LEN, 0 } )
-aadd( aArray, { "excess", "n", QTY_LEN, 0 } )
-aadd( aArray, { "consign", "n", QTY_LEN, 0 } )
+aadd( aArray, { "onhand", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "special", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "minstock", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "approval", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "stocktake", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "onorder", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "held", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "pp_onhand", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "excess", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "consign", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "sales_tax", "n", 1, 0 } )
 aadd( aArray, { "sale_ret", "l", 1, 0 } )
 aadd( aArray, { "lastpo", "n", PO_NUM_LEN, 0 } )
 aadd( aArray, { "date_po", "d", 8, 0 } )
-aadd( aArray, { "lastqty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "lastqty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "dlastrecv", "d", 8, 0 } )
 aadd( aArray, { "status", "c", 3, 0 } )
 aadd( aArray, { "binding", "c", 2, 0 } )
@@ -299,7 +517,7 @@ aadd( aArray, { "comments", "c", 40, 0 } )
 aadd( aArray, { "year", "c", 4, 0 } )
 aadd( aArray, { "update", "l", 1, 0 } )
 aadd( aArray, { "retdate", "d", 8, 0 } )
-aadd( aArray, { "retqty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "retqty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "entered", "d", 8, 0 } )
 aadd( aArray, { "nodisc", "l", 1, 0 } )
 aadd( aArray, { "taxexempt", "l", 1, 0 } )
@@ -335,7 +553,7 @@ dbcreate( sSysPath + "teleorde" + NEW_DBF_EXT, aArray )
 // ftsales
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "cost_price", "n", 10, 2 } )
 dbcreate( sSysPath + "ftsales" + NEW_DBF_EXT, aArray )
 
@@ -410,7 +628,7 @@ dbcreate( sSysPath + "salescde" + NEW_DBF_EXT, aArray )
 aArray := {} 
 aadd( aArray, { "code", "c", 6, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "skey", "c", 5, 0 } )
 dbcreate( sSysPath + "macatego" + NEW_DBF_EXT, aArray )
 
@@ -418,10 +636,10 @@ dbcreate( sSysPath + "macatego" + NEW_DBF_EXT, aArray )
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
 aadd( aArray, { "branch", "c", BRANCH_CODE_LEN, 0 } )
-aadd( aArray, { "onhand", "n", QTY_LEN, 0 } )
-aadd( aArray, { "available", "n", QTY_LEN, 0 } )
-aadd( aArray, { "onorder", "n", QTY_LEN, 0 } )
-aadd( aArray, { "excess", "n", QTY_LEN, 0 } )
+aadd( aArray, { "onhand", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "available", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "onorder", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "excess", "n", QTY_LEN, QTY_DEC } )
 dbcreate( sSysPath + "stock" + NEW_DBF_EXT, aArray )
 
 // suppweek
@@ -653,7 +871,7 @@ aArray := {}
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
 aadd( aArray, { "reference", "c", 20, 0 } )
 aadd( aArray, { "branch", "c", BRANCH_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "date", "d", 8, 0 } )
 aadd( aArray, { "type", "c", 1, 0 } )
 aadd( aArray, { "supp_code", "c", SUPP_CODE_LEN, 0 } )
@@ -954,8 +1172,8 @@ aArray := {}
 aadd( aArray, { "number", "n", 6, 0 } )
 aadd( aArray, { "branch", "c", BRANCH_CODE_LEN, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
-aadd( aArray, { "ord", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "ord", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "sell", "n", 10, 2 } )
 aadd( aArray, { "price", "n", 12, 4 } )
 aadd( aArray, { "tax", "n", 12, 4 } )
@@ -980,7 +1198,7 @@ dbcreate( sSysPath + "laybypay" + NEW_DBF_EXT, aArray )
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 dbcreate( sSysPath + "kit" + NEW_DBF_EXT, aArray )
 
 // serial
@@ -1018,9 +1236,9 @@ aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
 aadd( aArray, { "indxkey", "c", 20, 0 } )
 aadd( aArray, { "ponum", "n", PO_NUM_LEN, 0 } )
 aadd( aArray, { "over_write", "l", 1, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
-aadd( aArray, { "qty_ord", "n", QTY_LEN, 0 } )
-aadd( aArray, { "qty_inv", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "qty_ord", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "qty_inv", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "cost_price", "n", 10, 2 } )
 aadd( aArray, { "sell_price", "n", 10, 2 } )
 aadd( aArray, { "nett_price", "n", 10, 2 } )
@@ -1034,7 +1252,7 @@ aadd( aArray, { "posted", "l", 1, 0 } )
 aadd( aArray, { "operator", "c", OPERATOR_CODE_LEN, 0 } )
 aadd( aArray, { "retreason", "c", 2, 0 } )
 aadd( aArray, { "tranbranch", "c", BRANCH_CODE_LEN, 0 } )
-aadd( aArray, { "tranqty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "tranqty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "alt_loc", "c", DEPT_CODE_LEN, 0 } )
 dbcreate( sSysPath + "recvline" + NEW_DBF_EXT, aArray )
 
@@ -1059,7 +1277,7 @@ dbcreate( sSysPath + "rethead" + NEW_DBF_EXT, aArray )
 aArray:={}
 aadd( aArray, { "number", "n", 6, 0} ) 
 aadd( aArray, { "id", "c", 12, 0} )
-aadd( aArray, { "qty", "n", QTY_LEN, 0} )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC} )
 aadd( aArray, { "cost_price", "n", 10, 2} )
 aadd( aArray, { "retail", "n", 10, 2} )
 aadd( aArray, { "comment", "c", 80, 0} )
@@ -1071,7 +1289,7 @@ dbcreate( sSysPath + "retline" + NEW_DBF_EXT, aArray )
 // sales
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "tran_type", "c", 3, 0 } )
 aadd( aArray, { "tend_type", "c", 3, 0 } )
 aadd( aArray, { "mktg_type", "c", 3, 0 } )
@@ -1110,14 +1328,14 @@ dbcreate( sSysPath + "salesrep" + NEW_DBF_EXT, aArray )
 aArray := {} 
 aadd( aArray, { "number", "n", PO_NUM_LEN, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "cost_price", "n", 10, 2 } )
 aadd( aArray, { "back_ord", "l", 1, 0 } )
 aadd( aArray, { "date_bord", "d", 8, 0 } )
 aadd( aArray, { "skey", "c", 5, 0 } )
-aadd( aArray, { "qty_ord", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty_ord", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "ship_date", "d", 8, 0 } )
-aadd( aArray, { "ship_qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "ship_qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "ship_stat", "c", 2, 0 } )
 aadd( aArray, { "comment", "c", 80, 0 } )
 aadd( aArray, { "confirm", "c", 20, 0 } )
@@ -1130,8 +1348,8 @@ aadd( aArray, { "supp_code", "c", SUPP_CODE_LEN, 0 } )
 aadd( aArray, { "invoice", "c", 15, 0 } )
 aadd( aArray, { "inv_total", "n", 10, 2 } )
 aadd( aArray, { "inv_calc", "n", 10, 2 } )
-aadd( aArray, { "tot_items", "n", QTY_LEN, 0 } )
-aadd( aArray, { "items_calc", "n", QTY_LEN, 0 } )
+aadd( aArray, { "tot_items", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "items_calc", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "dreceived", "d", 8, 0 } )
 aadd( aArray, { "listed", "l", 1, 0 } )
 aadd( aArray, { "reserved", "l", 1, 0 } )
@@ -1143,6 +1361,7 @@ aadd( aArray, { "x_charges", "n", 10, 2 } )
 aadd( aArray, { "freight", "n", 10, 2 } )
 aadd( aArray, { "consign", "l", 1, 0 } )
 aadd( aArray, { "operator", "c", OPERATOR_CODE_LEN, 0 } )
+aadd( aArray, { "gst", "n", 10, 2 } )
 dbcreate( sSysPath + "recvhead" + NEW_DBF_EXT, aArray )
 
 // companys
@@ -1394,13 +1613,12 @@ aadd( aArray, { "c6", "c", 20, 0 } )
 aadd( aArray, { "c7", "c", 20, 0 } )
 aadd( aArray, { "c8", "c", 20, 0 } )
 aadd( aArray, { "c9", "c", 20, 0 } )
-aadd( aArray, { "color", "l", 1, 0 } )
-aadd( aArray, { "poz", "l", 1, 0 } )
+aadd( aArray, { "color", "l", 1, 0 } )   //64
+aadd( aArray, { "poledisplay", "l", 1, 0 } )
 aadd( aArray, { "onp", "l", 1, 0 } )
-aadd( aArray, { "modem", "l", 1, 0 } )
-aadd( aArray, { "mport", "n", 1, 0 } )
-aadd( aArray, { "mbaud", "n", 6, 0 } )
-aadd( aArray, { "minit", "c", 20, 0 } )
+aadd( aArray, { "pdport", "n", 2, 0 } )
+aadd( aArray, { "scale", "l", 1, 0 } )
+aadd( aArray, { "scaleport", "n", 2, 0 } )
 dbcreate( sSysPath + "nodes" + NEW_DBF_EXT, aArray )
 
 // cretrans
@@ -1427,7 +1645,7 @@ aArray := {}
 aadd( aArray, { "number", "n", 6, 0 } )
 aadd( aArray, { "branch", "c", BRANCH_CODE_LEN, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "date", "d", 8, 0 } )
 aadd( aArray, { "ponum", "n", PO_NUM_LEN, 0 } )
 aadd( aArray, { "retail", "n", 10, 2 } )
@@ -1580,7 +1798,7 @@ dbcreate( sSysPath + "debtrans" + NEW_DBF_EXT, aArray )
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
 aadd( aArray, { "key", "c", CUST_KEY_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "date", "d", 8, 0 } )
 aadd( aArray, { "type", "c", 1, 0 } )
 aadd( aArray, { "number", "n", 6, 0 } )
@@ -1632,8 +1850,8 @@ aadd( aArray, { "number", "n", 6, 0 } )
 aadd( aArray, { "branch", "c", BRANCH_CODE_LEN, 0 } )
 aadd( aArray, { "key", "c", CUST_KEY_LEN, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
-aadd( aArray, { "ord", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "ord", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "sell", "n", 10, 2 } )
 aadd( aArray, { "price", "n", 12, 4 } )
 aadd( aArray, { "tax", "n", 12, 4 } )
@@ -1663,7 +1881,7 @@ aadd( aArray, { "unit_price", "n", 10, 2 } )
 aadd( aArray, { "cost_price", "n", 10, 2 } )
 aadd( aArray, { "discount", "n", 12, 4 } )
 aadd( aArray, { "sales_tax", "n", 10, 2 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "key", "c", CUST_KEY_LEN, 0 } )
 aadd( aArray, { "area", "c", 5, 0 } )
 aadd( aArray, { "type", "c", 3, 0 } )
@@ -1682,10 +1900,10 @@ aadd( aArray, { "branch", "c", BRANCH_CODE_LEN, 0 } )
 aadd( aArray, { "key", "c", CUST_KEY_LEN, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
 aadd( aArray, { "date", "d", 8, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
-aadd( aArray, { "received", "n", QTY_LEN, 0 } )
-aadd( aArray, { "delivered", "n", QTY_LEN, 0 } )
-aadd( aArray, { "alloc", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "received", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "delivered", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "alloc", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "deposit", "n", 8, 2 } )
 aadd( aArray, { "supp_code", "c", SUPP_CODE_LEN, 0 } )
 aadd( aArray, { "comments", "c", 40, 0 } )
@@ -1704,30 +1922,30 @@ dbcreate( sSysPath + "special" + NEW_DBF_EXT, aArray )
 //stocklocs
 aArray := {}
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "l0", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l0", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l0dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l1", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l1", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l1dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l2", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l2", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l2dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l3", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l3", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l3dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l4", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l4", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l4dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l5", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l5", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l5dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l6", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l6", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l6dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l7", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l7", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "l7dept", "c", DEPT_CODE_LEN, 0 } )
-aadd( aArray, { "l0s", "n", QTY_LEN, 0 } )
-aadd( aArray, { "l1s", "n", QTY_LEN, 0 } )
-aadd( aArray, { "l2s", "n", QTY_LEN, 0 } )
-aadd( aArray, { "l3s", "n", QTY_LEN, 0 } )
-aadd( aArray, { "l4s", "n", QTY_LEN, 0 } )
-aadd( aArray, { "l5s", "n", QTY_LEN, 0 } )
-aadd( aArray, { "l6s", "n", QTY_LEN, 0 } )
-aadd( aArray, { "l7s", "n", QTY_LEN, 0 } )
+aadd( aArray, { "l0s", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "l1s", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "l2s", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "l3s", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "l4s", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "l5s", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "l6s", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "l7s", "n", QTY_LEN, QTY_DEC } )
 dbcreate( sSysPath + "stoclocs" + NEW_DBF_EXT, aArray )
 
 // Quote - Started off as a Header / Line items file but was easier to rehash the approval system
@@ -1737,7 +1955,7 @@ aadd( aArray, { "number", "n", INV_NUM_LEN, 0 } )
 aadd( aArray, { "key", "c", CUST_KEY_LEN, 0 } )
 aadd( aArray, { "Date", "d", 8, 0 } )
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "qty", "n", QTY_LEN, 0 } )
+aadd( aArray, { "qty", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "price", "n", 10, 2 } )
 aadd( aArray, { "comment", "c", 40, 0 } )
 aadd( aArray, { "valid", "d", 8, 0 } )      // Date of validity
@@ -1747,11 +1965,11 @@ dbcreate( sSysPath + "quote" + NEW_DBF_EXT, aArray )
 // ytdsales
 aArray := {} 
 aadd( aArray, { "id", "c", ID_CODE_LEN, 0 } )
-aadd( aArray, { "jan", "n", QTY_LEN, 0 } )
-aadd( aArray, { "feb", "n", QTY_LEN, 0 } )
-aadd( aArray, { "mar", "n", QTY_LEN, 0 } )
-aadd( aArray, { "apr", "n", QTY_LEN, 0 } )
-aadd( aArray, { "may", "n", QTY_LEN, 0 } )
+aadd( aArray, { "jan", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "feb", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "mar", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "apr", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "may", "n", QTY_LEN, QTY_DEC } )
 aadd( aArray, { "jun", "n", 4, 0 } )
 aadd( aArray, { "jul", "n", 4, 0 } )
 aadd( aArray, { "aug", "n", 4, 0 } )
@@ -1765,12 +1983,12 @@ aadd( aArray, { "per3", "n", 4, 0 } )
 aadd( aArray, { "per4", "n", 4, 0 } )
 aadd( aArray, { "per5", "n", 4, 0 } )
 aadd( aArray, { "per6", "n", 4, 0 } )
-aadd( aArray, { "per7", "n", QTY_LEN, 0 } )
-aadd( aArray, { "per8", "n", QTY_LEN, 0 } )
-aadd( aArray, { "per9", "n", QTY_LEN, 0 } )
-aadd( aArray, { "per10", "n", QTY_LEN, 0 } )
-aadd( aArray, { "per11", "n", QTY_LEN, 0 } )
-aadd( aArray, { "per12", "n", QTY_LEN, 0 } )
+aadd( aArray, { "per7", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "per8", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "per9", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "per10", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "per11", "n", QTY_LEN, QTY_DEC } )
+aadd( aArray, { "per12", "n", QTY_LEN, QTY_DEC } )
 dbcreate( sSysPath + "ytdsales" + NEW_DBF_EXT, aArray )
 
 return nil

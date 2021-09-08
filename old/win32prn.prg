@@ -72,13 +72,6 @@
 
 */
 
-#ifndef __PLATFORM__Windows
-
-   Function Win32Prn()
-   Return nil
-
-#else
-
 #include "hbclass.ch"
 #include "common.ch"
 
@@ -1249,4 +1242,3 @@ HB_FUNC_STATIC( SETBKMODE )
 
 #pragma ENDDUMP
 
-#endif

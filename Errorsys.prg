@@ -195,7 +195,7 @@ while cchoice != 'A'
 
  endif
  nIntense := set( _SET_INTENSITY , TRUE )
- @ nErrbot-1, 2 say 'Notify Bluegum Software with this error.'
+ @ nErrbot-1, 2 say 'Notify ' + DEVELOPER + ' with this error.'
  set( _SET_INTENSITY , nIntense )
 
  nIntense:=set( _SET_INTENSITY , TRUE )
@@ -228,7 +228,7 @@ while cchoice != 'A'
   LP( oPrinter, SYSNAME + ' Build ' + BUILD_NO + ' Error Report   #' + Ns( Sysinc( 'Fax', 'I', 1 ) ) )
   LP( oPrinter, NOBIGCHARS )
   LP( oPrinter, BIGCHARS )
-  LP( oPrinter, 'From ' + BPOSCUST)
+  LP( oPrinter, 'From ' + trim( BVars( B_NAME ) ))
   LP( oPrinter, NOBIGCHARS )
   LP( oPrinter, BIGCHARS )
   LP( oPrinter, 'Time ' + time() + '  Ph.' + Bvars( B_PHONE ) )
@@ -242,7 +242,7 @@ while cchoice != 'A'
 //  Printgraph( oPrinter )    // Adds the screen print to the mix
   LP( oPrinter, '' )
   LP( oPrinter, BIGCHARS )
-  LP( oPrinter, 'Please send me to Bluegum Software Email is ' + SUPPORT_EMAIL )
+  LP( oPrinter, 'Please send me to ' + DEVELOPER + ' Email is ' + SUPPORT_EMAIL )
   LP( oPrinter, NOBIGCHARS )
   LP( oPrinter, BIGCHARS )
   LP( oPrinter, 'Fax number ' + SUPPORT_FAX )
@@ -254,7 +254,7 @@ while cchoice != 'A'
   LP( oPrinter, '' )
   LP( oPrinter, 'Contact  ' + replicate( chr( 95 ), 60 ) )
   LP( oPrinter, '' )
-  LP( oPrinter, '____________________ < Bluegum Software Office Use >___________________' )
+  LP( oPrinter, '____________________ < ' + DEVELOPER + ' Office Use >___________________' )
   LP( oPrinter, '' )
   LP( oPrinter, 'Date ____________     Copies To : ______________   Log Number __________' )
   LP( oPrinter, '' )
@@ -274,7 +274,8 @@ enddo
 
 // Try to save the error locally
 
-nHandle = HB_FTempCreate( OddVars( SYSPATH ) + 'errors' )
+// nHandle = HB_FTempCreate( OddVars( SYSPATH ) + 'errors' )
+nHandle = FCreate( OddVars( SYSPATH ) + 'errors\' + strTran( dtoc( date() ), "/" ) + strTran( time(), ':' ) + '.log' ) 
 for x = 1 to len( aErrors )
    Fwrite( nHandle, aErrors[ x ] + CRLF )
 

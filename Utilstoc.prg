@@ -304,10 +304,10 @@ return
 procedure stprint
 local nMenuSelect,mstktype:=Sysinc("StkType","G"),mapp,mavg,mstocktake,aArray
 local getlist:={}, mscr, mdbf, aReport,sForCond
-local mcount,msum,mavr,msell,mrrp,moh,mcost,mappr,mapprval
+local mcount,msum,mavr,mrrp,moh,mappr,mapprval
 
-memvar totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin
-public totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin
+memvar totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin, mcost, msell
+public totcost, mdep, lIncludeApps, lanswer, monhand, mmargin, mupmargin, mcost, msell
 
 mdep:=Sysinc("Stkdept","G")
 while TRUE
@@ -687,6 +687,7 @@ while TRUE
   endif
   dept->( dbclosearea() )
   select master
+ 
  case nMenuSelect = 8
   Heading('Print Stocktake Listing')
   if !netuse( 'dept', SHARED, 10, NOALIAS, NEW )
@@ -705,9 +706,9 @@ while TRUE
    aadd(aReport,{'master->stocktake', 'Stocktake', 8, 0, TRUE } )
    aadd(aReport,{'master->onhand', 'Onhand', 7, 0, TRUE } )
    aadd(aReport,{'master->sell_price', 'Sell;Price', 10, 2, FALSE } )
-   aadd(aReport,{'master->sell_price*master->onhand', 'Valuation;Sell Price', 12,2, TRUE } )
+   aadd(aReport,{'master->sell_price*master->stocktake', 'ST Valuation; @Sell Price', 12,2, TRUE } )
    aadd(aReport,{'master->cost_price', 'Cost;Price', 10, 2, FALSE } )
-   aadd(aReport,{'master->cost_price*master->onhand','Valuation;Cost Price', 12,2, TRUE } )
+   aadd(aReport,{'master->cost_price*master->stocktake','St Valuation; @Cost Price', 12,2, TRUE } )
 //   aadd(aReport,{'100-Zero(master->cost_price,Zero(master->onhand->sell_price, 100))','Discount', 10,2, FALSE } )
    Reporter( aReport,;
             "Stocktake listing by Department",;
@@ -723,6 +724,7 @@ while TRUE
   endif
   dept->( dbclosearea() )
   select master
+
  case nMenuSelect = 9
   Heading('Print Data Entry Error Listing')
   mcost := 0.01
@@ -744,21 +746,20 @@ while TRUE
    Center( 10,'Processing - Please Wait' )
    select master
    ordsetfocus( BY_DEPARTMENT )
-   go top
-   // Pitch17()
+   master->( dbgotop() )
 
    aReport := {}
    aadd(aReport,{'substr(desc, 1, 35)','Item Description', 30, 0, FALSE } )
-   aadd(aReport,{'substr(alt_desc, 1, 25)','Alternate Desc', 25, 0, TRUE } )
-   aadd(aReport,{'master->stocktake','Stocktake', 8, 0, TRUE } )
-   aadd(aReport,{'master->onhand','Onhand', 7, 0, TRUE } )
+   aadd(aReport,{'substr(alt_desc, 1, 25)','Alternate Desc', 25, 0, FALSE } )
+   aadd(aReport,{'master->stocktake','Stktake', 8, 0, TRUE } )
+   aadd(aReport,{'master->onhand','Onhand', 8, 0, TRUE } )
    aadd(aReport,{'master->sell_price','Sell;Price', 10, 2, FALSE } )
    aadd(aReport,{'master->sell_price*master->onhand','Valuation;Sell Price', 12, 2, TRUE } )
    aadd(aReport,{'master->cost_price','Cost;Price', 10, 2, FALSE } )
    aadd(aReport,{'master->cost_price*master->onhand','Valuation;Cost Price', 12, 2, TRUE } )
 //   aadd(aReport,{'100-Zero(master->cost_price,Zero(master->onhand->sell_price, 100))','Discount', 10, 2, FALSE } )
 
-   sForCond = "master->onhand > 0 .and." + ;
+    sForCond = "master->onhand > 0 .and." + ;
               "( master->onhand>monhand.or.master->cost_price<mcost.or.master->sell_price>msell .or." + ;
               "100-Zero(master->cost_price,(master->sell_price/100))<mmargin .or." + ;
               "( Lookitup( 'supplier', 'supp_code', 'price_meth' ) = 'R'" + ;
@@ -852,8 +853,8 @@ if Secure( X_SYSUTILS )
 
 Heading("Resync Master File Quantities")
  mscr := Box_Save( 2, 02, 12, 76 )
- Center( 03, "This Procedure will scan the master,special,approval,hold and Purchase Order files" )
- Center( 05, "It will resyncronise the master file quantities from this information" )
+ Center( 03, "This Procedure will scan the Master, Special, Approval, Hold and Purchase Order files" )
+ Center( 05, "It will resynchronise the master file quantities from this information" )
  if Isready( 06 )
   if Netuse( "hold", EXCLUSIVE )
    if Netuse( "approval", EXCLUSIVE )
@@ -967,7 +968,7 @@ return nil
 function SetupHold
 local mscr := Box_Save( 2, 5, 7, 74 )
 Center( 3, 'This Procedure will update Special Order / Hold values' )
-Center( 4, 'Do not use it without advice from Bluegum Software' )
+Center( 4, 'Do not use it without advice from ' + DEVELOPER )
 if Isready( 12 )
  if Secure( X_SYSUTILS )
   if Master_use()

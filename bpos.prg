@@ -7,8 +7,7 @@
 
 #include "bpos.ch"
 
-
-Procedure Main
+Function Main()
 
 local nSelect
 local nLength
@@ -23,36 +22,49 @@ local getlist:={}
 local cScreen, moff:=0
 local aMenu
 local aHelp, aDir
+local cStoreName
+local cSysPath
 
 // local nMaxRow := maxrow(), nMaxCol := maxcol()
 
 #ifdef __GTWVW__
-//  local lMainCoord
-//altd()
+ //  local lMainCoord
  local lMainCoord := WVW_SetMainCoord( .t. )
- // wvW_SetWindowTitle( "Hello World")
+ // altd()
+ 
+ // WVW_SetWindowTitle( "Hello World")
  WVW_SetCodePage(,255)
 
  WVW_SetFont(,"Lucida Console",28,-12)
  //WVT_GTGetFont("Lucida Console",28,-12)
- //  WVW_SBcreate( 0 )
- //  WVW_SBaddPart( 0, '20', 20, 0, .t. )
- //  WVW_SBSetText(,,'Hello' )
+ WVW_SBcreate( 0 )
+ WVW_SBaddPart( 0, '20', 20, 0, .t. )
+ WVW_SBSetText(,,'Hello' )
  //wvw_showwindow()
- //wait
-
+ 
 #else
  setmode(25,80)
-
+ #ifdef __GTWVG__
+  Wvt_SetGui( TRUE )
+  Wvt_SetTitle( SYSNAME )
+ #endif 
 #endif
 
-parameter sys_path
-
-Oddvars( SYSPATH, "\BPOS\" )
+cSysPath := GetENV( "BPOSPATH" )
+if !empty( cSysPath )
+ if right( trim( cSysPath ), 1 ) != '\'
+  cSysPath += '\'
+ 
+ endif
+else
+ cSysPath = '\bpos\'
+ 
+endif
+Oddvars( SYSPATH, cSysPath )
 
 Oddvars( START_SCR, { Savescreen(), row(), col() } )
 
-cls
+// cls
 ?? 'Initialising ' + SYSNAME + '....  Please Wait'
 
 set scoreboard off   // No <Ins> etc
@@ -68,12 +80,11 @@ request DBFCDX
 
 set autopen on
 set( _SET_MFILEEXT, ".FPT" )
-set( _SET_EVENTMASK, INKEY_ALL )
+set( _SET_EVENTMASK, INKEY_ALL )  // Turn this on for mice etc
+// set( _SET_EVENTMASK, INKEY_KEYBOARD )
 set( _SET_DEBUG, .t. )
 set( _SET_AUTOPEN, TRUE )
 set( _SET_AUTORDER, TRUE )
-
-oddvars( SYSPATH, if( type( "sys_path" ) = 'U', Oddvars( SYSPATH ), upper( m->sys_path ) ) )
 
 set path to ( Oddvars( SYSPATH ) )
 
@@ -86,7 +97,6 @@ if len( directory( Oddvars( SYSPATH ) + 'errors', 'D' ) ) = 0   // Create a dire
  DirMake( Oddvars( SYSPATH ) + 'errors' )
 
 endif
-
 
 Lvarget()                   // Set up Local Arrays
 Bvarget()                   // Set up the Bvars Array
@@ -117,18 +127,21 @@ Lvars( L_PRINTER, 'lpt1' )    // This is crap
 
 Chkfield( "Quote", "SysRec" )
 ChkField( "TaxExempt", "master" )
+ChkField( "pdport", "nodes")
+ChkField( "scale", "nodes")
+ChkField( "scaleport", "nodes")
 
-Bvars( B_NAME, if( empty( BPOSCUST ),'No Serial No',trim( BPOSCUST ) ) )
-nLength := max( ( 20 + len( BPOSCUST ) ) /2, 16 )         // Format Box for Licencee Length
+cStoreName := trim( Bvars( B_NAME ) ) 
+nLength := max( ( 20 + len( cStoreName ) ) /2, 16 )         // Format Box for Licencee Length
 
 Syscolor( 1 )
 Heading('*** Welcome to ' + SYSNAME + ' ***')
 Box_Save( 04, 79/2-1-nLength, 11, 79/2 + nLength, 8 )        // Clear Box
 Center( 05, 'Copyright ' + DEVELOPER )                // Hello
+Center( 06, cStoreName )                // Hello
 Center( 08, DEVELOPER_PHONE )
 Center( 09, SYSNAME + ' Build Number ' + BUILD_NO )
 
-Center( 10, "Licensed to -=< " + BPOSCUST + " >=-")
 Syscolor( 1 )
 
 if !empty( getenv( 'pack' )  )
@@ -171,7 +184,7 @@ setkey( K_ALT_L, { || Login( TRUE ) } )         // Allow an Operator Add
 
 #endif
 
-Poz( BPOSCUST )                                 // Init the pole display if used
+PoleDisplay( trim( BVars( B_NAME ) ) )                                 // Init the pole display if used
 
 //BPOSSendmail()
 
@@ -194,7 +207,7 @@ while TRUE                                      // Main Menu Loop
  @ 03, 18 prompt 'Purchasing' message line_clear( 24 ) + 'Purchase and Returns'
  @ 03, 34 prompt '  Sales   ' message line_clear( 24 ) + 'Sales Related Activities'
  @ 03, 50 prompt ' Utility  ' message line_clear( 24 ) + 'Utility Functions, Pack, Index'
- @ 03, 69 prompt ' Modules  ' message line_clear( 24 ) + 'Extra Modules / Accounting Operations'
+ @ 03, 65 prompt ' Account  ' message line_clear( 24 ) + 'Accounting Operations'
  line_clear( 24 )
 
  Syscolor( C_NORMAL )
@@ -330,10 +343,11 @@ while TRUE                                      // Main Menu Loop
   if Isready( 19,,'Exit ' + SYSNAME + '?' )     // Clean up
 
    Dbcloseall()
-   Poz( 'Register not in use' )
+   PoleDisplay( 'Register not in use' )
    Lvarsave()
    adir := directory( '_*.*' )
    aeval( aDir, { | del_element | ferase( del_element[ 1 ] ) } )
+   cls
    quit
 
   endif
@@ -341,7 +355,7 @@ while TRUE                                      // Main Menu Loop
 
  endcase
 enddo
-return 
+return nil
 
 *
 

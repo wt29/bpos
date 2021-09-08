@@ -290,7 +290,7 @@ procedure apprret ( by_appr_number )
 
 local oldscr := Box_Save(), mno, sID, mqty, getlist:={}
 local firstpass, mkey:='', ntempfile
-local page_number,page_width,page_len,top_mar,bot_mar,col_head1,col_head2, report_name 
+local page_number,page_width,page_len,top_mar,bot_mar,col_head1,col_head2, report_name, oPrinter
 
 while TRUE
  Box_Restore( oldscr )
@@ -398,42 +398,50 @@ while TRUE
     if Isready( 12, 10 , 'Ok to print Approvals Returns Receipt' )
      select apptemp
      set relation to apptemp->id into master
+	 
+	 oPrinter:= Win32Prn():New(Lvars( L_PRINTER) )
+     oPrinter:Landscape:= .F.
+     oPrinter:FormType := FORM_A4
+     oPrinter:Copies   := 1
+     if !oPrinter:Create()
+      Alert( "Cannot create Printer " + LVars( L_PRINTER ) )
 
+     endif
+     report_name := 'Approvals Returns Receipt'
+     oPrinter:StartDoc( report_name )
+     oPrinter:SetPen(PS_SOLID, 1, RGB_RED)
+     oPrinter:SetFont('Lucida Console',8,{3,-50})
+ 
      page_number:=1
      page_width:=80
      page_len:=66
      top_mar:=0
      bot_mar:=10
+
      col_head1 := 'Desc                   Author         Qty Returned   Qty Outstanding   App No'
      col_head2 := 'ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄ ÄÄÄÄÄÄÄÄÄÄÄÄÄ  ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ ÄÄÄÄÄÄÄÄ'
-     report_name := 'Approval Returns Receipt from ' + trim( customer->name )
 
-     Print_find( "report" )
-     
-     // Pitch10()
-
-     set device to printer
-     setprc(0,0)              // Could be superfluous
-
-     PageHead( report_name, page_width, page_number, col_head1, col_head2 )
+     PageHead( oPrinter, report_name, page_width, page_number, Col_head1, Col_head2 )
 
      apptemp->( dbgotop() )
      while !apptemp->( eof() ) .and. Pinwheel( NOINTERUPT ) // Start print Routine
-      if PageEject( page_len, top_mar, bot_mar )
+      if PageEject2( oPrinter )
        page_number++
-       PageHead( report_name, page_width, page_number, col_head1, col_head2 )
+       PageHead( oPrinter, report_name, page_width, page_number, Col_head1, Col_head2 )
+
       endif
-      @ prow()+1, 0 say Substr( master->desc, 1, 23 )
-      @ prow(), 24 say Substr( master->alt_desc, 1, 15 )
-      @ prow(), 43 say apptemp->received  pict '9999'
-      @ prow(), 58 say apptemp->qty - apptemp->delivered - apptemp->received pict '9999'
-      @ prow(), 68 say apptemp->number
+	 
+      LP( oPrinter, Substr( master->desc, 1, 23 ), 0, NEWLINE )
+      LP( oPrinter, Substr( master->alt_desc, 1, 15 ), 24, NEWLINE )
+      LP( oPrinter, Substr( apptemp->received, 1, 23 ), 43, NEWLINE )
+	  LP( oPrinter, Ns( apptemp->qty - apptemp->delivered - apptemp->received, 4 ), 58, NEWLINE )
+	  LP( oPrinter, Ns( apptemp->number, 6 ), 68, NEWLINE )
 
       apptemp->( dbskip() )
      enddo
-     // Pitch10()
-     Endprint()
-     set device to screen
+
+     oPrinter:endDoc()
+     oPrinter:Destroy()
 
     endif
 
@@ -523,7 +531,7 @@ while TRUE
  select approval
 
  farr := {}
- aadd(farr,{'idcheck(id)','id',13, 0, FALSE})
+ aadd(farr,{'idcheck(id)',ID_DESC,13, 0, FALSE})
  if choice = 5
   aadd(farr,{'master->desc','Desc', 55, 0, FALSE})
 
@@ -532,15 +540,17 @@ while TRUE
 
  endif
 
- aadd(farr,{'qty','Qty', 3, 0, TRUE } )
- aadd(farr,{'received','Qty;Ret', 6, 0, TRUE } )
- aadd(farr,{'delivered','Qty;Inv',6, 0, TRUE } )
- aadd(farr,{'price','Price', 6, 2, FALSE})
- aadd(farr,{'price*qty','Price;Extended',10,2,TRUE})
- aadd(farr,{'date','Date of;Approval',8,0,FALSE})
+ aadd( farr, {'qty','Qty', 3, 0, TRUE } )
+ aadd( farr, {'received','Qty;Ret', 6, 0, TRUE } )
+ aadd( farr, {'delivered','Qty;Inv',6, 0, TRUE } )
+ aadd( farr, {'price','Price', 6, 2, FALSE})
+ aadd( farr, {'price*qty','Price;Extended',10,2,TRUE})
+ aadd( farr, {'space(1)',' ',1,0,FALSE})
+ aadd( farr, {'date','Date of;Approval',8,0,FALSE})
 
  if choice < 5
 //  aadd(farr,{'date()-date','Days;Outstand',10,0,TRUE})
+  aadd( farr, {'space(1)',' ',1,0,FALSE})
   aadd(farr,{'customer->name','Customer Name',25,0,FALSE})
   aadd(farr,{'customer->phone1','Telephone1',14,0,FALSE})
 
@@ -571,8 +581,8 @@ while TRUE
 
  case choice = 3
   Heading('Print All Approval Details')
-  mscr:=Box_Save( 20,25,22,55 )
-  @ 21,27 say 'Print all Approvals ( Including Filled )' get mall pict 'y'
+  mscr:=Box_Save( 20, 12, 22, 58 )
+  @ 21, 14 say 'Print all Approvals ( Including Filled )' get mall pict 'y'
   read
   if Isready(17)
 
@@ -763,7 +773,7 @@ endif
 
 if nPage > 1
  LP( oPrinter, DRAWLINE )
- LP( oPrinter, BPOSCUST, 0, NONEWLINE )
+ LP( oPrinter, bVarGet( B_NAME ), 0, NONEWLINE )
  LP( oPrinter, 'Approval No: ' + Ns( napprovalNo, 6 ), 32, NONEWLINE )
  LP( oPrinter, 'Page No: ' + Ns( nPage, 3 ), 66 )
  LP( oPrinter, DRAWLINE )
@@ -788,7 +798,7 @@ else
  LP( oPrinter, PRN_GREEN )
  LP( oPrinter, BOLD )
  LP( oPrinter, BIGCHARS )
- LP( oPrinter, BPOSCUST, 20 )
+ LP( oPrinter, trim( BVars( B_NAME ) ), 20 )
  LP( oPrinter, NOBIGCHARS )
  LP( oPrinter, NOBOLD )
  LP( oPrinter, PRN_BLACK )

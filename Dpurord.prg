@@ -1,3 +1,4 @@
+
 /**
         Dpurord.prg
  
@@ -19,7 +20,7 @@ if Netuse( "purhist" )
   if Master_use()
    if Netuse( "supplier" )
     if Netuse( "draft_po" )
-     set relation to padr( draft_po->id, ID_CODE_LEN ) into master,;
+     set relation to draft_po->id into master,;
                   to draft_po->supp_code into supplier
      mgo := TRUE
     endif

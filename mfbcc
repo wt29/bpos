@@ -20,13 +20,12 @@ USERDEFINE =
 USERINCLUDE = 
 USERLIBS = 
 EDITOR = notepad
-GTWVW = YES
+GTWVW = 
 CGI = NO
 GUI = YES
 MT = NO
 SRC04 = obj 
 PROJECT = bpos.exe $(PR) 
-
 OBJFILES = $(SRC04)\BPOS.obj $(SRC04)\ACME.obj $(SRC04)\APCHEQUE.obj $(SRC04)\APEOM.obj $(SRC04)\APREMIT.obj //
  $(SRC04)\APREP.obj $(SRC04)\APTRAN.obj $(SRC04)\AREOM.obj $(SRC04)\ARREP.obj $(SRC04)\ARSTAT.obj //
  $(SRC04)\ARTRAN.obj $(SRC04)\DPURORD.obj $(SRC04)\ERRORSYS.obj $(SRC04)\FPURORD.obj $(SRC04)\INVFORMS.obj //
@@ -37,7 +36,6 @@ OBJFILES = $(SRC04)\BPOS.obj $(SRC04)\ACME.obj $(SRC04)\APCHEQUE.obj $(SRC04)\AP
  $(SRC04)\S_INV2.obj $(SRC04)\S_LAYB.obj $(SRC04)\S_QUOTE.obj $(SRC04)\S_REPO.obj $(SRC04)\S_SPEC.obj //
  $(SRC04)\UTILARCH.obj $(SRC04)\UTILBACK.obj $(SRC04)\UTILCOND.obj $(SRC04)\UTILLABE.obj $(SRC04)\UTILPACK.obj //
  $(SRC04)\UTILREPR.obj $(SRC04)\UTILSPPA.obj $(SRC04)\UTILSTOC.obj $(OB) 
-
 PRGFILES = BPOS.PRG ACME.PRG APCHEQUE.PRG APEOM.PRG APREMIT.PRG //
  APREP.PRG APTRAN.PRG AREOM.PRG ARREP.PRG ARSTAT.PRG //
  ARTRAN.PRG DPURORD.PRG ERRORSYS.PRG FPURORD.PRG INVFORMS.PRG //
@@ -48,17 +46,15 @@ PRGFILES = BPOS.PRG ACME.PRG APCHEQUE.PRG APEOM.PRG APREMIT.PRG //
  S_INV2.PRG S_LAYB.PRG S_QUOTE.PRG S_REPO.PRG S_SPEC.PRG //
  UTILARCH.PRG UTILBACK.PRG UTILCOND.PRG UTILLABE.PRG UTILPACK.PRG //
  UTILREPR.PRG UTILSPPA.PRG UTILSTOC.PRG $(PS) 
-
 OBJCFILES = $(OBC) 
 CFILES = $(CF)
-RESFILES = BPOS.RES
-RESDEPEN = BPOS.RES
+RESFILES = 
+RESDEPEN = 
 TOPMODULE = BPOS.PRG
-LIBFILES = gtwvw.lib lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib common.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib hbsix.lib zlib.lib telepath.lib
-#LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfcdx.lib common.lib gtwvw.lib codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib zlib.lib
+LIBFILES = lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib dbfcdx.lib dbffpt.lib common.lib gtwvw.lib  codepage.lib ct.lib tip.lib pcrepos.lib hsx.lib hbsix.lib zlib.lib
 EXTLIBFILES =
 DEFFILE = 
-HARBOURFLAGS = -w1
+HARBOURFLAGS =  -w0
 CFLAG1 =  -OS $(SHELL)  $(CFLAGS) -d -c -L$(HB_DIR)\lib 
 CFLAG2 =  -I$(HB_DIR)\include;$(CC_DIR)\include
 RFLAGS = 
@@ -69,9 +65,9 @@ LINKER = ilink32
 ALLOBJ = c0w32.obj $(OBJFILES) $(OBJCFILES)
 ALLRES = $(RESDEPEN)
 ALLLIB = $(USERLIBS) $(LIBFILES) import32.lib cw32.lib
+.autodepend
  
 #DEPENDS
-.autodepend
  
 #COMMANDS
 .cpp.obj:
@@ -83,8 +79,8 @@ $(CC_DIR)\BIN\bcc32 -I$(HB_DIR)\include $(CFLAG1) $(CFLAG2) -o$* $**
 .prg.obj:
 $(HB_DIR)\bin\harbour -D__EXPORT__ -n -go -I$(HB_DIR)\include $(HARBOURFLAGS) -o$* $**
  
-#.rc.res:
-# $(CC_DIR)\BIN\brcc32 $(RFLAGS) $<
+.rc.res:
+$(CC_DIR)\BIN\brcc32 $(RFLAGS) $<
  
 #BUILD
  

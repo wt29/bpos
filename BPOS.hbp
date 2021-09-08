@@ -45,19 +45,29 @@ s_layb.prg
 s_quote.prg
 s_repo.prg
 s_spec.prg
+<<<<<<< HEAD
 sendmail.prg
+=======
+>>>>>>> a22a911617bb64ad5cd84867cc450c357921e968
 Setupdbf.prg
 testw32p.prg
 Utilarch.prg
 Utilback.prg
 Utilcond.prg
+<<<<<<< HEAD
 Utilimpo.prg
+=======
+>>>>>>> a22a911617bb64ad5cd84867cc450c357921e968
 Utillabe.prg
 Utilpack.prg
 Utilrepr.prg
 Utilsppa.prg
 Utilstoc.prg
+<<<<<<< HEAD
 Utilupdt.prg
 win32prn.prg
+=======
+-3rd=hbide_file=bpos.ch
+>>>>>>> a22a911617bb64ad5cd84867cc450c357921e968
 
  

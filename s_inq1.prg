@@ -10,7 +10,6 @@ Procedure s_enquire
 #include "bpos.ch"
 #include "getexit.ch"
 
-
 local lMainLoop:=FALSE, nMenuChoice
 local mloop, cid, cKeyValue, nRow, nPos
 local lIsLocked, lSecHandFlag, aArray
@@ -31,7 +30,7 @@ while lMainLoop
  Heading('Master File Enquiry')
  aArray := {}
  aadd( aArray, { 'Exit', 'Return to previous option' } )
- aadd( aArray, { 'ID', 'Display item using the Item ID' } )
+ aadd( aArray, { 'ID', 'Display item using the ' + ID_DESC } )
  aadd( aArray, { DESC_DESC, 'Find item using part of the ' + DESC_DESC } )
  aadd( aArray, { ALT_DESC, 'Find item using part of the ' + ALT_DESC } )
  aadd( aArray, { 'Supplier', 'Locate item by supplier' } )
@@ -277,7 +276,7 @@ while lMainLoop
         cid:=space( ID_ENQ_LEN )
         mqty:=1
         cScreenSave:=Box_Save( 2, 10, 4, 70 )
-        @ 3,12 say 'id/Code to add to category list' get cid pict '@!'
+        @ 3,12 say ID_DESC + ' to add to category list' get cid pict '@!'
         read
         Box_Restore( cScreenSave )
         if Codefind( cid )
@@ -291,7 +290,7 @@ while lMainLoop
         endif
         select xcat
        case nKeyPressed == K_DEL
-        if Isready( 3, 12, 'Ok to delete desc from list' )
+        if Isready( 3, 12, 'Ok to delete ' + DESC_DESC + ' from list' )
          Del_rec( 'xcat', UNLOCK )
          eval( sobj:skipblock , -1 )
          sobj:refreshall()
@@ -453,11 +452,11 @@ okf12 := setkey( K_F12, { || F12OrderIt() } )
 if master->binding = "KI"
  oksf10 := setkey( K_SH_F10, { || Enq_kit() } )
 endif
-okaf1 := setkey( K_ALT_F1, { || Desc_dele() } )
+okaf1 := setkey( K_ALT_F1, { || ItemDelete() } )
 DispItem()
 if go_to_edit
-// EditDesc( @dump_flag, @append_all, nil, FromAddDesc )
- EditDesc( nil )
+// EditItem( @dump_flag, @append_all, nil, FromAddDesc )
+ EditItem( nil )
 
 else
  while TRUE
@@ -506,7 +505,7 @@ if select( "ytdsales" ) = 0
 endif
 ytdsales->( dbseek( master->id ) )
 select master
-Heading( 'Item Inquiry' )
+Heading( ITEM_DESC + ' Inquiry' )
 @ 02, 14 - len( PLU_DESC ) say PLU_DESC
 @ 02, 52 say 'Catalog'
 @ 03, 14 - len( DESC_DESC ) say DESC_DESC
@@ -526,6 +525,7 @@ Heading( 'Item Inquiry' )
 @ 13, 04 say 'Sell Price'
 // @ 15, 10 say 'Nett'
 @ 17, 05 say '   Status'
+@ 18, 04 say Padl( TAX_DESC, 10)
 @ 19, 05 say ' Comments'
 @ 09, 34 say 'Qty Avail.'
 @ 10, 26 say '<F7>   On Approval'
@@ -562,6 +562,7 @@ syscolor( C_BRIGHT )
 @ 09, 15 say LookItUp( 'dept' , master->department )
 @ 13, 15 say master->sell_price pict PRICE_PICT
 @ 17, 15 say LookItUp( 'Status', master->status )
+@ 18, 15 say master->taxExempt pict 'Y'
 @ 19, 15 say left( master->comments, 35 )
 @ 09, 46 say MASTAVAIL pict QTY_PICT
 @ 09, 50 say ' (' + trim( ns( master->onhand ) ) + ')'
@@ -637,17 +638,18 @@ return nil
 
 proc f10edit
 F11Costs()   // Will display hidden field Headings.
-EditDesc()
+EditItem()
 DispItem()  // Force a redisplay
 return
 
 *
 
-procedure EditDesc ( super, FromAddDesc )
-local getlist:={},cScreenSave,temp_id:=master->id+' ',chkval,mreplace,mrec
-local msub,o_id,lAnswer, oldcur:=setcursor(1),old_price:=master->sell_price
+procedure EditItem ( super, FromAddDesc )
+local getlist:={},cScreenSave,temp_id:=master->id+' ', mreplace,mrec
+local o_id,lAnswer, oldcur:=setcursor(1),old_price:=master->sell_price
 local okf1,sFunKey3,sFunKey4,okf5,okf6,okf7,okf8,okf9,okaf8,okf10:=setkey( K_F10, { || tedit()} )
 local oktab,okafa,okaf1,tscr:=Box_Save(),bit:='',stuff_cat:=FALSE, mWasChanged := FALSE
+// local chkval, msub
 
 default super to FALSE
 default FromAddDesc to FALSE
@@ -688,6 +690,7 @@ endif
 @ 14,15 get master->retail pict PRICE_PICT
 @ 17,15 say space( 15 )
 @ 17,15 get master->status pict '@!' valid( lastkey() = K_UP .or. dup_chk( master->status, "status" ) )
+@ 18,15 get master->taxExempt pict 'Y'
 @ 19,15 get master->comments pict '@S35'
 if super
  @ 11,46 get master->approval pict QTY_PICT
@@ -741,7 +744,7 @@ if super
   @ 24,68 get ytdsales->per12
  endif
 endif
-okaf8 := setkey( K_ALT_F8, { || EditDesc( TRUE ) } )
+okaf8 := setkey( K_ALT_F8, { || EditItem( TRUE ) } )
 Rec_lock( 'master' )
 read
 mWasChanged := updated()
@@ -786,7 +789,7 @@ if temp_id != master->id
  if mreplace
   o_id := master->id
   cScreenSave := Box_Save( 2, 8, 5, 72 )
-  lAnswer := FALSE
+  lAnswer := TRUE   // no reason to ever not change the value - this probably should just "Do It"
   @ 3,10 say 'You Have changed the Code field do you wish to change'
   @ 4,10 say ' all occurences of ' + o_id + ' to ' + temp_id get lAnswer pict 'y'
   read

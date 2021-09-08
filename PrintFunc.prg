@@ -21,81 +21,91 @@
 static nDefPrinterCharWidth  // Set in Create Printer
 
 function print_find ( sPTRMain )
-local mret:=FALSE
+local lReturn := FALSE
+local sWarning := " has not been configured on this machine"
 
-sPTRMain = lower( sPTRMAIN )
+sPTRMain := lower( sPTRMAIN )
 
 do case
 Case sPTRMain = "docket"
  if !PrinterExists( trim( LVars( L_DOCKET_NAME ) ) )
-  Alert( "Docket Printer " + trim( LVars( L_DOCKET_NAME ) ) + " not installed on this machine" )
+  Alert( "The docket printer " + trim( LVars( L_DOCKET_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_DOCKET_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_DOCKET_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 Case sPTRMain = "report"
  if !PrinterExists( trim( LVars( L_REPORT_NAME ) ) )
-  Alert( "Report Printer " + trim( LVars( L_REPORT_NAME ) ) + " not installed on this machine" )
+  Alert( "The report printer " + trim( LVars( L_REPORT_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_REPORT_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_REPORT_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 Case sPTRMain = "barcode"
  if !PrinterExists( trim( LVars( L_BARCODE_NAME ) ) )
-  Alert( "Barcode Printer " + trim( LVars( L_BARCODE_NAME ) ) + " not installed on this machine" )
+  Alert( "The barcode printer " + trim( LVars( L_BARCODE_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_BARCODE_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_BARCODE_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 Case sPTRMain = "invoice"
  if !PrinterExists( trim( LVars( L_INVOICE_NAME ) ) )
-  Alert( "Invoice Printer " + trim( LVars( L_INVOICE_NAME ) ) + " not installed on this machine" )
+  Alert( "The invoice printer " + trim( LVars( L_INVOICE_NAME ) ) + sWarning )
 
  else
   set printer to ( trim( LVars( L_INVOICE_NAME ) ) )
   LVars( L_PRINTER, trim( LVars( L_INVOICE_NAME ) ) )
-
+  lReturn := TRUE
+ 
  endif
 
 EndCase
 
-return mret                  // Have we found the required printer
+return lReturn                  // Have we found the required printer
 
 *
-
 
 function open_de_draw
 static lPortOpen := FALSE
 if lvars( L_AUTO_OPEN )
  do case
+ case lvars( L_CDTYPE ) = 'N'
+ 
  case lvars( L_CDTYPE ) = 'C'    // Citizen Docket Printers with cashdraw kickout
-  Print_Find( "Docket" )
-  set console off
-  set print on
-  ?? chr( 7 )
-  set print off
-  set console on
-  set printer to
+  if Print_Find( "Docket" )
+   set console off
+   set print on
+   ?? chr( 7 )
+   set print off
+   set console on
+   set printer to
+  
+  endif
 
  case lvars( L_CDTYPE ) = 'E'    // Epson Docket Printers with cashdraw kickout
-  Print_Find( "Docket" )
-  set console off
-  set print on
-  ?? chr( K_ESC ) + 'p' + chr( 0 ) + chr( 25 ) + chr( 250 )
-  ??
-  set print off
-  set console on
-  set printer to
-
+  if Print_Find( "Docket" )
+   set console off
+   set print on
+   ?? chr( K_ESC ) + 'p' + chr( 0 ) + chr( 25 ) + chr( 250 )
+   ??
+   set print off
+   set console on
+   set printer to
+   
+  endif
+  
  endcase
 
 endif
@@ -114,7 +124,7 @@ if Secure( X_CASHDRAWER )
  set console on
  Box_Restore( sScreen )
  if upper( newpass ) != 'CASH'
-  Error( 'Cash Drawer Passwords not accepted', 12 )
+  Error( 'Cash drawer password not accepted', 12 )
   SysAudit( 'CDPassFail' )
  else
   SysAudit( 'CDOpen' )
@@ -406,7 +416,7 @@ while !eof() .and. cont
     oPrinter:SetColor( RGB_BLACK )
 
    else
-   oPrinter:Write( CRLF+CRLF+'** ' + eval( grp_head ) )
+    oPrinter:Write( CRLF+CRLF+'** ' + eval( grp_head ) )
 
    endif
 
@@ -417,6 +427,7 @@ while !eof() .and. cont
    if eval( bForCondition )
     if !empty( sub_group_by )
      if !toScreen
+      oPrinter:newline()
       oPrinter:newline()
       oPrinter:SetColor( RGB_MAGENTA )
       oPrinter:textout( '* '+eval( sub_head ) )
@@ -499,7 +510,6 @@ while !eof() .and. cont
 
        else
         sOut := padr( fldrec[ i, 1 ], aReport[ i, PR_FLD_LEN ] )
-
 
        endif
 
@@ -606,7 +616,8 @@ while !eof() .and. cont
        oPrinter:TextOut( '* Subsubtotal *' )
 
       else
-        oPrinter:Write( CRLF + '* Subsubtotal *' )
+	    oPrinter:NewLine()
+        oPrinter:Write( '* Subsubtotal *' )
 
       endif
 
@@ -808,7 +819,7 @@ nTotWidth = max( nTotWidth, page_width )
 if report_name != nil
  if !toScreen
   oPrinter:NewLine()
-  oPrinter:TextOut( BPOSCUST )
+  oPrinter:TextOut( bVars( B_NAME) )
   oprinter:setpos( (oPrinter:maxcol - len(a) ) * oPrinter:CharWidth )
   oPrinter:TextOut( a )
   oPrinter:NewLine()
@@ -817,7 +828,7 @@ if report_name != nil
   oPrinter:TextOut( b )
 
  else
-  oPrinter:Write( BPOSCUST + space( nTotWidth - len( BPOSCUST ) - len(a) ) + a + CRLF )
+  oPrinter:Write( bVars( B_NAME) + space( nTotWidth - len( bVars( B_NAME ) ) - len(a) ) + a + CRLF )
   oPrinter:Write( report_name + space( nTotWidth - len( report_name ) - len(b) ) + b + CRLF )
 
  endif
@@ -826,10 +837,10 @@ endif
 
 if !toScreen
  oPrinter:NewLine()
- oPrinter:TextOut( replicate( chr( '=' ), oPrinter:maxcol() ) )
+ oPrinter:TextOut( replicate( DBL_ULINE, oPrinter:maxcol() ) )
 
 else
- oPrinter:Write( replicate( chr( "=" ), nTotWidth ) )
+ oPrinter:Write( replicate( DBL_ULINE, nTotWidth ) )
 
 endif
 
@@ -1039,10 +1050,10 @@ return ''
 Function PageHead( oPrinter, rptName, page_width, page, col_head1, col_head2 )
 local a := dtoc( date() ) + " "
 local b := time() + " Page " + Ns( page )
-local mlicense := BPOSCUST
+// local mlicense := trim( BVars( B_NAME ) )
 
 if rptName != nil
- oPrinter:TextOut( mlicense )
+ oPrinter:TextOut( BVars( B_NAME ) )
  oPrinter:SetPos( (page_width -len(a)) * oPrinter:CharWidth )
  oPrinter:TextOut( a )
  oPrinter:NewLine()
