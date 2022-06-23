@@ -24,7 +24,7 @@ GTWVW = YES
 CGI = NO
 GUI = YES
 MT = NO
-SRC04 = obj 
+SRC04 = 
 PROJECT = bpos.exe $(PR) 
 
 OBJFILES = $(SRC04)\BPOS.obj $(SRC04)\ACME.obj $(SRC04)\APCHEQUE.obj $(SRC04)\APEOM.obj $(SRC04)\APREMIT.obj //
@@ -59,7 +59,7 @@ LIBFILES = gtwvw.lib lang.lib vm.lib rtl.lib rdd.lib macro.lib pp.lib dbfntx.lib
 EXTLIBFILES =
 DEFFILE = 
 HARBOURFLAGS = -w1
-CFLAG1 =  -OS $(SHELL)  $(CFLAGS) -d -c -L$(HB_DIR)\lib 
+CFLAG1 =  -OS $(SHELL) $(CFLAGS) -d -c -L$(HB_DIR)\lib 
 CFLAG2 =  -I$(HB_DIR)\include;$(CC_DIR)\include
 RFLAGS = 
 LFLAGS = -L$(CC_DIR)\lib\obj;$(CC_DIR)\lib;$(HB_DIR)\lib -Gn -M -m -s -Tpe -x -aa

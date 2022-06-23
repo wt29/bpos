@@ -2,7 +2,8 @@
 set CC=C:\borland\bcc55
 rem set HB=C:\develop\harbour-core
 rem set HB=C:\develop\harbour\HB30
-set HB=C:\develop\xharbour\1.2.3
+rem set HB=C:\develop\xharbour\1.2.3
+set HB=C:\develop\xharbour\1.20
 
 
 set oldpath=%path%
@@ -12,7 +13,7 @@ set lib=%cc%\lib;%HB%\lib\win\bcc
 
 
 set HB_ARCHITECTURE=win
-set HB_COMPILER=bcc
+set HB_COMPILER=bcc 
 set HB_GT_LIB=gtwin
 rem gtwvg
 

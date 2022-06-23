@@ -24,10 +24,10 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 // #include "wvtgui.ch"
 
 // Required for xHarbour
-#define __GTWVW__
+//#define __GTWVW__
 
 // Harbour uses this
-// #define __GTWVG__
+#define __GTWVG__
 
 #define BUILD_NO "1.25.4"
 #define DEVELOPER_PHONE "+61 2 4751 8497"

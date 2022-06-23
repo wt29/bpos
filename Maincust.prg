@@ -1161,7 +1161,8 @@ return TRUE
 *
 
 Function CustDispScr
-Box_Save( 01, 00, 24, 79, C_CYAN )
+// Box_Save( 01, 00, 24, 79, C_CYAN )
+Box_Save( 01, 00, 24, 79 )
 Heading( 'Customer Data Entry Form' )
 // Highlight( 02, 73, '', if( !empty( customer->abs_ptr ),  'Abs', '' ) )
 if customer->debtor
