@@ -30,11 +30,11 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 #define __GTWVG__
 
 #define BUILD_NO "1.25.4"
-#define DEVELOPER_PHONE "+61 2 4751 8497"
-#define DEVELOPER_FAX "+61 2 4751 8479"
+#define DEVELOPER_PHONE "+61 409 101 205"
+#define DEVELOPER_FAX "No Fax - use email"
 #define SUPPORT_FAX "No Number - use email"
 #define SUPPORT_EMAIL "tglynn@hotmail.com"
-#define SUPPORT_PHONE "+61 2 4751 8497"
+#define SUPPORT_PHONE "+61 409 101 205"
 #define EXECUTABLE "bpos.exe"
 #define SYSNAME 'BPOS'
 #define DEVELOPER 'Bluegum Software'
@@ -178,8 +178,8 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 #define TB_COLOR  'W/' + C_BACKGROUND + ', N/W'
 /* W/R, +GR/R, N/BG, +W/BG, W/RB, +GR/RB, W/B, +W/B, W/G, +GR/G, R/W, B/W, W/GR, +GR/GR' */
 
-#define HEADSEP 'Í'
-#define COLSEP '³'
+#define HEADSEP 'ï¿½'
+#define COLSEP 'ï¿½'
 
 #define ULINE chr(95)
 #define DBL_ULINE "="
