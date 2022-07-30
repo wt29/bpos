@@ -24,10 +24,10 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 // #include "wvtgui.ch"
 
 // Required for xHarbour
-//#define __GTWVW__
+// #define __GTWVW__
 
 // Harbour uses this
-#define __GTWVG__
+// #define __GTWVG__
 
 #define BUILD_NO "1.25.4"
 #define DEVELOPER_PHONE "+61 409 101 205"
@@ -44,7 +44,7 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 
 // BPOS Customer Information
 // #define LYTTLETON
-#define THE_LOOK
+#define DEMO
 // #define DUCKWORTHS
 
 #ifdef LYTTLETON
@@ -76,6 +76,8 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 
 #ifdef DEMO
  #define BPOSCUST 'Demonstration'
+ #define DEBTORS
+ #define CREDITORS
 
 #endif
  
@@ -178,8 +180,8 @@ v1.25.4 - Reports with bugs - still issues with Win32() printer but workarounds 
 #define TB_COLOR  'W/' + C_BACKGROUND + ', N/W'
 /* W/R, +GR/R, N/BG, +W/BG, W/RB, +GR/RB, W/B, +W/B, W/G, +GR/G, R/W, B/W, W/GR, +GR/GR' */
 
-#define HEADSEP '�'
-#define COLSEP '�'
+#define HEADSEP chr(205)
+#define COLSEP chr(179)
 
 #define ULINE chr(95)
 #define DBL_ULINE "="

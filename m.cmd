@@ -7,12 +7,12 @@ rem set HB_GT_LIB=gtwvg
 rem for Multi thread support, un-remark next line
 rem set HB_MT=MT
 
-rem Make using MSVC
-rem nmake
 rem Make using Borland and Harbour
-rem call m_bcc.cmd
-rem Make using Borland and xHarbour- Seems to have better printer detection and GTVWV
 call m_bcc.cmd
+
+rem Make using Mingw32
+:: call m_mingw.cmd  %1
+
 if not exist bpos.exe goto noexe
 goto end
 :noexe 
