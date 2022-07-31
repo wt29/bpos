@@ -18,7 +18,7 @@ set lib=%cc%\lib;%HB%\lib\win\%HB_COMPILER%
 :: hbmk2 -obpos *.prg bpos.rc gtwvg.hbc hbtip.hbc xhb.hbc hbct.hbc hbtpathy.hbc 
 hbmk2 -obpos *.prg bpos.rc gtwvg.hbc hbtip.hbc xhb.hbc hbct.hbc hbtpathy.hbc 
 
-rem set path=%oldpath%
+set path=%oldpath%
 
 
 
